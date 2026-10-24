@@ -52,3 +52,8 @@ describe("coronary mapping", () => {
     expect(v.unsupported.filter((u) => u.label === "Coronary stenosis")).toHaveLength(3);
   });
 });
+
+describe("vessel naming", () => {
+  // flipped to a real test in Task 6, once the template manifest lists the atlas vessels
+  it.todo("DISPLAY_NAME covers every manifest vessel id");
+});

@@ -16,6 +16,15 @@ export const VESSEL_LABEL: Record<CoronaryVessel, string> = {
   LM: "Left main", LAD: "Left anterior descending", LCx: "Left circumflex", RCA: "Right coronary", PDA: "Posterior descending",
 };
 
+/** Every vessel id that can appear in `_CORO.x` (pipeline/cor_pipeline/coronary.py VESSELS), for naming a picked vessel. */
+export const DISPLAY_NAME: Record<number, string> = {
+  1: "Left main", 2: "Left anterior descending", 3: "Left circumflex", 4: "Right coronary", 5: "Posterior descending",
+  6: "Diagonal branch (D1)", 7: "Diagonal branch (D2)", 14: "Diagonal branch (D3)", 15: "Diagonal branch (D4)",
+  9: "Obtuse marginal", 10: "Conus branch", 11: "Sinoatrial nodal artery", 12: "Acute marginal", 13: "Posterolateral branch",
+  20: "Great cardiac vein", 21: "Middle cardiac vein", 22: "Small cardiac vein", 24: "Coronary sinus",
+  25: "Posterior vein of the left ventricle", 26: "Left marginal vein",
+};
+
 export interface CoronaryFinding {
   vessel: CoronaryVessel;
   segment?: CoronarySegment;

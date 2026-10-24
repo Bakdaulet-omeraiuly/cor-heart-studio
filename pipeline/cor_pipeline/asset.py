@@ -449,7 +449,34 @@ def heart_fidelity(mesh: trimesh.Trimesh, fields, grid: "FineGrid", masks, affin
     return {"toleranceMm": round(tol, 2), "structures": rows, "overall": summarise(rows, round(tol, 2))}
 
 
-def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None, lods=(("high", 300_000), ("low", 120_000)), ct=None, with_coronaries: bool = False):
+def _atlas_coronaries(hi, samples, grid, fields, valves, lv, to_ras_pt, aortic_ras, apex_app, surface_at, normals_at):
+    """BodyParts3D coronaries and veins registered onto this heart (docs/atlas-heart.md)."""
+    import trimesh
+    from .atlas import ATLAS_PARTS, DEFAULT_ROOT, load_parts
+    from .coronary import atlas_coronaries
+    from .register import VALVE_KEYS, atlas_landmarks, bp3d_to_app_mm, fit
+
+    keys = [k for k, p in ATLAS_PARTS.items() if p.kind in ("chamber", "valve", "coronary_artery", "coronary_vein")]
+    parts = load_parts(DEFAULT_ROOT, keys)
+    epi_v = (np.abs(samples["outer"]) < 0.8) & (samples["cavity"] > 0.9)
+    epi = trimesh.Trimesh(hi.vertices, hi.faces[epi_v[hi.faces].all(axis=1)], process=True)
+    to_target = lambda p: to_ras_pt(bp3d_to_app_mm(p) / 10.0)   # atlas frame -> this heart's RAS (orientation; the warp fits the rest)
+    a = {k: to_ras_pt(v[None] / 10.0)[0] for k, v in atlas_landmarks(parts).items()}
+    b = {k: to_ras_pt(np.asarray(valves[n]["center"], float)[None])[0] for k, n in VALVE_KEYS.items()}
+    b["apex"] = to_ras_pt(np.asarray(apex_app, float)[None])[0]
+    chambers = trimesh.util.concatenate([parts[k] for k in ("left_ventricle", "right_ventricle", "left_atrium", "right_atrium")])
+    aepi = trimesh.Trimesh(to_target(chambers.vertices), chambers.faces, process=False)
+    w = fit(aepi, epi, a, b, n_surface=1500, rounds=6, smoothing=2.0)
+    vessels = {k: m for k, m in parts.items() if ATLAS_PARTS[k].kind in ("coronary_artery", "coronary_vein")}
+    outer_at = lambda p: grid.sample(fields["outer"], p)
+    lines, radii, sources, report = atlas_coronaries(vessels, lambda p: w(to_target(p)), surface_at, normals_at, outer_at,
+                                                     aortic_ras, to_ras_pt(np.asarray(apex_app, float)[None])[0], scale=w.s)
+    report["_registration"] = {"scale": round(float(w.s), 3), "method": "landmark similarity + thin-plate spline (6 ICP rounds)"}
+    return lines, radii, sources, report
+
+
+def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None, lods=(("high", 300_000), ("low", 120_000)), ct=None, with_coronaries: bool = False,
+                coronaries: str = "routed"):
     """Returns ({lod: glb bytes}, manifest dict, lv cavity proxy dict, qa list, volumes or None).
 
     With `ct` (the CT on the labels' grid), volumes = (meta, image u8, label-index u8) for the slice views.
@@ -510,8 +537,10 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
         ostia_ras = {"left": ao_c + flow * 10 + lat([-1.0, -0.5, 0]) * r_mm,   # RAS: -x = left, -y = posterior
                      "right": ao_c + flow * 10 + lat([1.0, 1.0, 0]) * r_mm}      # right and anterior
         ostia_app = {k: frame.point(p) for k, p in ostia_ras.items()}
-        centrelines, debug = route(hi, samples, {"anterior": np.array([0.0, 1.0, 0.0]), "axis": to_ras_dir(lv["axis"])},
-                               ostia_ras, to_ras_pt(apex_app))
+        vessel_sources, vessel_fit, radii = {}, None, None
+        if coronaries == "routed":
+            centrelines, debug = route(hi, samples, {"anterior": np.array([0.0, 1.0, 0.0]), "axis": to_ras_dir(lv["axis"])},
+                                       ostia_ras, to_ras_pt(apex_app))
         def normals_at(pts):
             # outward direction = gradient of the epicardial distance field (robust where the mesh normals are not)
             e = 0.75
@@ -523,16 +552,21 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
             for _ in range(3):
                 pts = pts - normals_at(pts) * grid.sample(fields["outer"], pts)[:, None]
             return pts
+        if coronaries == "atlas":
+            centrelines, radii, vessel_sources, vessel_fit = _atlas_coronaries(
+                hi, samples, grid, fields, valves, lv, to_ras_pt, ao_c, apex_app, surface_at, normals_at)
+            debug = {}
         import os
         if os.environ.get("COR_CORONARY_DEBUG"):
             np.savez_compressed(os.environ["COR_CORONARY_DEBUG"], v=hi.vertices, faces=hi.faces, outer=samples["outer"],
                                 **{f"g_{k}": x for k, x in debug.items()}, **{f"path_{k}": c for k, c in centrelines.items()})
         centrelines = {k: surface_at(c) for k, c in centrelines.items()}
-        pos, nrm, faces, t, r, vid = build_vessels(centrelines, normals_at)
+        pos, nrm, faces, t, r, vid = build_vessels(centrelines, normals_at, radii=radii)
         line_tree = cKDTree(np.concatenate(list(centrelines.values())))
         coronary = {"pos": pos, "nrm": nrm, "faces": faces, "t": t, "r": r, "vid": vid, "line_tree": line_tree,
                     "lengthsMm": {k: round(float(np.linalg.norm(np.diff(_smooth(c), axis=0), axis=1).sum()), 1) for k, c in centrelines.items()},
-                    "vessels": VESSELS}
+                    "vessels": {i: v for i, v in VESSELS.items() if v[0] in centrelines},
+                    "sources": vessel_sources, "fit": vessel_fit, "method": coronaries}
 
     glbs, tissue_by_lod, points_by_lod = {}, {}, {}
     from .glb import write_glb
@@ -553,20 +587,30 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
             epi = tissue[:, 0] < 40
             fat = np.clip(1 - (d - 3) / 6, 0, 1) * epi
             tissue[:, 1] = np.round(fat * 255).astype(np.uint8)
-            near = cKDTree(mesh.vertices).query(coronary["pos"])[1]
-            n = len(coronary["pos"])
-            parts.append({
-                "name": "coronary_arteries",
-                "attributes": {
-                    "POSITION": frame.point(coronary["pos"]).astype(np.float32),
-                    "NORMAL": (coronary["nrm"] @ RAS_TO_APP.T * 10).astype(np.float32),
-                    "_WEIGHTS": weights[near],
-                    "_TISSUE": np.tile(np.array([0, 0, 3, 8], np.uint8), (n, 1)),
-                    "_CORO": np.stack([coronary["vid"], np.round(coronary["t"] * 255), np.clip(np.round(coronary["r"] / 0.05), 0, 255), np.zeros(n)], axis=1).astype(np.uint8),
-                },
-                "indices": coronary["faces"],
-                "extras": {"structure": "coronary_vessels", "layers": ["coronary"]},
-            })
+            near_all = cKDTree(mesh.vertices).query(coronary["pos"])[1]
+            from .coronary import VESSEL_KIND
+            kind_of = np.vectorize(lambda i: VESSEL_KIND.get(int(i), 3))(coronary["vid"]) if len(coronary["vid"]) else np.zeros(0)
+            for mesh_name, kind in (("coronary_arteries", 3), ("cardiac_veins", 4)):
+                keep = kind_of == kind
+                if not keep.any():
+                    continue
+                remap = -np.ones(len(keep), np.int64)
+                remap[keep] = np.arange(keep.sum())
+                f = coronary["faces"][keep[coronary["faces"]].all(axis=1)]
+                n = int(keep.sum())
+                parts.append({
+                    "name": mesh_name,
+                    "attributes": {
+                        "POSITION": frame.point(coronary["pos"][keep]).astype(np.float32),
+                        "NORMAL": (coronary["nrm"][keep] @ RAS_TO_APP.T * 10).astype(np.float32),
+                        "_WEIGHTS": weights[near_all[keep]],
+                        "_TISSUE": np.tile(np.array([0, 0, kind, 8], np.uint8), (n, 1)),
+                        "_CORO": np.stack([coronary["vid"][keep], np.round(coronary["t"][keep] * 255),
+                                           np.clip(np.round(coronary["r"][keep] / 0.05), 0, 255), np.zeros(n)], axis=1).astype(np.uint8),
+                    },
+                    "indices": remap[f],
+                    "extras": {"structure": "coronary_vessels", "layers": ["coronary"]},
+                })
         glbs[lod] = write_glb(parts, {"assetId": f"cor-ct-{case_id}", "version": "1.0.0"})
         tissue_by_lod[lod], points_by_lod[lod] = tissue, points
 
@@ -697,8 +741,16 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
         "coronaryOstia": {k: _r(p) for k, p in ostia_app.items()},
         "anchors": {k: _r(v) for k, v in anchors.items()},
         **({"coronary": {
-            "pattern": "right-dominant; LM, LAD, LCx, RCA, PDA routed along the AV and interventricular grooves (not from imaging)",
-            "vessels": {str(i): {"name": n, "proximalDiameterMm": d0, "distalDiameterMm": d1, "distalAssumed": a, "lengthMm": coronary["lengthsMm"].get(n)}
+            "pattern": ("BodyParts3D atlas coronary arteries and cardiac veins (right-dominant specimen), registered onto this heart's "
+                        "epicardium; not imaged in this scan. Obtuse marginal and SA-nodal artery are illustrative (not in the atlas)"
+                        if coronary["method"] == "atlas" else
+                        "right-dominant; LM, LAD, LCx, RCA, PDA routed along the AV and interventricular grooves (not from imaging)"),
+            "dominance": "right",
+            "method": coronary["method"],
+            **({"fit": coronary["fit"], "license": "CC BY-SA 2.1 JP (BodyParts3D, DBCLS) — derived vessel meshes are CC BY-SA"}
+               if coronary["method"] == "atlas" else {}),
+            "vessels": {str(i): {"name": n, "proximalDiameterMm": d0, "distalDiameterMm": d1, "distalAssumed": a, "lengthMm": coronary["lengthsMm"].get(n),
+                                 "source": coronary["sources"].get(n, "routed")}
                         for i, (n, d0, d1, a) in coronary["vessels"].items()},
             "diameterSource": "Dodge JT et al. Circulation 1992;86:232-46, doi:10.1161/01.cir.86.1.232",
             "attribute": "_CORO uint8 vec4: vessel id, position along the vessel (0..255), lumen radius in 0.05 mm, 0",

@@ -27,7 +27,18 @@ VESSELS = {  # id: (name, proximal diameter mm, distal diameter mm, distal-is-as
     3: ("LCx", 3.4, 1.8, True),
     4: ("RCA", 3.9, 2.0, True),
     5: ("PDA", 2.0, 1.4, True),
+    # atlas branches and veins (docs/atlas-heart.md): diameters are the atlas specimen's, scaled to this heart, when
+    # the atlas has the vessel; the numbers here are the fallback for illustrative branches (assumed, marked as such)
+    6: ("D1", 2.4, 1.2, True), 7: ("D2", 2.0, 1.0, True), 14: ("D3", 1.8, 1.0, True), 15: ("D4", 1.6, 0.9, True),
+    9: ("OM", 2.4, 1.4, True), 10: ("conal", 1.4, 0.9, True), 11: ("SA_nodal", 1.0, 0.8, True),
+    12: ("acute_marginal", 1.8, 1.0, True), 13: ("PLB", 2.0, 1.2, True),
+    20: ("great_cardiac_vein", 4.0, 3.0, True), 21: ("middle_cardiac_vein", 3.0, 2.0, True),
+    22: ("small_cardiac_vein", 2.0, 1.5, True), 24: ("coronary_sinus", 8.0, 7.0, True),
+    25: ("posterior_lv_vein", 2.5, 1.8, True), 26: ("left_marginal_vein", 2.5, 1.8, True),
 }
+VESSEL_KIND = {i: (4 if i >= 20 else 3) for i in VESSELS}  # _TISSUE kind byte: 3 coronary artery, 4 coronary vein
+DIAGONALS = ["D1", "D2", "D3", "D4"]
+MIN_BRANCH_MM = 15.0
 SEGMENTS = 14  # ring resolution
 LM_LENGTH_MM = 10.0  # typical left main length (assumption; not in the Dodge abstract)
 
@@ -175,7 +186,7 @@ def route(mesh: trimesh.Trimesh, s: dict[str, np.ndarray], frame_dirs: dict[str,
     return {k: v[p] for k, p in paths.items()}, {"g_av": g_av, "g_iv": g_iv}
 
 
-def build_vessels(centrelines: dict[str, np.ndarray], normals_at, lift_mm: float = 1.9):
+def build_vessels(centrelines: dict[str, np.ndarray], normals_at, lift_mm: float = 1.9, radii: dict[str, np.ndarray] | None = None):
     """Tube mesh arrays for every vessel. Centrelines are lifted by radius*lift: in a groove the artery rides on the
     epicardial fat that fills the crease, so its centre sits about a diameter above the muscle surface."""
     pos, nrm, faces, t, r, vid = [], [], [], [], [], []
@@ -186,9 +197,76 @@ def build_vessels(centrelines: dict[str, np.ndarray], normals_at, lift_mm: float
         _, d0, d1, _ = VESSELS[vessel]
         c = _smooth(pts)
         u = np.linspace(0, 1, len(c))
-        radius = 0.5 * (d0 + (d1 - d0) * u)
+        if radii and name in radii:  # measured calibre along the vessel (atlas specimen, scaled)
+            src = np.asarray(radii[name], float)
+            radius = np.interp(u, np.linspace(0, 1, len(src)), src)
+        else:
+            radius = 0.5 * (d0 + (d1 - d0) * u)
         c = c + normals_at(c) * (radius * lift_mm)[:, None]
         p, n, f, tt, rr, ii = _tube(c, radius, vessel, 0.0, 1.0)
         pos.append(p); nrm.append(n); faces.append(f + base); t.append(tt); r.append(rr); vid.append(ii)
         base += len(p)
     return (np.concatenate(pos), np.concatenate(nrm), np.concatenate(faces), np.concatenate(t), np.concatenate(r), np.concatenate(vid))
+
+
+def atlas_coronaries(parts: dict[str, trimesh.Trimesh], warp, surface_at, normals_at, outer_at, aortic: np.ndarray,
+                     apex: np.ndarray, scale: float = 1.0, max_shift_mm: float = 12.0, max_inside_mm: float = 6.0):
+    """Coronary arteries and cardiac veins from atlas meshes, seated on this heart's epicardium.
+
+    parts: atlas vessel meshes keyed like cor_pipeline.atlas.ATLAS_PARTS; warp maps their coordinates into this heart.
+    surface_at / normals_at / outer_at: projection onto, outward normal of, and signed distance (mm, + outside) to
+    the epicardium. Returns centrelines on the surface (build_vessels lifts them), lumen radii (mm), the source of
+    every vessel ("atlas" or "illustrative") and a fit report. Raises FitError when a registered vessel runs more
+    than max_inside_mm inside the tissue or more than max_shift_mm off the surface: it would not be this heart's
+    vessel any more, so it must not be drawn.
+    """
+    from .centreline import branches
+    from .register import FitError  # noqa: F401  (re-exported for callers)
+
+    names = {n for n, *_ in VESSELS.values()}
+    lines, radii, sources, report = {}, {}, {}, {}
+
+    def seat(name, pts, r, source):
+        c = warp(np.asarray(pts, float))
+        d = outer_at(c)
+        if d.min() < -max_inside_mm or np.abs(d).max() > max_shift_mm:
+            raise FitError(f"{name}: registered course is {-d.min():.1f} mm inside / {np.abs(d).max():.1f} mm off the "
+                           f"epicardium (limits {max_inside_mm} / {max_shift_mm} mm)")
+        on = surface_at(c)
+        if np.linalg.norm(on[-1] - aortic) < np.linalg.norm(on[0] - aortic):
+            on, r = on[::-1], r[::-1]
+        lines[name], radii[name], sources[name] = on, np.asarray(r, float) * scale, source
+        report[name] = {"source": source, "maxShiftMm": round(float(np.abs(d).max()), 1), "maxInsideMm": round(float(max(-d.min(), 0)), 1)}
+
+    for key, mesh in parts.items():
+        if key == "D1":
+            found = [b for b in branches(mesh, min_length_mm=MIN_BRANCH_MM) if len(b[0]) * 0.5 >= MIN_BRANCH_MM]
+            for name, (pts, r) in zip(DIAGONALS, found):
+                seat(name, pts, r, "atlas")
+        elif key in names:
+            pts, r = branches(mesh, min_length_mm=np.inf)[0]
+            seat(key, pts, r, "atlas")
+    # branches BodyParts3D 4.0 lacks, along their standard course (illustrative). Septal perforators run inside
+    # the septum and are not drawn on the surface.
+    def course(start, end, n=60):
+        p = start[None] + np.linspace(0, 1, n)[:, None] * (end - start)[None]
+        for _ in range(4):
+            p = surface_at(p)
+        return p
+    if "LCx" in lines and "OM" not in lines:  # obtuse marginal: from the mid LCx down the lateral wall
+        c = lines["LCx"]
+        p0 = c[int(len(c) * 0.4)]
+        lines["OM"] = course(p0, p0 + 0.6 * (apex - p0))
+        radii["OM"] = np.linspace(VESSELS[9][1], VESSELS[9][2], len(lines["OM"])) / 2
+        sources["OM"], report["OM"] = "illustrative", {"source": "illustrative"}
+    if "RCA" in lines and "SA_nodal" not in lines:  # SA-nodal: from the proximal RCA up towards the base
+        c = lines["RCA"]
+        p0 = c[int(len(c) * 0.08)]
+        up = (aortic - apex) / np.linalg.norm(aortic - apex)
+        lines["SA_nodal"] = course(p0, p0 + up * 25.0, 30)
+        radii["SA_nodal"] = np.linspace(VESSELS[11][1], VESSELS[11][2], len(lines["SA_nodal"])) / 2
+        sources["SA_nodal"], report["SA_nodal"] = "illustrative", {"source": "illustrative"}
+    return lines, radii, sources, report
+
+
+from .register import FitError  # noqa: E402  (coronary.FitError is part of this module's interface)
