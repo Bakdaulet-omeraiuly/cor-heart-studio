@@ -163,3 +163,29 @@ Glossary:
 
    Each case SHALL give the input, the expected `Assessment` (or the expected behaviour) and a source.
 3. A unit test SHALL run every case through `assess()`. All rule-defined grades SHALL match the expected grades (100 %).
+
+### Requirement 13 — Guideline management options
+**User Story:** As a clinician, I want to see what the cited guideline recommends for each finding, with its class and
+level of evidence, so that I can weigh the options. The engine must not decide anything for the patient.
+
+#### Acceptance Criteria
+1. THE engine SHALL return `options: ManagementOption[]` in every Assessment (empty when none apply).
+2. EVERY option SHALL carry:
+   - the `findingCondition` of an existing finding;
+   - a short paraphrased `label` (no guideline text copied);
+   - the guideline's own `cor` and `loe`;
+   - `appliesBecause` evidence;
+   - a `source` naming the guideline, section and DOI.
+3. THE engine SHALL emit an option only if its catalogue entry has `verified: true`, meaning COR and LOE were confirmed
+   from the guideline's recommendation table. Entries with `verified: false` SHALL never be emitted.
+4. AN option SHALL be emitted only WHEN the record meets all its conditions.
+   IF a condition depends on a fact the record does not contain (e.g. symptom status, NYHA class) THEN the engine
+   SHALL NOT emit the option, and SHALL list the fact in `missing[]`. This applies only to verified entries.
+5. Options SHALL NOT contain doses, specific drug names chosen for the patient, or a ranking other than COR. Drug
+   classes are allowed only as the guideline names them.
+6. "Asymptomatic" SHALL require an explicit statement in the record. An absent symptom list SHALL mean the status is
+   unknown.
+7. Red flags SHALL be unchanged by options.
+8. WHEN the option's drug class matches a `cor-outlook-engine` intervention THEN the option MAY carry
+   `outlookInterventionId`.
+9. THE options SHALL be deterministic and computed offline, like the rest of the Assessment.

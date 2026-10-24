@@ -369,6 +369,8 @@ The publishers' PDFs could not be opened from the sandbox (HTTP 403), so this pa
 | MGMT-MR-SURG-D | `mitral-regurgitation` severe (primary) | severe primary MR and symptoms | mitral valve intervention | 1 | B-NR | ACC/AHA 2020 VHD §7.3.3 | no |
 | MGMT-CCD-STATIN | `coronary-stenosis` CAD-RADS ≥ 1 | chronic coronary disease | high-intensity statin | 1 | A | AHA/ACC 2023 chronic coronary disease, doi:10.1161/CIR.0000000000001168 | no |
 
+Section numbers (§) are from memory and must be confirmed with the PDF. They are part of the verification step.
+
 **Applicability.**
 - "Symptomatic" means a structured cardinal symptom is present.
 - "Asymptomatic" needs an explicit statement: an `asymptomatic` entry, or every cardinal symptom marked `present: false`.
