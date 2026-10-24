@@ -2,7 +2,7 @@
 //
 // `planFocus(ref)` is pure: it reads the ref's `organ` and `target` and decides which store actions to run.
 // `focusTarget(ref)` runs that plan against the app store. Anything that cannot be shown in the heart view
-// (no target, unknown target, brain finding, no WebGL) yields `{ kind: "none" }`: the panel only highlights
+// (a missing-data `M#` ref, no target, unknown target, brain finding, no WebGL) yields `{ kind: "none" }`: the panel only highlights
 // the ref, and nothing throws.
 //
 // Accepted `target` strings (the agreed `Finding.target` is a free string, docs/tasks/kerimku1.md):
@@ -66,7 +66,8 @@ function parseCoronary(target: string): FocusPlan | null {
 
 /** Decide what the 3D view should do for a ref. Pure; never throws. */
 export function planFocus(ref: Ref | null | undefined): FocusPlan {
-  if (!ref || ref.organ !== "heart" || typeof ref.target !== "string") return NONE;
+  // A missing item (`M#`) has nothing to show in 3D, whatever else the ref carries.
+  if (!ref || ref.kind === "missing" || ref.organ !== "heart" || typeof ref.target !== "string") return NONE;
   const target = ref.target.trim();
   if (!target) return NONE;
   return parseStructure(target) ?? parseCoronary(target) ?? NONE;

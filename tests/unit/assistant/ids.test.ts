@@ -50,6 +50,12 @@ describe("withIds — deterministic ids", () => {
     expect(evidenceIds(ided.differential[0])).toEqual(["E3"]);
   });
 
+  it("stamps M# across missing[] in order, independent of F#/E#", () => {
+    expect(withIds(EMPTY_WITH_MISSING).missing.map((m) => m.id)).toEqual(["M1", "M2", "M3"]);
+    // A record with findings still starts missing items at M1.
+    expect(withIds(CONCENTRIC_WALL_THICKENING).missing.map((m) => m.id)).toEqual(["M1"]);
+  });
+
   it("keeps F# and E# sequences independent of each other", () => {
     // AORTIC_STENOSIS has one finding with three evidence items.
     const ided = withIds(AORTIC_STENOSIS);
@@ -59,10 +65,23 @@ describe("withIds — deterministic ids", () => {
 });
 
 describe("refsFor — contents", () => {
-  it("returns a Ref for every finding id and every evidence id", () => {
+  it("returns a Ref for every finding, evidence and missing id", () => {
     const ided = withIds(CONCENTRIC_WALL_THICKENING);
     const refs = refsFor(ided);
-    expect(Object.keys(refs).sort()).toEqual(["E1", "E2", "E3", "F1", "F2"]);
+    expect(Object.keys(refs).sort()).toEqual(["E1", "E2", "E3", "F1", "F2", "M1"]);
+  });
+
+  it("populates missing refs with kind, label, field and why, and no target/organ", () => {
+    const refs = refsFor(withIds(CONCENTRIC_WALL_THICKENING));
+    expect(refs.M1).toEqual({
+      id: "M1",
+      kind: "missing",
+      label: "Missing data",
+      field: "observations.lvMassIndex",
+      why: CONCENTRIC_WALL_THICKENING.missing[0].why,
+    });
+    expect(refs.M1).not.toHaveProperty("target");
+    expect(refs.M1).not.toHaveProperty("organ");
   });
 
   it("populates finding refs with label, target and organ", () => {
@@ -142,16 +161,18 @@ describe("refsFor — contents", () => {
 });
 
 describe("empty Assessment", () => {
-  it("yields empty id maps without throwing", () => {
+  it("yields only missing refs without throwing", () => {
     const ided = withIds(EMPTY_WITH_MISSING);
     expect(ided.findings).toEqual([]);
     expect(ided.differential).toEqual([]);
-    expect(refsFor(ided)).toEqual({});
+    const refs = refsFor(ided);
+    expect(Object.keys(refs)).toEqual(["M1", "M2", "M3"]);
+    expect(Object.values(refs).every((r) => r.kind === "missing")).toBe(true);
   });
 
-  it("passes missing/redFlags/disclaimer through unchanged", () => {
+  it("keeps missing field/why and passes redFlags/disclaimer through unchanged", () => {
     const ided = withIds(EMPTY_WITH_MISSING);
-    expect(ided.missing).toEqual(EMPTY_WITH_MISSING.missing);
+    expect(ided.missing.map(({ field, why }) => ({ field, why }))).toEqual(EMPTY_WITH_MISSING.missing);
     expect(ided.redFlags).toEqual(EMPTY_WITH_MISSING.redFlags);
     expect(ided.disclaimer).toBe(EMPTY_WITH_MISSING.disclaimer);
   });

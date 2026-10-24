@@ -1,13 +1,11 @@
-// TEMPORARY — hand-written `Assessment` fixtures used while `src/domain/diagnosis/types.ts`
-// and the real `assess()` do not yet exist (@HyorinmaruK, H3). `assessFixture` mimics the
-// agreed signature `(record: PatientRecord) => Assessment` and picks a fixture by patientId,
-// so switching to the real engine changes only the two re-export lines in `engine.ts`.
+// Hand-written `Assessment` fixtures for unit tests, typed against the real engine types in
+// `src/domain/diagnosis/types.ts`. Until task 12 they were also the stand-in engine; `engine.ts`
+// now re-exports the real `assess()`.
 //
 // Numbers below are copied from the synthetic sample records in
 // `public/samples/synthetic-patients.json` (SYN-003, SYN-004). Rule ids and sources mirror
 // the ones used in `src/domain/mapping/` and `src/domain/outlook/evidence.ts`.
-import type { PatientRecord } from "@/domain/schema/record";
-import type { Assessment } from "./types";
+import type { Assessment } from "@/domain/diagnosis";
 
 const DISCLAIMER =
   "Not a diagnosis — decision support for clinicians. Demo on synthetic data; numbers come from the record and grades from the rules engine.";
@@ -206,20 +204,3 @@ export const INJECTION_IN_RECORD_TEXT: Assessment = {
   redFlags: [],
   disclaimer: DISCLAIMER,
 };
-
-/**
- * Fixture stand-in for the real `assess()`. Picks an Assessment by `record.patientId`:
- * SYN-003 → concentric wall thickening, SYN-004 → aortic stenosis, anything else → the empty
- * Assessment with `missing` items. The red-flag and injection fixtures are exported for tests
- * and are not selected here.
- */
-export function assessFixture(record: PatientRecord): Assessment {
-  switch (record.patientId) {
-    case "SYN-004":
-      return AORTIC_STENOSIS;
-    case "SYN-003":
-      return CONCENTRIC_WALL_THICKENING;
-    default:
-      return EMPTY_WITH_MISSING;
-  }
-}

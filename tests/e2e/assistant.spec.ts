@@ -24,7 +24,7 @@ const assessment = {
     },
   ],
   differential: [],
-  missing: [{ field: "valves.aortic.area", why: "Valve area confirms the grade when velocity and gradient disagree." }],
+  missing: [{ id: "M1", field: "valves.aortic.area", why: "Valve area confirms the grade when velocity and gradient disagree." }],
   redFlags: [],
   disclaimer: ENGINE_DISCLAIMER,
 };
@@ -33,6 +33,7 @@ const refs = {
   F1: { id: "F1", kind: "finding", label: "Aortic stenosis, severe", organ: "heart", target: "aortic_valve" },
   E1: { id: "E1", kind: "evidence", label: "Aortic stenosis, severe", field: "valves.aortic.peakVelocity", value: 4.3, unit: "m/s", rule: "R-VALVE-STEN-01", source: "ESC/EACTS 2021", organ: "heart", target: "aortic_valve" },
   E2: { id: "E2", kind: "evidence", label: "Aortic stenosis, severe", field: "valves.aortic.meanGradient", value: 46, unit: "mmHg", rule: "R-VALVE-STEN-01", source: "ESC/EACTS 2021", organ: "heart", target: "aortic_valve" },
+  M1: { id: "M1", kind: "missing", label: "Missing data", field: "valves.aortic.area", why: "Valve area confirms the grade when velocity and gradient disagree." },
 };
 
 const okReply = {
@@ -45,7 +46,7 @@ const okReply = {
 
 const fallbackReply = {
   status: "fallback",
-  text: "F1 Aortic stenosis, severe (rule-defined) — E1 valves.aortic.peakVelocity 4.3 m/s · E2 valves.aortic.meanGradient 46 mmHg",
+  text: "F1 Aortic stenosis, severe (rule-defined) — E1 peak velocity 4.3 m/s · E2 mean gradient 46 mmHg.\nMissing: M1 valves.aortic.area.",
   assessment,
   refs,
   disclaimer: ENGINE_DISCLAIMER,
@@ -128,7 +129,20 @@ test("a fallback response shows the engine list and the withheld note", async ({
   await expect(finding.getByText("(rule-defined)", { exact: true })).toBeVisible();
   await expect(log.getByRole("button", { name: "Evidence E1" })).toBeVisible();
   await expect(log.getByText("= 4.3 m/s", { exact: true })).toBeVisible();
-  await expect(log.getByText("valves.aortic.area", { exact: true })).toBeVisible();
+  // missing item: M# button with field · why on focus; activating it only highlights it (no 3D selection)
+  const missing = log.getByRole("listitem").filter({ has: page.getByRole("button", { name: "Missing data M1" }) });
+  // the tooltip repeats the field, so check the row's visible text, not the text alone
+  await expect(missing).toBeVisible();
+  await expect(missing).toContainText("valves.aortic.area");
+  const m1 = log.getByRole("button", { name: "Missing data M1" });
+  await m1.focus();
+  await expect(log.getByRole("tooltip").filter({ hasText: "Valve area confirms the grade" })).toBeVisible();
+  const selected = page.getByRole("region", { name: /^Selected structure/ });
+  const selectedBefore = await selected.count();
+  await page.keyboard.press("Enter");
+  await expect(m1).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("region", { name: "Selected structure Aortic valve" })).toHaveCount(0);
+  expect(await selected.count()).toBe(selectedBefore);
 });
 
 test("an error shows one line with Retry, and retry gets the answer", async ({ page }) => {

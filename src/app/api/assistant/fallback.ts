@@ -12,13 +12,16 @@
 //     starts with its finding id and cites each evidence item's id inline, so the
 //     guard's citation check always finds a known id next to the grade word,
 //     finding label and numbers on that line.
-//   - Non-clinical lines (the `Missing:` list, plainly-rendered red flags, the
-//     disclaimer) carry no number, grade word or finding label, so the guard does
-//     not require a citation for them.
+//   - The `Missing:` line cites each item by its `M#` id (`Missing: M1 <field>,
+//     M2 <field>.`). The guard strips id tokens before extracting numbers and
+//     counts known `M#` ids as citations, so the line passes either way.
+//   - Other non-clinical lines (plainly-rendered red flags, the disclaimer) carry
+//     no number, grade word or finding label, so the guard does not require a
+//     citation for them.
 //
 // Design choices that keep the text guard-safe:
 //
-//   - `Missing:` lines are rendered from the field name only, NOT the free-text
+//   - `Missing:` lines are rendered from the id and field name only, NOT the free-text
 //     `why`. A `why` string can contain a grade word ("…confirms *severe*
 //     grading…") with no finding it belongs to, which would read as an uncited
 //     clinical claim. Field paths (`observations.aorticValveAreaIndexed`) carry no
@@ -96,7 +99,8 @@ function renderFinding(finding: IdedFinding): string {
  * Build the deterministic fallback reply from an ided Assessment.
  *
  * Sections, in order (each omitted when empty): findings, differential, a single
- * `Missing:` line of field names, red-flag lines, and the disclaimer. The result
+ * `Missing:` line of `M#` ids with their field names, red-flag lines, and the
+ * disclaimer. The result
  * passes `guard(text, a, patient)` for any patient whose allowed numbers include
  * the Assessment's evidence values (which `allowedNumbers` always does).
  */
@@ -111,7 +115,7 @@ export function fallbackText(a: IdedAssessment): string {
   }
 
   if (a.missing.length > 0) {
-    const fields = a.missing.map((m) => m.field).join(", ");
+    const fields = a.missing.map((m) => `${m.id} ${m.field}`).join(", ");
     lines.push(`Missing: ${fields}.`);
   }
 

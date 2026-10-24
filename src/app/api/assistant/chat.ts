@@ -4,15 +4,20 @@
 // model reply grounded in the engine's assessment. The flow, from design.md
 // ("Claude loop"):
 //
-//   1. Call 1 FORCES the `get_assessment` tool
-//      (`tool_choice: { type: "tool", name: "get_assessment" }`) so the model can
-//      never answer before it has seen the engine's facts.
-//   2. When the model stops with `tool_use`, we echo its turn back and reply with a
+//   1. EVERY call uses `tool_choice: { type: "auto" }`. The live check (task 7.4)
+//      showed `claude-sonnet-5-5` and `claude-opus-5-5` reject a forced
+//      `tool_choice` (`type: "tool"` or `"any"`) with HTTP 400, so the tool is not
+//      forced; the system prompt (rule 2) tells the model to call it first.
+//   2. Code enforces that rule: if the FIRST response has no `tool_use` block
+//      named `get_assessment`, the loop stops at once with
+//      `assessmentCalled: false` and no further call; the route then returns the
+//      fallback (the model never answers without the engine's facts).
+//   3. When the model stops with `tool_use`, we echo its turn back and reply with a
 //      `tool_result` for each `tool_use` block — the real assessment JSON for
 //      `get_assessment`, an `is_error` result for any other (unexpected) tool —
-//      then call again with `tool_choice: { type: "auto" }`.
-//   3. The loop stops at `stop_reason === "end_turn"` or after 3 calls total.
-//   4. A `max_tokens` stop is treated as a MODEL FAILURE: we throw `ModelError`
+//      then call again (still `auto`).
+//   4. The loop stops at `stop_reason === "end_turn"` or after 3 calls total.
+//   5. A `max_tokens` stop is treated as a MODEL FAILURE: we throw `ModelError`
 //      and return no partial text, so the route maps it to `model_error` (502).
 //
 // The Anthropic client is INJECTED (`deps.client`) and never created here — the
@@ -26,8 +31,8 @@ import type { ChatTurn } from "./request";
 import { SYSTEM_PROMPT, toolDefinitions } from "./prompt";
 
 /**
- * The maximum number of `messages.create` calls per question. One forced tool
- * call, one follow-up after the tool result, and one spare — three total is the
+ * The maximum number of `messages.create` calls per question. One tool-calling
+ * turn, one follow-up after the tool result, and one spare — three total is the
  * hard ceiling so a misbehaving model cannot loop forever (design.md: "≤ 3 calls").
  */
 const MAX_CALLS = 3;
@@ -70,11 +75,16 @@ export interface ChatDeps {
  *   - `usage`  one `Usage` entry per `messages.create` call, in call order, so the
  *              route can log/sum input and output tokens.
  *   - `calls`  how many `messages.create` calls were made (1 ≤ calls ≤ 3).
+ *   - `assessmentCalled` whether the FIRST response called `get_assessment`.
+ *              `false` means the loop stopped after that one call with
+ *              `text: ""` (the unchecked model text is dropped); the caller must
+ *              return the fallback instead of any model text.
  */
 export interface ChatResult {
   text: string;
   usage: Anthropic.Messages.Usage[];
   calls: number;
+  assessmentCalled: boolean;
 }
 
 /**
@@ -127,6 +137,13 @@ function textOf(message: Anthropic.Messages.Message): string {
     )
     .map((block) => block.text)
     .join("");
+}
+
+/** True when the message contains at least one `tool_use` block for `get_assessment`. */
+function callsAssessment(message: Anthropic.Messages.Message): boolean {
+  return message.content.some(
+    (block) => block.type === "tool_use" && block.name === ASSESSMENT_TOOL,
+  );
 }
 
 /**
@@ -203,17 +220,14 @@ export async function runChat(
   while (calls < MAX_CALLS) {
     const isFirstCall = calls === 0;
 
-    // Call 1 FORCES the tool; every later call lets the model decide (`auto`).
-    const toolChoice: Anthropic.Messages.ToolChoice = isFirstCall
-      ? { type: "tool", name: ASSESSMENT_TOOL }
-      : { type: "auto" };
-
+    // `auto` on EVERY call: a forced `tool`/`any` choice is rejected (HTTP 400)
+    // by the current models, so the "tool first" rule is enforced in code below.
     const params: Anthropic.Messages.MessageCreateParamsNonStreaming = {
       model: deps.model,
       max_tokens: deps.maxTokens,
       system,
       tools,
-      tool_choice: toolChoice,
+      tool_choice: { type: "auto" },
       messages,
     };
 
@@ -234,9 +248,16 @@ export async function runChat(
       throw new ModelError("Model response exceeded max_tokens");
     }
 
+    // The first response skipped `get_assessment`: whatever it says was written
+    // without the engine's facts. Stop now (no further call) and drop its text;
+    // the route returns the fallback (Requirement 3.3).
+    if (isFirstCall && !callsAssessment(response)) {
+      return { text: "", usage, calls, assessmentCalled: false };
+    }
+
     // The model finished its answer — stop and return its text.
     if (response.stop_reason === "end_turn") {
-      return { text: textOf(response), usage, calls };
+      return { text: textOf(response), usage, calls, assessmentCalled: true };
     }
 
     // The model asked to use a tool. Echo its turn, then answer every tool_use
@@ -261,7 +282,7 @@ export async function runChat(
   if (last && last.stop_reason !== "tool_use") {
     const text = textOf(last);
     if (text.length > 0) {
-      return { text, usage, calls };
+      return { text, usage, calls, assessmentCalled: true };
     }
   }
 

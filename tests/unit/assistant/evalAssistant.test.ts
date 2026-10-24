@@ -8,6 +8,7 @@ import {
   handlesScope,
   mentionsField,
   mentionsPhrase,
+  parseRuns,
   percentile,
   report,
   shortName,
@@ -141,7 +142,59 @@ describe("eval-assistant — report", () => {
       "| A-sonnet | 50% (1/2) | 2 (1/2 replies) | 100% (2/2) | n/a | n/a | n/a | 1.0 s | 6.0 s | $0.030 |",
     );
     expect(lines[3]).toMatch(/^\| C-sonnet \| n\/a /);
-    expect(md).toContain("| A-sonnet | `claude-sonnet-5-5` | 3 | timeout 1 |");
+    expect(md).toContain("| A-sonnet | `claude-sonnet-5-5` | 3 | timeout 1 | 0/3 |");
+    expect(md).toContain("| C-sonnet | `claude-sonnet-5-5` | 0 | 0 | n/a |");
+  });
+
+  it("counts no-tool fallbacks separately: not graded, but in latency and cost", () => {
+    const base = { invented: 0, citationsOk: true, uncited: 0, guardOk: true };
+    const results: TurnResult[] = [
+      { arm: "A-opus", grades: { ...base, grade: true }, ttftMs: 1000, totalMs: 2000, costUsd: 0.01 },
+      { arm: "A-opus", fallback: "no_tool", ttftMs: 3000, totalMs: 8000, costUsd: 0.03 },
+      { arm: "A-opus", fallback: "no_tool", totalMs: 4000, costUsd: 0.02 },
+    ];
+    const md = report([{ name: "A-opus", model: "claude-opus-5-5" }], results);
+    const lines = md.split("\n");
+    // Main table: §7 columns unchanged; the rubric rates use the one graded reply only,
+    // TTFT p50 over [1000, 3000] → 1.0 s, total p95 over [2000, 8000, 4000] → 8.0 s, $/turn = 0.06 / 3.
+    expect(lines[0]).toBe(
+      "| Arm | Grade | Invented numbers | Citations | Missing | Scope | Injection | TTFT p50 | Total p95 | $/turn |",
+    );
+    expect(lines[2]).toBe(
+      "| A-opus | 100% (1/1) | 0 (0/1 replies) | 100% (1/1) | n/a | n/a | n/a | 1.0 s | 8.0 s | $0.020 |",
+    );
+    expect(md).toContain("| A-opus | `claude-opus-5-5` | 3 | 0 | 2/3 | 100% (1/1) | 0 |");
+    expect(md).toContain("| $0.06 |");
+  });
+
+  it("an arm with only no-tool fallbacks has no rubric results", () => {
+    const md = report(
+      [{ name: "A-opus", model: "claude-opus-5-5" }],
+      [{ arm: "A-opus", fallback: "no_tool", ttftMs: 500, totalMs: 1000, costUsd: 0.01 }],
+    );
+    expect(md.split("\n")[2]).toBe("| A-opus | n/a | n/a | n/a | n/a | n/a | n/a | 0.5 s | 1.0 s | $0.010 |");
+    expect(md).toContain("| A-opus | `claude-opus-5-5` | 1 | 0 | 1/1 | n/a | 0 |");
+  });
+});
+
+describe("eval-assistant — EVAL_RUNS", () => {
+  it("defaults to 3 when unset or blank", () => {
+    expect(parseRuns(undefined)).toEqual({ ok: true, runs: 3 });
+    expect(parseRuns("")).toEqual({ ok: true, runs: 3 });
+    expect(parseRuns("  ")).toEqual({ ok: true, runs: 3 });
+  });
+
+  it("accepts positive integers", () => {
+    expect(parseRuns("1")).toEqual({ ok: true, runs: 1 });
+    expect(parseRuns(" 5 ")).toEqual({ ok: true, runs: 5 });
+  });
+
+  it("rejects anything else with a clear message instead of using the default", () => {
+    for (const raw of ["0", "-1", "1.5", "abc", "2x", "1e2", "99999999999999999999"]) {
+      const r = parseRuns(raw);
+      expect(r.ok, raw).toBe(false);
+      if (!r.ok) expect(r.message).toMatch(/EVAL_RUNS must be a positive integer/);
+    }
   });
 });
 

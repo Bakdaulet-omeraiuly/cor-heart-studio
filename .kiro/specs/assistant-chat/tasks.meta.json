@@ -324,6 +324,21 @@
         "executionId": "2c2d7db6-ee9a-4540-99fc-2474fec65a2a",
         "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
         "timestamp": 1792870278058
+      },
+      {
+        "executionId": "25371d27-b81b-485a-b9da-8bd8233c9857",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792873122911
+      },
+      {
+        "executionId": "25371d27-b81b-485a-b9da-8bd8233c9857",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792873135942
+      },
+      {
+        "executionId": "25371d27-b81b-485a-b9da-8bd8233c9857",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792873383148
       }
     ],
     "8.1 Implement `useAssistant()` (in-memory state, reset on record change, fetch with abort).": [
@@ -460,6 +475,21 @@
         "executionId": "37614299-dc27-4d62-9373-b12054843338",
         "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
         "timestamp": 1792864539184
+      },
+      {
+        "executionId": "25371d27-b81b-485a-b9da-8bd8233c9857",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792873123000
+      },
+      {
+        "executionId": "e057baeb-eba5-4e85-8384-fde2867dfa1c",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792875195529
+      },
+      {
+        "executionId": "e057baeb-eba5-4e85-8384-fde2867dfa1c",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792875655154
       }
     ],
     "3. Output guard": [
@@ -516,6 +546,122 @@
         "executionId": "0474fd1b-0b3d-4d6d-9cd6-f72cdc049b9f",
         "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
         "timestamp": 1792872864413
+      }
+    ],
+    "7.4 Manual check with a local key in `.env.local` (never committed): ask about SYN-004 and SYN-003. Re-run": [
+      {
+        "executionId": "e057baeb-eba5-4e85-8384-fde2867dfa1c",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792873707777
+      },
+      {
+        "executionId": "e057baeb-eba5-4e85-8384-fde2867dfa1c",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792874759049
+      },
+      {
+        "executionId": "e057baeb-eba5-4e85-8384-fde2867dfa1c",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792875195388
+      }
+    ],
+    "13.1 `chat.ts` / `route.ts`: `tool_choice: { type: \"auto\" }` on every call; a first response without a": [
+      {
+        "executionId": "e057baeb-eba5-4e85-8384-fde2867dfa1c",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792873707870
+      },
+      {
+        "executionId": "e057baeb-eba5-4e85-8384-fde2867dfa1c",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792873710787
+      },
+      {
+        "executionId": "e057baeb-eba5-4e85-8384-fde2867dfa1c",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792873890682
+      }
+    ],
+    "13.2 M ids: `withIds` assigns `M1`, `M2`, … to `missing[]`; `refsFor` adds `kind: \"missing\"` refs with `field`": [
+      {
+        "executionId": "e057baeb-eba5-4e85-8384-fde2867dfa1c",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792873707905
+      },
+      {
+        "executionId": "e057baeb-eba5-4e85-8384-fde2867dfa1c",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792873892282
+      },
+      {
+        "executionId": "e057baeb-eba5-4e85-8384-fde2867dfa1c",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792874494475
+      }
+    ],
+    "13.3 Plain text: `SYSTEM_PROMPT` says plain text, no Markdown, and cite `[M#]` for missing-data sentences;": [
+      {
+        "executionId": "e057baeb-eba5-4e85-8384-fde2867dfa1c",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792873707940
+      },
+      {
+        "executionId": "e057baeb-eba5-4e85-8384-fde2867dfa1c",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792874498580
+      },
+      {
+        "executionId": "e057baeb-eba5-4e85-8384-fde2867dfa1c",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792874757865
+      }
+    ],
+    "13.4 503 message exactly \"Assistant is not configured\"; update the route test.": [
+      {
+        "executionId": "e057baeb-eba5-4e85-8384-fde2867dfa1c",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792873707970
+      },
+      {
+        "executionId": "e057baeb-eba5-4e85-8384-fde2867dfa1c",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792873893036
+      },
+      {
+        "executionId": "e057baeb-eba5-4e85-8384-fde2867dfa1c",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792874495200
+      }
+    ],
+    "13.5 Eval script: the A arm applies the route's first-call rule (no `get_assessment` → fallback);": [
+      {
+        "executionId": "e057baeb-eba5-4e85-8384-fde2867dfa1c",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792873708004
+      },
+      {
+        "executionId": "e057baeb-eba5-4e85-8384-fde2867dfa1c",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792874499402
+      },
+      {
+        "executionId": "e057baeb-eba5-4e85-8384-fde2867dfa1c",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792874756646
+      }
+    ],
+    "13. Live-check fixes (from task 7.4)": [
+      {
+        "executionId": "e057baeb-eba5-4e85-8384-fde2867dfa1c",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792874757948
+      }
+    ],
+    "7. Route handler": [
+      {
+        "executionId": "e057baeb-eba5-4e85-8384-fde2867dfa1c",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792875195436
       }
     ]
   }

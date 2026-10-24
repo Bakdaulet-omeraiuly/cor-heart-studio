@@ -1,4 +1,7 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { normalizeRecord } from "@/domain/normalization/normalize";
 import { fallbackText } from "@/app/api/assistant/fallback";
 import { guard } from "@/app/api/assistant/guard";
 import { withIds } from "@/app/api/assistant/ids";
@@ -41,36 +44,58 @@ function patientFor(patientId: string): NormalizedPatient {
   };
 }
 
-/** Build `assess(record)` by patientId, exactly as the route will. */
-function assessFor(patientId: string): Assessment {
-  return assess({ patientId, studyId: "STUDY-1" } as PatientRecord);
+/** The synthetic sample records shipped with the app (SYN-001 … ). */
+const SAMPLES = (
+  JSON.parse(readFileSync(resolve(process.cwd(), "public/samples/synthetic-patients.json"), "utf8")) as {
+    patients: unknown[];
+  }
+).patients;
+
+/** Normalize a sample record and run the real engine on it, exactly as the route does. */
+function realCase(patientId: string): { ided: ReturnType<typeof withIds>; patient: NormalizedPatient } {
+  const raw = SAMPLES.find((p) => (p as { patientId?: string }).patientId === patientId);
+  const n = normalizeRecord(raw);
+  if (!n.ok) throw new Error(`sample ${patientId} does not normalize`);
+  return { ided: withIds(assess(n.patient.record)), patient: n.patient };
 }
 
-// The required cases: SYN-004 (aortic stenosis), SYN-003 (wall thickening), an
-// unknown id (→ the empty-with-missing Assessment). Plus the red-flag and
-// injection fixtures so the guard-safety invariant is proven for EVERY fixture.
-const cases: { name: string; ided: ReturnType<typeof withIds>; patientId: string }[] = [
-  { name: "SYN-004 (aortic stenosis)", ided: withIds(assessFor("SYN-004")), patientId: "SYN-004" },
-  { name: "SYN-003 (wall thickening)", ided: withIds(assessFor("SYN-003")), patientId: "SYN-003" },
-  { name: "unknown id → empty with missing", ided: withIds(assessFor("SYN-999")), patientId: "SYN-999" },
-  { name: "red flag", ided: withIds(RED_FLAG), patientId: "SYN-RF" },
-  { name: "injection in record text", ided: withIds(INJECTION_IN_RECORD_TEXT), patientId: "SYN-INJ" },
+// Every hand-written fixture, plus the real engine on the SYN-004 / SYN-003 samples
+// and on a bare record (→ only `missing` items), so the guard-safety invariant is
+// proven for fixture and real Assessments alike.
+const fixtureCases: { name: string; a: Assessment; patientId: string }[] = [
+  { name: "aortic stenosis fixture", a: AORTIC_STENOSIS, patientId: "SYN-004" },
+  { name: "wall thickening fixture", a: CONCENTRIC_WALL_THICKENING, patientId: "SYN-003" },
+  { name: "empty-with-missing fixture", a: EMPTY_WITH_MISSING, patientId: "SYN-999" },
+  { name: "red flag fixture", a: RED_FLAG, patientId: "SYN-RF" },
+  { name: "injection-in-record-text fixture", a: INJECTION_IN_RECORD_TEXT, patientId: "SYN-INJ" },
 ];
 
 describe("fallbackText — always passes the guard", () => {
-  for (const { name, ided, patientId } of cases) {
-    it(`produces guard-safe text for ${name}`, () => {
-      const text = fallbackText(ided);
-      const result = guard(text, ided, patientFor(patientId));
-      expect(result).toEqual({ ok: true });
+  for (const { name, a, patientId } of fixtureCases) {
+    it(`produces guard-safe text for the ${name}`, () => {
+      const ided = withIds(a);
+      expect(guard(fallbackText(ided), ided, patientFor(patientId))).toEqual({ ok: true });
     });
   }
 
-  it("matches the selected-fixture Assessments to the required sources", () => {
-    // Sanity: the route's `assess(record)` picks fixtures by patientId as designed.
-    expect(assessFor("SYN-004")).toBe(AORTIC_STENOSIS);
-    expect(assessFor("SYN-003")).toBe(CONCENTRIC_WALL_THICKENING);
-    expect(assessFor("SYN-999")).toBe(EMPTY_WITH_MISSING);
+  for (const patientId of ["SYN-004", "SYN-003"]) {
+    it(`produces guard-safe text for the real engine on ${patientId}`, () => {
+      const { ided, patient } = realCase(patientId);
+      expect(ided.findings.length).toBeGreaterThan(0);
+      expect(guard(fallbackText(ided), ided, patient)).toEqual({ ok: true });
+    });
+  }
+
+  it("produces guard-safe text for the real engine on a bare record (missing items only)", () => {
+    const ided = withIds(assess({ patientId: "SYN-999", studyId: "STUDY-1" } as PatientRecord));
+    expect(ided.findings).toEqual([]);
+    expect(ided.missing.length).toBeGreaterThan(0);
+    expect(guard(fallbackText(ided), ided, patientFor("SYN-999"))).toEqual({ ok: true });
+  });
+
+  it("the real engine grades the SYN-004 sample as aortic stenosis", () => {
+    const { ided } = realCase("SYN-004");
+    expect(ided.findings.some((f) => f.condition === "aortic-stenosis")).toBe(true);
   });
 });
 
@@ -84,21 +109,27 @@ describe("fallbackText — content", () => {
     expect(text).toContain("E3 valve area 0.8 cm2");
   });
 
-  it("includes differential findings and a field-only Missing line", () => {
+  it("includes differential findings and an id + field Missing line", () => {
     const text = fallbackText(withIds(CONCENTRIC_WALL_THICKENING));
     expect(text).toContain("F1 Concentric left ventricular hypertrophy (rule-defined)");
     expect(text).toContain("F2 Hypertensive heart disease (supported)");
     expect(text).toContain("E3 systolic bp 162 mmHg");
-    // Missing line is built from field names only (no free-text `why`).
-    expect(text).toContain("Missing: observations.lvMassIndex.");
+    // Missing line cites each item's M# id with its field name (no free-text `why`).
+    expect(text).toContain("Missing: M1 observations.lvMassIndex.");
     expect(text).not.toContain("distinguishes concentric hypertrophy");
   });
 
-  it("lists missing fields when no rule fired", () => {
+  it("lists missing fields with their M# ids when no rule fired", () => {
     const text = fallbackText(withIds(EMPTY_WITH_MISSING));
     expect(text).toContain(
-      "Missing: valveFindings, observations.lvEjectionFraction, echo.wallThickness.",
+      "Missing: M1 valveFindings, M2 observations.lvEjectionFraction, M3 echo.wallThickness.",
     );
+  });
+
+  it("cites only M# ids the guard knows", () => {
+    const ided = withIds(EMPTY_WITH_MISSING);
+    const cited = fallbackText(ided).match(/\bM\d+\b/g);
+    expect(cited).toEqual(ided.missing.map((m) => m.id));
   });
 
   it("cites a finding id on a clinical red-flag line and never echoes quoted record text", () => {

@@ -30,7 +30,9 @@
 //   5. assess          → the engine's Assessment  (assess takes PatientRecord)
 //   6. withIds / refs  → F#/E# ids + the id→Ref lookup
 //   7. runChat (45 s)  → 502 model_error / 504 timeout / 429 rate_limited (API 429)
-//   8. guard           → 200 ok (guard passes) | 200 fallback (guard fails)
+//   8. first-call rule → 200 fallback (log reason no_tool) when the first model
+//                        response did not call get_assessment
+//      guard           → 200 ok (guard passes) | 200 fallback (guard fails)
 //
 // Rationale for parse-before-rate-limit (vs. the literal "rate limit → parse"):
 //   - The limiter is keyed by session, and the session comes from the body, so a
@@ -282,7 +284,7 @@ export async function POST(req: Request): Promise<Response> {
       outputTokens: 0,
       calls: 0,
     });
-    return errorResponse(503, "not_configured", "The assistant is not configured.");
+    return errorResponse(503, "not_configured", errorMessageFor("not_configured"));
   }
 
   // --- Step 4: normalize ----------------------------------------------------
@@ -310,11 +312,10 @@ export async function POST(req: Request): Promise<Response> {
   const patient = normalized.patient;
 
   // --- Step 5: assess -------------------------------------------------------
-  // The engine is deterministic and offline. Its agreed signature takes a
-  // `PatientRecord` (see __fixtures__/types.ts `Assess`), so we pass
+  // The engine is deterministic and offline. Its signature takes a
+  // `PatientRecord` (`Assess` in src/domain/diagnosis/types.ts), so we pass
   // `patient.record` — the schema-validated record carried on the normalized
-  // patient. (When the real engine lands, task 12 adjusts only this call if the
-  // signature changes.)
+  // patient.
   const assessment = assess(patient.record);
 
   // --- Step 6: ids + refs ---------------------------------------------------
@@ -322,8 +323,8 @@ export async function POST(req: Request): Promise<Response> {
   const refs = refsFor(ided);
 
   // --- Step 7: runChat (45 s) -----------------------------------------------
-  // Build the real client via the seam (only now that we have a key), force the
-  // tool-first loop, and bound the whole loop with a 45 s abort signal. The
+  // Build the real client via the seam (only now that we have a key), run the
+  // tool loop (`tool_choice: auto` on every call), and bound the whole loop with a 45 s abort signal. The
   // history is forwarded as-is: it already holds only user turns and the
   // assistant's already-guarded texts from the client (design.md "Request").
   const client = clientFactory(apiKey);
@@ -370,13 +371,23 @@ export async function POST(req: Request): Promise<Response> {
     return errorResponse(httpStatus, code, errorMessageFor(code));
   }
 
-  // --- Step 8: guard → ok | fallback ----------------------------------------
-  // The guard checks numbers, citations and unknown ids against the Assessment
-  // and the normalized patient. Pass → status "ok" with the model's text. Fail →
-  // status "fallback" (HTTP 200) with the deterministic, guard-safe fallbackText.
-  const verdict = guard(chatResult.text, ided, patient);
-  const status: "ok" | "fallback" = verdict.ok ? "ok" : "fallback";
-  const text = verdict.ok ? chatResult.text : fallbackText(ided);
+  // --- Step 8: first-call rule, then guard → ok | fallback ------------------
+  // If the first response skipped `get_assessment` (assessmentCalled: false),
+  // runChat already stopped without a further call; the reply was written
+  // without the engine's facts, so it is never shown → status "fallback" with
+  // log reason "no_tool" (Requirement 3.3; error table row "First response
+  // without get_assessment").
+  // Otherwise the guard checks numbers, citations and unknown ids against the
+  // Assessment and the normalized patient. Pass → status "ok" with the model's
+  // text. Fail → status "fallback" (HTTP 200). Every fallback carries the
+  // deterministic, guard-safe fallbackText.
+  let reasons: string[] = ["no_tool"];
+  if (chatResult.assessmentCalled) {
+    const verdict = guard(chatResult.text, ided, patient);
+    reasons = verdict.ok ? [] : verdict.reasons;
+  }
+  const status: "ok" | "fallback" = reasons.length === 0 ? "ok" : "fallback";
+  const text = status === "ok" ? chatResult.text : fallbackText(ided);
 
   const inputTokens = sumUsage(chatResult.usage, "input");
   const outputTokens = sumUsage(chatResult.usage, "output");
@@ -390,8 +401,8 @@ export async function POST(req: Request): Promise<Response> {
     inputTokens,
     outputTokens,
     calls: chatResult.calls,
-    // Guard reasons are enum strings (e.g. "number", "uncited"), never content.
-    ...(verdict.ok ? {} : { guardReasons: verdict.reasons }),
+    // Reasons are enum strings ("no_tool", "number", "uncited", …), never content.
+    ...(status === "fallback" ? { guardReasons: reasons } : {}),
   });
 
   return json(200, {
@@ -461,7 +472,7 @@ function errorMessageFor(
     case "model_error":
       return "The assistant could not produce an answer. Please try again.";
     case "not_configured":
-      return "The assistant is not configured.";
+      return "Assistant is not configured";
     case "too_large":
       return "Request body too large";
     case "bad_request":

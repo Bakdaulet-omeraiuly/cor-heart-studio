@@ -104,10 +104,10 @@ describe("toOutcome", () => {
   it("passes through ok, fallback and error bodies", () => {
     expect(toOutcome(200, reply("t [F1]."))).toMatchObject({ status: "ok", text: "t [F1]." });
     expect(toOutcome(200, reply("list", "fallback")).status).toBe("fallback");
-    expect(toOutcome(503, { status: "error", code: "not_configured", message: "The assistant is not configured." })).toEqual({
+    expect(toOutcome(503, { status: "error", code: "not_configured", message: "Assistant is not configured" })).toEqual({
       status: "error",
       code: "not_configured",
-      message: "The assistant is not configured.",
+      message: "Assistant is not configured",
     });
   });
 

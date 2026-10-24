@@ -104,11 +104,12 @@ const NUMBER_TOKEN = new RegExp(
   "gu",
 );
 
-// Id tokens the engine uses for citations. We strip them BEFORE extracting
-// numbers so the digits inside `[F12]` or a bare `E3` are never mistaken for a
-// clinical number. The bracketed form and the bare form are both covered; a
-// word boundary keeps us from eating the `E` in, say, "ECG".
-const ID_TOKEN = /\[(?:F|E)\d+\]|\b(?:F|E)\d+\b/g;
+// Id tokens the engine uses for citations: findings `F#`, evidence `E#` and
+// missing items `M#`. We strip them BEFORE extracting numbers so the digits
+// inside `[F12]`, `[M2]` or a bare `E3` are never mistaken for a clinical number.
+// The bracketed form and the bare form are both covered; a word boundary keeps us
+// from eating the `E` in, say, "ECG".
+const ID_TOKEN = /\[(?:F|E|M)\d+\]|\b(?:F|E|M)\d+\b/g;
 
 // Leading list markers on each line: "1.", "2)", "- ", "* ", "• ". These are
 // document structure, not clinical numbers, so they are stripped per line before
@@ -439,16 +440,18 @@ const GRADE_WORD_RE = new RegExp(
 // Id-token recognition, mirroring `ID_TOKEN` above but WITHOUT the global flag so
 // we can `.test()` / `.match()` per sentence without carrying `lastIndex` state
 // between calls. Captures the id itself (dropping the optional brackets) so we
-// can compare it against the known set. Covers both `[F2]`/`[E5]` and bare
-// `F2`/`E5`; the word boundary keeps the `E` in "ECG" from matching.
-const ID_TOKEN_CAPTURE = /\[((?:F|E)\d+)\]|\b((?:F|E)\d+)\b/gu;
+// can compare it against the known set. Covers both `[F2]`/`[E5]`/`[M1]` and bare
+// `F2`/`E5`/`M1`; the word boundary keeps the `E` in "ECG" from matching.
+const ID_TOKEN_CAPTURE = /\[((?:F|E|M)\d+)\]|\b((?:F|E|M)\d+)\b/gu;
 
 /**
  * Collect the set of ids the Assessment actually produced.
  *
- * Every finding (and differential entry) carries an `F#` id and every evidence
- * item an `E#` id (stamped by `withIds`). Any id token in the reply that is not
- * in this set was invented by the model and is reported as unknown.
+ * Every finding (and differential entry) carries an `F#` id, every evidence
+ * item an `E#` id and every missing item an `M#` id (stamped by `withIds`). An
+ * `[M#]` citation therefore satisfies a missing-data sentence. Any id token in the
+ * reply that is not in this set (including an `M#` past the end of `missing[]`)
+ * was invented by the model and is reported as unknown.
  */
 function knownIds(a: IdedAssessment): Set<string> {
   const ids = new Set<string>();
@@ -458,13 +461,16 @@ function knownIds(a: IdedAssessment): Set<string> {
       ids.add(evidence.id);
     }
   }
+  for (const m of a.missing) {
+    ids.add(m.id);
+  }
   return ids;
 }
 
 /**
  * Pull every id token out of a string.
  *
- * Returns the bare ids (`F2`, `E5`) regardless of whether they were written
+ * Returns the bare ids (`F2`, `E5`, `M1`) regardless of whether they were written
  * bracketed (`[F2]`) or bare. Uses a fresh match loop so callers can run it over
  * the whole reply or a single sentence without regex state leaking across calls.
  */
@@ -503,10 +509,21 @@ function idTokensIn(text: string): string[] {
  * always included.
  */
 function splitSentences(text: string): string[] {
-  // Split on: (a '.' not preceded by a digit, OR a '!'/'?') then whitespace.
-  // The alternation keeps `!`/`?` unconditional while only the period carries the
-  // decimal-point guard. Lookbehind is supported by the target runtime (Node).
-  const parts = text.split(/(?<=(?<!\d)[.!?])\s+/u);
+  // Split on: (a '.' not preceded by a digit, OR a '!'/'?'), optionally followed by
+  // citation ids, then whitespace. The alternation keeps `!`/`?` unconditional
+  // while only the period carries the decimal-point guard. Lookbehind is
+  // supported by the target runtime (Node).
+  //
+  // Citations written AFTER the full stop ("… rule-defined. [F1]") belong to the
+  // sentence they follow — the live check (task 7.4) showed the model writes
+  // them this way. So the split never happens between the punctuation and a
+  // following `[F#]`/`[E#]`/`[M#]` (negative lookahead), and does happen after
+  // such a trailing citation group (the optional group inside the lookbehind).
+  // A citation group only ever attaches to the ONE sentence directly before it;
+  // it never covers earlier sentences on the same line.
+  const parts = text.split(
+    /(?<=(?<!\d)[.!?](?:[ \t]*\[(?:F|E|M)\d+\])*)\s+(?![ \t]*\[(?:F|E|M)\d+\])/u,
+  );
   return parts.map((s) => s.trim()).filter((s) => s.length > 0);
 }
 

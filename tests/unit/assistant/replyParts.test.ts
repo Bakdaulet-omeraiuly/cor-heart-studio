@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Ref } from "@/app/api/assistant/ids";
-import { refAccessibleName, refDetails, refValue, splitReply } from "@/components/assistant/replyParts";
+import { refAccessibleName, refDetails, refValue, splitReply, stripMarkdown } from "@/components/assistant/replyParts";
 
 const evidence: Ref = {
   id: "E1",
@@ -15,6 +15,13 @@ const evidence: Ref = {
   organ: "heart",
 };
 const finding: Ref = { id: "F1", kind: "finding", label: "Aortic stenosis, severe", organ: "heart", target: "aortic_valve" };
+const missing: Ref = {
+  id: "M1",
+  kind: "missing",
+  label: "Missing data",
+  field: "observations.aorticValveAreaIndexed",
+  why: "Indexed valve area confirms severe grading.",
+};
 
 describe("splitReply", () => {
   it("splits bracketed ids into ref parts and keeps the text around them", () => {
@@ -36,6 +43,17 @@ describe("splitReply", () => {
     ]);
   });
 
+  it("splits [M#] citations, alone and grouped, into ref parts", () => {
+    expect(splitReply("Indexed area not recorded [M1]. Grade [F1, M2].")).toEqual([
+      { kind: "text", text: "Indexed area not recorded " },
+      { kind: "ref", id: "M1" },
+      { kind: "text", text: ". Grade " },
+      { kind: "ref", id: "F1" },
+      { kind: "ref", id: "M2" },
+      { kind: "text", text: "." },
+    ]);
+  });
+
   it("leaves bare ids, other brackets and plain text untouched", () => {
     expect(splitReply("See E1 and [note] or [X1].")).toEqual([{ kind: "text", text: "See E1 and [note] or [X1]." }]);
     expect(splitReply("")).toEqual([]);
@@ -45,6 +63,33 @@ describe("splitReply", () => {
     const text = "[F1] at start, middle [E12], end [E3]";
     const back = splitReply(text).map((p) => (p.kind === "text" ? p.text : `[${p.id}]`)).join("");
     expect(back).toBe(text);
+  });
+});
+
+describe("stripMarkdown", () => {
+  it("removes every ** marker", () => {
+    expect(stripMarkdown("**Severe** aortic stenosis [F1]. **")).toBe("Severe aortic stenosis [F1]. ");
+  });
+
+  it("removes a leading '- ' bullet on each line, including indented ones", () => {
+    expect(stripMarkdown("- Severe AS [F1].\n  - Peak velocity 4.3 m/s [E1].\nNo bullet here.")).toBe(
+      "Severe AS [F1].\nPeak velocity 4.3 m/s [E1].\nNo bullet here.",
+    );
+  });
+
+  it("keeps hyphens and minus signs inside text and at line start without a space", () => {
+    const text = "LVEF 40-50% [E2]. Strain -2.5 [E3].\n-2.5 is the value [E3]. Left - right shunt absent.";
+    expect(stripMarkdown(text)).toBe(text);
+  });
+
+  it("leaves citations splittable after stripping", () => {
+    expect(splitReply(stripMarkdown("- **Severe** AS [F1].\n- Area not recorded [M1]."))).toEqual([
+      { kind: "text", text: "Severe AS " },
+      { kind: "ref", id: "F1" },
+      { kind: "text", text: ".\nArea not recorded " },
+      { kind: "ref", id: "M1" },
+      { kind: "text", text: "." },
+    ]);
   });
 });
 
@@ -70,7 +115,16 @@ describe("ref formatting", () => {
     expect(refDetails({ ...evidence, value: undefined, unit: undefined })[1]).toBe("valves.aortic.peakVelocity");
   });
 
+  it("formats a missing-data ref as label · field · why", () => {
+    expect(refDetails(missing)).toEqual([
+      "Missing data",
+      "observations.aorticValveAreaIndexed",
+      "Indexed valve area confirms severe grading.",
+    ]);
+  });
+
   it("names id buttons by kind", () => {
+    expect(refAccessibleName("M1", missing)).toBe("Missing data M1");
     expect(refAccessibleName("E1", evidence)).toBe("Evidence E1");
     expect(refAccessibleName("F1", finding)).toBe("Finding F1");
     expect(refAccessibleName("F9", undefined)).toBe("Citation F9");

@@ -1,3 +1,3 @@
-// TEMPORARY until src/domain/diagnosis/types.ts and assess() exist (@HyorinmaruK, H3)
-export { assessFixture as assess } from "./__fixtures__/assess";
-export type { Assessment, Finding, Evidence } from "./__fixtures__/types";
+// The only import of the diagnosis engine in the assistant (spec: .kiro/specs/assistant-chat/, "Engine boundary").
+export { assess } from "@/domain/diagnosis";
+export type { Assessment, Finding, Evidence } from "@/domain/diagnosis";

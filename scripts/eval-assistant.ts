@@ -9,12 +9,20 @@
 //                      explicitly for the run.
 //   EVAL_MODELS        comma-separated model ids (default "claude-opus-5-5,claude-sonnet-5-5").
 //   EVAL_CASES         optional comma-separated case ids to run a subset (e.g. "as-01,inj-01").
+//   EVAL_RUNS          runs per case × question × arm: a positive integer (default 3; 1 for a smoke run).
+//                      An invalid value ("0", "-1", "1.5", "abc") is NOT replaced by the default: the script
+//                      prints a clear message, sends nothing and exits 0, because a silent default could
+//                      multiply the cost of a run the user meant to keep small. Empty/unset → 3.
 //
 // Arms (§7 "Arms"): for every model in EVAL_MODELS
 //   A-<name>  architecture A — the SAME server code as POST /api/assistant, called as functions (not HTTP):
 //             parseRequest → normalizeRecord → assess → withIds → assessmentForModel → runChat → guard.
+//             The route's first-call rule applies (Requirement 13.6): when runChat returns
+//             `assessmentCalled: false` (the first response did not call get_assessment), the route returns the
+//             fallback with log reason `no_tool`, so the turn is counted as a no-tool fallback and its (empty)
+//             text is NOT graded as a model answer.
 //   C-<name>  "LLM only" control — same SYSTEM_PROMPT, no tools, the raw record JSON in the user message.
-// Every case × question × arm runs RUNS (= 3) times.
+// Every case × question × arm runs EVAL_RUNS times; the plan line and the report state the runs actually used.
 //
 // Questions per case: the case's `question` (or a default summary question), plus "what is missing" when the case
 // lists expected `missing` items (that is the "when asked" of the Missing metric).
@@ -32,6 +40,12 @@
 //   Latency     time to first text token and total turn time, p50 / p95 (streamed, so TTFT is measurable even
 //               though the route itself checks before it sends).
 //   Cost        Σ usage × price (§6, incl. cache write 1.25× / read 0.05×) per turn.
+// No-tool fallbacks (A arm only): excluded from the per-reply rubric metrics above (Grade … Injection and the
+// details' Guard pass / Uncited sentences), because there is no model answer to grade — the user sees the
+// deterministic fallback. They are counted in the details table's "No tool" column (n/turns), which must be read
+// next to the rubric rates: an arm that often skips the tool looks better on the rubric than it is. They DO count
+// in latency and cost, since the user waited for and the API billed that turn. Errors count in neither.
+// The §7 main-table columns are unchanged.
 // Rubric items that a regex cannot judge (no value filled in, refusal tone, …) still need the hand-graded sample
 // of §7.
 //
@@ -49,18 +63,12 @@ import { withIds, type IdedAssessment } from "@/app/api/assistant/ids";
 import { assessmentForModel, SYSTEM_PROMPT } from "@/app/api/assistant/prompt";
 import { ModelError, runChat } from "@/app/api/assistant/chat";
 import { allowedNumbers, checkCitations, extractNumbers, guard, matchNumber } from "@/app/api/assistant/guard";
-// TEMPORARY: the fixtures are used (a) as the case source while tests/assistant/cases/ is empty and (b) to warn
-// when engine.ts still re-exports the fixture engine. Remove with the fixtures (task 12).
-import {
-  AORTIC_STENOSIS,
-  assessFixture,
-  CONCENTRIC_WALL_THICKENING,
-} from "@/app/api/assistant/__fixtures__/assess";
+import { PatientRecordSchema } from "@/domain/schema/record";
 
 // --- Settings (mirroring route.ts, whose constants are module-private) --------------------------------------
 
 const DEFAULT_EVAL_MODELS = "claude-opus-5-5,claude-sonnet-5-5";
-const RUNS = 3;
+const DEFAULT_RUNS = 3;
 const MAX_TOKENS = 1024; // route.ts DEFAULT_MAX_TOKENS
 const TURN_TIMEOUT_MS = 45_000; // route.ts RUN_CHAT_TIMEOUT_MS
 const CONCURRENCY = 4;
@@ -134,9 +142,17 @@ export interface Grades {
   injection?: boolean;
 }
 
+/**
+ * One turn. Exactly one of `error`, `fallback` or `grades` is set:
+ *   error     the call failed (content-free error class); no timing/cost metrics.
+ *   fallback  "no_tool": an A-arm turn whose first response skipped get_assessment — the route would return the
+ *             fallback, so there is no model answer to grade (counts in latency and cost only).
+ *   grades    a graded model reply.
+ */
 export interface TurnResult {
   arm: string;
   error?: string;
+  fallback?: "no_tool";
   grades?: Grades;
   ttftMs?: number;
   totalMs: number;
@@ -189,7 +205,12 @@ function loadCaseFiles(): { cases: EvalCase[]; invalid: string[] } {
   return { cases, invalid };
 }
 
-function expectedFromFixture(a: Assessment, behavior: Behavior): CaseExpected {
+/** Expected values read off the real engine's Assessment (fallback cases only: grades agree by construction). */
+function expectedFromEngine(record: unknown, behavior: Behavior): CaseExpected {
+  const parsed = PatientRecordSchema.safeParse(record);
+  const a: Assessment = parsed.success
+    ? assess(parsed.data)
+    : { findings: [], differential: [], missing: [], redFlags: [], disclaimer: "" };
   return {
     ruleDefined: a.findings
       .filter((f) => f.basis === "rule-defined")
@@ -200,7 +221,7 @@ function expectedFromFixture(a: Assessment, behavior: Behavior): CaseExpected {
   };
 }
 
-/** Cases built from the assistant fixtures and the matching synthetic samples (SYN-003, SYN-004). */
+/** Fallback cases from the synthetic samples SYN-003 and SYN-004, used only when tests/assistant/cases/ is empty. */
 function fixtureCases(): EvalCase[] {
   if (!existsSync(SAMPLES_FILE)) return [];
   let patients: unknown[] = [];
@@ -220,7 +241,7 @@ function fixtureCases(): EvalCase[] {
       category: "synthetic-sample",
       question: "How severe is the aortic stenosis, and on what basis?",
       record: syn4,
-      expected: expectedFromFixture(AORTIC_STENOSIS, "answer"),
+      expected: expectedFromEngine(syn4, "answer"),
     });
     cases.push({
       id: "fixture-syn-004-oos",
@@ -236,7 +257,7 @@ function fixtureCases(): EvalCase[] {
       category: "synthetic-sample",
       question: DEFAULT_QUESTION,
       record: syn3,
-      expected: expectedFromFixture(CONCENTRIC_WALL_THICKENING, "answer"),
+      expected: expectedFromEngine(syn3, "answer"),
     });
   }
   return cases;
@@ -360,6 +381,24 @@ export function costOf(usage: Anthropic.Messages.Usage[], model: string): number
   return usd;
 }
 
+/**
+ * Parse EVAL_RUNS. Unset or blank → the default (3). Otherwise it must be a positive integer written in decimal
+ * digits ("1", " 5 "); anything else ("0", "-1", "1.5", "2x", "1e2") is an error — the caller exits 0 without
+ * sending, rather than silently running the default number of (paid) turns.
+ */
+export function parseRuns(raw: string | undefined): { ok: true; runs: number } | { ok: false; message: string } {
+  const value = (raw ?? "").trim();
+  if (value === "") return { ok: true, runs: DEFAULT_RUNS };
+  const runs = /^\d+$/.test(value) ? Number(value) : NaN;
+  if (!Number.isSafeInteger(runs) || runs < 1) {
+    return {
+      ok: false,
+      message: `EVAL_RUNS must be a positive integer (e.g. EVAL_RUNS=1 for a smoke run; default ${DEFAULT_RUNS}).`,
+    };
+  }
+  return { ok: true, runs };
+}
+
 /** Short arm name from a model id: claude-opus-5-5 → opus. */
 export function shortName(model: string): string {
   return model.replace(/^claude-/, "").replace(/-\d.*$/, "") || model;
@@ -419,6 +458,17 @@ async function runTurn(
         [],
         c.toolResult,
       );
+      // The route's first-call rule: no get_assessment in the first response → fallback (reason no_tool).
+      // runChat already dropped that text; there is no model answer to grade.
+      if (!result.assessmentCalled) {
+        return {
+          arm: arm.name,
+          fallback: "no_tool",
+          ttftMs,
+          totalMs: performance.now() - started,
+          costUsd: costOf(result.usage, arm.model),
+        };
+      }
       text = result.text;
       usage = result.usage;
     } else {
@@ -489,18 +539,22 @@ export function report(arms: { name: string; model: string }[], results: TurnRes
     "|---|---|---|---|---|---|---|---|---|---|",
   ];
   const details = [
-    "| Arm | Model | Turns | Errors | Guard pass | Uncited sentences | TTFT p50 / p95 | Total p50 / p95 | Total $ |",
-    "|---|---|---|---|---|---|---|---|---|",
+    "| Arm | Model | Turns | Errors | No tool | Guard pass | Uncited sentences | TTFT p50 / p95 | Total p50 / p95 | Total $ |",
+    "|---|---|---|---|---|---|---|---|---|---|",
   ];
   for (const arm of arms) {
     const all = results.filter((r) => r.arm === arm.name);
+    // Rubric metrics: graded replies only. Latency and cost: graded replies plus no-tool fallbacks (both are
+    // completed turns the user waited for and the API billed); errors count in neither.
     const ok = all.filter((r): r is TurnResult & { grades: Grades } => r.grades !== undefined);
+    const noTool = all.filter((r) => r.fallback === "no_tool").length;
+    const completed = all.filter((r) => r.grades !== undefined || r.fallback !== undefined);
     const g = ok.map((r) => r.grades);
     const invented = g.reduce((n, x) => n + x.invented, 0);
     const withInvented = g.filter((x) => x.invented > 0).length;
-    const ttft = ok.flatMap((r) => (r.ttftMs === undefined ? [] : [r.ttftMs]));
-    const total = ok.map((r) => r.totalMs);
-    const costs = ok.flatMap((r) => (r.costUsd === undefined ? [] : [r.costUsd]));
+    const ttft = completed.flatMap((r) => (r.ttftMs === undefined ? [] : [r.ttftMs]));
+    const total = completed.map((r) => r.totalMs);
+    const costs = completed.flatMap((r) => (r.costUsd === undefined ? [] : [r.costUsd]));
     const costSum = costs.length > 0 ? costs.reduce((a, b) => a + b, 0) : undefined;
     const injection = g.map((x) => x.injection);
     const injectionCount = injection.filter((v) => v !== undefined);
@@ -526,6 +580,7 @@ export function report(arms: { name: string; model: string }[], results: TurnRes
         `\`${arm.model}\``,
         String(all.length),
         errors.size === 0 ? "0" : [...errors].map(([k, n]) => `${k} ${n}`).join(", "),
+        arm.name.startsWith("A-") || noTool > 0 ? `${noTool}/${all.length}` : "n/a",
         rate(g.map((x) => x.guardOk)),
         String(g.reduce((n, x) => n + x.uncited, 0)),
         `${seconds(percentile(ttft, 50))} / ${seconds(percentile(ttft, 95))}`,
@@ -542,7 +597,15 @@ export function report(arms: { name: string; model: string }[], results: TurnRes
 async function main(): Promise<void> {
   const log = (line: string) => console.error(`[eval] ${line}`);
 
-  // 1. Cases: tests/assistant/cases/*.json, or the fixtures until those exist.
+  // 0. EVAL_RUNS: an invalid value stops the run (exit 0, nothing sent) instead of falling back to the default.
+  const parsedRuns = parseRuns(process.env.EVAL_RUNS);
+  if (!parsedRuns.ok) {
+    console.log(`${parsedRuns.message} Nothing was sent.`);
+    return;
+  }
+  const runs = parsedRuns.runs;
+
+  // 1. Cases: tests/assistant/cases/*.json, or the SYN-003/SYN-004 fallback cases if that folder is empty.
   const loaded = loadCaseFiles();
   let cases = loaded.cases;
   let usingFixtures = false;
@@ -556,7 +619,7 @@ async function main(): Promise<void> {
     }
     log(
       `NOTE: no case files in tests/assistant/cases/ — using ${cases.length} fixture cases ` +
-        "(SYN-003/SYN-004 with the assistant fixtures). This is a smoke run, not the §7 measurement.",
+        "(SYN-003/SYN-004, expected values from the engine). This is a smoke run, not the §7 measurement.",
     );
   }
   const only = (process.env.EVAL_CASES ?? "").split(",").map((s) => s.trim()).filter(Boolean);
@@ -579,14 +642,6 @@ async function main(): Promise<void> {
     console.log("No case passed the route's request validation — nothing to evaluate.");
     return;
   }
-  // With real cases the fixture engine cannot produce their expected findings; with fixture cases it is expected.
-  const fixtureEngine = assess === assessFixture && !usingFixtures;
-  if (fixtureEngine) {
-    log(
-      "NOTE: src/app/api/assistant/engine.ts still re-exports the fixture assess() (task 12 switches it to the real " +
-        "engine). Arm A sees fixture Assessments, so grade and missing results are not meaningful yet.",
-    );
-  }
 
   // 3. Arms and plan.
   const models = (process.env.EVAL_MODELS ?? DEFAULT_EVAL_MODELS).split(",").map((s) => s.trim()).filter(Boolean);
@@ -598,10 +653,10 @@ async function main(): Promise<void> {
     ...models.map((model) => ({ name: `C-${label(model)}`, model, architecture: "C" as const })),
   ];
   const questionCount = prepared.reduce((n, c) => n + c.questions.length, 0);
-  const turns = arms.length * questionCount * RUNS;
+  const turns = arms.length * questionCount * runs;
   log(
     `${prepared.length} case(s)${usingFixtures ? " [fixtures]" : ""}, ${questionCount} question(s), ` +
-      `arms ${arms.map((a) => a.name).join(", ")}, ${RUNS} runs → ${turns} turns`,
+      `arms ${arms.map((a) => a.name).join(", ")}, ${runs} run${runs === 1 ? "" : "s"} (EVAL_RUNS) → ${turns} turns`,
   );
 
   // 4. Key check: without a key nothing is sent.
@@ -619,7 +674,7 @@ async function main(): Promise<void> {
   for (const arm of arms) {
     for (const c of prepared) {
       for (const q of c.questions) {
-        for (let run = 0; run < RUNS; run++) jobs.push(() => runTurn(client, arm, c, q));
+        for (let run = 0; run < runs; run++) jobs.push(() => runTurn(client, arm, c, q));
       }
     }
   }
@@ -634,9 +689,10 @@ async function main(): Promise<void> {
       `## Assistant evaluation — ${new Date().toISOString().slice(0, 10)}`,
       "",
       `${prepared.length} cases${usingFixtures ? " (FIXTURES — tests/assistant/cases/ is empty)" : ""}, ` +
-        `${questionCount} questions, ${RUNS} runs per arm. Graded by script on the raw model reply; see ` +
+        `${questionCount} questions, ${runs} run${runs === 1 ? "" : "s"} per case × question × arm (EVAL_RUNS). ` +
+        "Graded by script on the raw model reply; A-arm turns whose first response skipped get_assessment are " +
+        'counted under "No tool" (route fallback, reason no_tool) and not graded; see ' +
         "docs/research/assistant-chat.md §7 for the bars and the hand-graded sample.",
-      ...(fixtureEngine ? ["", "Arm A used the fixture engine (engine.ts, task 12 pending)."] : []),
       "",
       report(arms, results),
     ].join("\n"),

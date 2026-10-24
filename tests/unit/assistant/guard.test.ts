@@ -58,7 +58,13 @@ const ASSESSMENT: Assessment = {
     },
   ],
   differential: [],
-  missing: [],
+  // One missing item → M1, so the `[M#]` citation cases have a known id.
+  missing: [
+    {
+      field: "observations.aorticValveAreaIndexed",
+      why: "Indexed valve area confirms severe grading in small-body patients.",
+    },
+  ],
   redFlags: [],
   disclaimer: "Not a diagnosis.",
 };
@@ -224,6 +230,10 @@ describe("extractNumbers — parsing", () => {
     expect(extractNumbers("As cited [F12] and E3, nothing numeric here.")).toEqual(
       [],
     );
+  });
+
+  it("ignores digits inside missing-item ids ([M2], bare M1)", () => {
+    expect(extractNumbers("Not recorded [M2]; see also M1.")).toEqual([]);
   });
 
   it("keeps a real number alongside stripped ids", () => {
@@ -427,6 +437,32 @@ describe("guard — end to end", () => {
     {
       name: "a clinical sentence with no known id is uncited",
       text: "The findings are severe.",
+      expected: { ok: false, reasons: ["uncited"] },
+    },
+    {
+      name: "a known [M#] counts as the citation of a missing-data sentence",
+      text: "The indexed valve area is not recorded, so severe grading cannot be confirmed [M1].",
+      expected: { ok: true },
+    },
+    {
+      name: "an unknown M# is an unknown id (and does not cite the sentence)",
+      text: "The indexed valve area is not recorded, so severe grading cannot be confirmed [M2].",
+      expected: { ok: false, reasons: ["unknown_id", "uncited"] },
+    },
+    {
+      name: "a bracketed M# id is not read as a number",
+      text: "Indexed valve area is missing [M1].",
+      expected: { ok: true },
+    },
+    {
+      // Live check (task 7.4): the model writes the citation after the full stop.
+      name: "a citation after the full stop cites the sentence before it",
+      text: "The findings are severe. [E1]\nPeak velocity is 1.3 m/s. [E1]",
+      expected: { ok: true },
+    },
+    {
+      name: "a citation after the full stop covers only the sentence directly before it",
+      text: "The findings are severe. Peak velocity is 1.3 m/s. [E1]",
       expected: { ok: false, reasons: ["uncited"] },
     },
   ];

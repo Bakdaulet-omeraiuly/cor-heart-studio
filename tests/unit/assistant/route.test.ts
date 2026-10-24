@@ -97,10 +97,19 @@ function makeMessage(options: {
 // Request helpers
 // ---------------------------------------------------------------------------
 
-/** A minimal, schema-valid record whose patientId selects the SYN-004 fixture. */
+/** A small, schema-valid record with SYN-004's aortic values; the real engine grades it severe AS. */
 const RECORD: PatientRecord = {
   patientId: "SYN-004",
   studyId: "STUDY-1",
+  valveFindings: [
+    {
+      valve: "aortic_valve",
+      condition: "stenosis",
+      peakVelocity: { value: 4.3, unit: "m/s" },
+      meanGradient: { value: 48, unit: "mmHg" },
+      valveArea: { value: 0.8, unit: "cm2" },
+    },
+  ],
 } as PatientRecord;
 
 interface Body {
@@ -137,7 +146,7 @@ async function callRoute(
 }
 
 /**
- * Seed the fake client for a single question: a forced tool_use turn, then an
+ * Seed the fake client for a single question: a get_assessment tool_use turn, then an
  * end_turn carrying `replyText`. runChat makes two calls per question.
  */
 function seedOneQuestion(create: CreateFn, replyText: string): void {
@@ -230,6 +239,40 @@ describe("POST /api/assistant — fallback", () => {
     // The route substitutes the deterministic, guard-safe fallback text.
     expect(json.text).toBe(guardSafeText(RECORD));
   });
+
+  it("returns 200 fallback (log reason no_tool) when the first response skips get_assessment", async () => {
+    const info = vi.spyOn(console, "info").mockImplementation(() => {});
+    // Even guard-passing text is withheld: it was written without the tool result.
+    fakeCreate.mockResolvedValueOnce(
+      makeMessage({
+        stopReason: "end_turn",
+        content: [textBlock(guardSafeText(RECORD))],
+      }),
+    );
+
+    const { res, json } = await callRoute({
+      question: "Grade?",
+      record: RECORD,
+      sessionId: "s-no-tool",
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get("cache-control")).toBe("no-store");
+    if (json.status === "error") throw new Error("expected a non-error response");
+    expect(json.status).toBe("fallback");
+    expect(json.text).toBe(guardSafeText(RECORD));
+    // No further model call after the first response.
+    expect(fakeCreate).toHaveBeenCalledTimes(1);
+
+    expect(info).toHaveBeenCalledTimes(1);
+    const line = JSON.parse(info.mock.calls[0][0] as string);
+    expect(line).toMatchObject({
+      outcome: "fallback",
+      http: 200,
+      calls: 1,
+      guardReasons: ["no_tool"],
+    });
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -250,6 +293,7 @@ describe("POST /api/assistant — 503 not_configured", () => {
     expect(res.status).toBe(503);
     if (json.status !== "error") throw new Error("expected an error response");
     expect(json.code).toBe("not_configured");
+    expect(json.message).toBe("Assistant is not configured");
     // No model call should have been made.
     expect(fakeCreate).not.toHaveBeenCalled();
   });
@@ -347,7 +391,7 @@ describe("POST /api/assistant — 429 rate_limited", () => {
 
 describe("POST /api/assistant — model errors", () => {
   it("maps a ModelError to 502 model_error", async () => {
-    // The forced first call throws ModelError (e.g. a max_tokens cut-off).
+    // The first call throws ModelError (e.g. a max_tokens cut-off).
     fakeCreate.mockRejectedValueOnce(new ModelError("cut off"));
 
     const { res, json } = await callRoute({

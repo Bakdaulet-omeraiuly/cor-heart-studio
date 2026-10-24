@@ -1,9 +1,10 @@
 "use client";
-// Renders one assistant reply (Requirements 10.3, 10.4).
+// Renders one assistant reply (Requirements 10.3, 10.4, 10.8).
 //
-// - `ok`: the guarded model text, with every `[F#]` / `[E#]` citation turned into a small id button. Hover or
-//   keyboard focus shows the ref (label · field = value unit · rule · source); activating it calls
-//   `onActivate(ref)` (the panel highlights the ref and calls `focusTarget` to move the 3D view).
+// - `ok`: the guarded model text, first stripped of stray `**` and leading `- ` bullets (`stripMarkdown`), with every `[F#]` / `[E#]` / `[M#]` citation turned into a small id button.
+//   Hover or keyboard focus shows the ref (label · field = value unit · rule · source; for an `M#` missing item:
+//   field · why); activating it calls `onActivate(ref)` (the panel highlights the ref and calls `focusTarget`,
+//   which moves the 3D view for `F#`/`E#` and does nothing for `M#`).
 // - `fallback`: the engine's Assessment as a plain list with the same id buttons, plus the "answer withheld"
 //   note. Rendered from the structured `assessment`, not by parsing the fallback prose.
 import { useId } from "react";
@@ -11,7 +12,7 @@ import type { Ref } from "@/app/api/assistant/ids";
 import type { Evidence } from "@/app/api/assistant/engine";
 import { cx } from "../ui/primitives";
 import type { AssistantReply } from "./chatState";
-import { refAccessibleName, refDetails, refValue, splitReply } from "./replyParts";
+import { refAccessibleName, refDetails, refValue, splitReply, stripMarkdown } from "./replyParts";
 
 export const WITHHELD_NOTE = "Generated answer withheld — showing the engine result.";
 
@@ -27,7 +28,7 @@ export function ReplyText({ reply, activeId, onActivate }: ReplyTextProps) {
     ? <FallbackList reply={reply} activeId={activeId} onActivate={onActivate} />
     : (
       <p className="whitespace-pre-wrap break-words text-[12px] leading-relaxed text-ink">
-        {splitReply(reply.text).map((part, i) =>
+        {splitReply(stripMarkdown(reply.text)).map((part, i) =>
           part.kind === "text"
             ? <span key={i}>{part.text}</span>
             : <RefButton key={i} id={part.id} ref_={reply.refs[part.id]} active={activeId === part.id} onActivate={onActivate} />,
@@ -84,7 +85,11 @@ function FallbackList({ reply, activeId, onActivate }: ReplyTextProps) {
           <h4 className="text-[11px] font-medium uppercase tracking-wider text-faint">Missing</h4>
           <ul className="mt-0.5 space-y-0.5">
             {a.missing.map((m) => (
-              <li key={m.field} className="text-muted"><span className="num text-ink">{m.field}</span> — {m.why}</li>
+              <li key={m.id} className="flex flex-wrap items-baseline gap-1 text-muted">
+                {btn(m.id)}
+                <span className="num text-ink">{m.field}</span>
+                <span>— {m.why}</span>
+              </li>
             ))}
           </ul>
         </section>

@@ -120,30 +120,40 @@ function optionsOf(
   return create.mock.calls[callIndex][1];
 }
 
-// ---------------------------------------------------------------------------
-// 1. Forced first tool call
-// ---------------------------------------------------------------------------
-
-describe("runChat — forced first tool call", () => {
-  it("forces get_assessment and sends cached system + tools on the first call", async () => {
-    const { create, client } = makeClient();
-    create.mockResolvedValueOnce(
+/** Seed a first `tool_use` turn for get_assessment, then an `end_turn` with text. */
+function seedToolThenAnswer(create: CreateFn, answer: string): void {
+  create
+    .mockResolvedValueOnce(
       makeMessage({
-        stopReason: "end_turn",
-        content: [textBlock("done [F1]")],
+        stopReason: "tool_use",
+        content: [toolUseBlock("toolu_1", "get_assessment")],
         usage: makeUsage(1),
       }),
+    )
+    .mockResolvedValueOnce(
+      makeMessage({
+        stopReason: "end_turn",
+        content: [textBlock(answer)],
+        usage: makeUsage(2),
+      }),
     );
+}
+
+// ---------------------------------------------------------------------------
+// 1. First call: auto tool choice, cached system + tools
+// ---------------------------------------------------------------------------
+
+describe("runChat — first call", () => {
+  it("uses tool_choice auto and sends cached system + tools on the first call", async () => {
+    const { create, client } = makeClient();
+    seedToolThenAnswer(create, "done [F1]");
 
     await runChat(makeDeps(client), "What is the grade?", [], TOOL_RESULT);
 
     const params = paramsOf(create, 0);
 
-    // Tool is forced by name.
-    expect(params.tool_choice).toEqual({
-      type: "tool",
-      name: "get_assessment",
-    });
+    // The tool is never forced (forced choices are rejected by the API).
+    expect(params.tool_choice).toEqual({ type: "auto" });
 
     // System is a single text block carrying the prompt and a cache marker.
     const system = params.system as Anthropic.Messages.TextBlockParam[];
@@ -170,13 +180,7 @@ describe("runChat — forced first tool call", () => {
 
   it("forwards history then appends the current question as the last user turn", async () => {
     const { create, client } = makeClient();
-    create.mockResolvedValueOnce(
-      makeMessage({
-        stopReason: "end_turn",
-        content: [textBlock("ok [F1]")],
-        usage: makeUsage(1),
-      }),
-    );
+    seedToolThenAnswer(create, "ok [F1]");
 
     const history: ChatTurn[] = [
       { role: "user", text: "Earlier question" },
@@ -185,12 +189,69 @@ describe("runChat — forced first tool call", () => {
 
     await runChat(makeDeps(client), "Latest question", history, TOOL_RESULT);
 
-    const messages = paramsOf(create, 0).messages;
+    // runChat appends to the same array after call 1 (the mock keeps a
+    // reference), so compare the seeded prefix only.
+    const messages = paramsOf(create, 0).messages.slice(0, 3);
     expect(messages).toEqual([
       { role: "user", content: "Earlier question" },
       { role: "assistant", content: "Earlier answer [F1]" },
       { role: "user", content: "Latest question" },
     ]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 1b. First response without get_assessment → stop, assessmentCalled: false
+// ---------------------------------------------------------------------------
+
+describe("runChat — first response skips get_assessment", () => {
+  it("stops after one call with assessmentCalled false and no text when the model answers directly", async () => {
+    const { create, client } = makeClient();
+    const u1 = makeUsage(7);
+    create.mockResolvedValueOnce(
+      makeMessage({
+        stopReason: "end_turn",
+        content: [textBlock("Severe aortic stenosis [F1]")],
+        usage: u1,
+      }),
+    );
+
+    const result = await runChat(makeDeps(client), "Grade?", [], TOOL_RESULT);
+
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      text: "",
+      usage: [u1],
+      calls: 1,
+      assessmentCalled: false,
+    });
+  });
+
+  it("stops after one call when the first response uses only another tool", async () => {
+    const { create, client } = makeClient();
+    create.mockResolvedValueOnce(
+      makeMessage({
+        stopReason: "tool_use",
+        content: [toolUseBlock("toolu_x", "some_other_tool")],
+        usage: makeUsage(1),
+      }),
+    );
+
+    const result = await runChat(makeDeps(client), "Grade?", [], TOOL_RESULT);
+
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(result.assessmentCalled).toBe(false);
+    expect(result.text).toBe("");
+  });
+
+  it("reports assessmentCalled true when the first response calls get_assessment", async () => {
+    const { create, client } = makeClient();
+    seedToolThenAnswer(create, "ok [F1]");
+
+    const result = await runChat(makeDeps(client), "Grade?", [], TOOL_RESULT);
+
+    expect(result.assessmentCalled).toBe(true);
+    expect(result.text).toBe("ok [F1]");
   });
 });
 
@@ -308,6 +369,10 @@ describe("runChat — call ceiling", () => {
     ).rejects.toBeInstanceOf(ModelError);
 
     expect(create).toHaveBeenCalledTimes(3);
+    // tool_choice auto on every call, never a forced tool.
+    for (let i = 0; i < 3; i += 1) {
+      expect(paramsOf(create, i).tool_choice).toEqual({ type: "auto" });
+    }
   });
 });
 
@@ -370,7 +435,10 @@ describe("runChat — unknown tool name", () => {
       .mockResolvedValueOnce(
         makeMessage({
           stopReason: "tool_use",
-          content: [toolUseBlock("toolu_x", "some_other_tool")],
+          content: [
+            toolUseBlock("toolu_1", "get_assessment"),
+            toolUseBlock("toolu_x", "some_other_tool"),
+          ],
           usage: makeUsage(1),
         }),
       )
@@ -391,14 +459,19 @@ describe("runChat — unknown tool name", () => {
 
     const blocks = paramsOf(create, 1).messages[2]
       .content as Anthropic.Messages.ToolResultBlockParam[];
-    expect(blocks).toHaveLength(1);
+    expect(blocks).toHaveLength(2);
     expect(blocks[0]).toMatchObject({
+      type: "tool_result",
+      tool_use_id: "toolu_1",
+      content: TOOL_RESULT,
+    });
+    expect(blocks[1]).toMatchObject({
       type: "tool_result",
       tool_use_id: "toolu_x",
       is_error: true,
     });
     // The is_error result must NOT carry the real assessment JSON.
-    expect(blocks[0].content).not.toBe(TOOL_RESULT);
+    expect(blocks[1].content).not.toBe(TOOL_RESULT);
 
     expect(result.text).toBe("Recovered [F1]");
     expect(result.calls).toBe(2);

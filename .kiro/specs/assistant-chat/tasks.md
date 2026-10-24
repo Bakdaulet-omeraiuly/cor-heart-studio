@@ -54,7 +54,7 @@ Before the first task, read `node_modules/next/dist/docs/01-app/01-getting-start
   - [x] 6.3 Unit tests `tests/unit/assistant/chat.test.ts` with a fake client.
     - _Requirements: 12.1_
 
-- [ ] 7. Route handler
+- [x] 7. Route handler
   - [x] 7.1 Implement `rateLimit.ts` (10 / 60 s per IP + session, per instance).
     - _Requirements: 8.2_
   - [x] 7.2 Implement `route.ts`: `runtime = "nodejs"`, `maxDuration = 60`, no `dynamic`/`revalidate`/`fetchCache`;
@@ -63,7 +63,8 @@ Before the first task, read `node_modules/next/dist/docs/01-app/01-getting-start
     - _Requirements: 2.1, 2.5, 3.1, 4.2, 4.3, 4.6, 6.6, 7.1, 7.2, 7.3, 8.1, 8.3, 9.1, 9.2, 9.3_
   - [x] 7.3 Unit tests `tests/unit/assistant/route.test.ts` (ok, fallback, 503 without key, 400, 413, 429).
     - _Requirements: 12.1_
-  - [ ] 7.4 Manual check with a local key in `.env.local` (never committed): ask about SYN-004 and SYN-003.
+  - [x] 7.4 Manual check with a local key in `.env.local` (never committed): ask about SYN-004 and SYN-003. Re-run
+    after task 13 with the default model (`claude-sonnet-5-5`).
     - _Requirements: 4.1_
 
 - [x] 8. Chat panel
@@ -95,8 +96,46 @@ Before the first task, read `node_modules/next/dist/docs/01-app/01-getting-start
   - [x] 11.2 Add `"eval:assistant": "tsx scripts/eval-assistant.ts"` to `package.json`.
     - _Requirements: 13.1_
 
-- [ ] 12. Switch to the real engine (after @HyorinmaruK pushes `src/domain/diagnosis/types.ts` and `assess()`)
+- [x] 13. Live-check fixes (from task 7.4)
+  - [x] 13.1 `chat.ts` / `route.ts`: `tool_choice: { type: "auto" }` on every call; a first response without a
+    `get_assessment` tool_use → `assessmentCalled: false`, no further call, route returns the fallback (status
+    `fallback`, log reason `no_tool`); `SYSTEM_PROMPT` tells the model to call `get_assessment` before answering.
+    Unit tests in `chat.test.ts` and `route.test.ts`.
+    - _Requirements: 3.3, 4.2, 5.2, 12.1_
+  - [x] 13.2 M ids: `withIds` assigns `M1`, `M2`, … to `missing[]`; `refsFor` adds `kind: "missing"` refs with `field`
+    and `why`; `assessmentForModel` exposes the ids; the guard accepts known `M#` ids as citations; `fallbackText`
+    cites them; `focusTarget` is a no-op for `M#`; `ReplyText` renders `M#` buttons with an InfoTip (not focusable in
+    3D). Unit tests (ids, guard, prompt, fallback); update the e2e canned responses if the refs shape changes.
+    - _Requirements: 3.2, 5.4, 6.3, 6.5, 7.1, 10.3, 11.3, 12.1, 12.2_
+  - [x] 13.3 Plain text: `SYSTEM_PROMPT` says plain text, no Markdown, and cite `[M#]` for missing-data sentences;
+    `ReplyText` strips stray `**` and leading "- ". Unit tests.
+    - _Requirements: 5.4, 5.9, 10.8, 12.1_
+  - [x] 13.4 503 message exactly "Assistant is not configured"; update the route test.
+    - _Requirements: 4.6, 12.1_
+  - [x] 13.5 Eval script: the A arm applies the route's first-call rule (no `get_assessment` → fallback);
+    `EVAL_RUNS` (default 3). Unit tests in `evalAssistant.test.ts`.
+    - _Requirements: 13.2, 13.6_
+
+- [x] 12. Switch to the real engine (after @HyorinmaruK pushes `src/domain/diagnosis/types.ts` and `assess()`)
   - Change the two lines in `engine.ts`; delete the TEMPORARY type copy; adjust `route.ts` if `assess` takes
-    `PatientRecord`; re-run all tests and `npm run eval:assistant`; fill the results table in
-    `docs/research/assistant-chat.md`.
-  - _Requirements: 3.1, 3.5, 13.4_
+    `PatientRecord`; re-run all tests.
+  - Run only a smoke eval, not the full evaluation: `EVAL_MODELS=claude-sonnet-5-5`, `EVAL_CASES` limited to about
+    5 cases (one AS, one LV, one ECG, one injection, one out-of-scope), `EVAL_RUNS=1`; record the results in
+    `docs/research/assistant-chat.md`, clearly labelled as a smoke run.
+  - _Requirements: 3.1, 3.5, 13.2, 13.4_
+
+## Task Dependency Graph
+
+Only incomplete leaf sub-tasks are listed. Task 13 runs before the re-run of 7.4; task 12 has no sub-tasks and
+waits for the real engine.
+
+```json
+{
+  "waves": [
+    { "id": 0, "tasks": ["13.1"] },
+    { "id": 1, "tasks": ["13.2", "13.4"] },
+    { "id": 2, "tasks": ["13.3", "13.5"] },
+    { "id": 3, "tasks": ["7.4"] }
+  ]
+}
+```
