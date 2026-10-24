@@ -1,0 +1,4 @@
+concept id	name	element file id
+FMA1	test artery	FJ1	
+FMA1	test artery	FJ2	
+FMA2	test branch	FJ2	
