@@ -1,0 +1,32 @@
+{
+  "id": "lv-07",
+  "title": "EF 29 % → severely abnormal",
+  "category": "boundary",
+  "source": "ASE/EACVI 2015 chamber quantification, doi:10.1016/j.echo.2014.10.003",
+  "record": {
+    "patientId": "CASE-lv-07",
+    "studyId": "CASE-lv-07-A",
+    "synthetic": true,
+    "observations": {
+      "lvEjectionFraction": {
+        "value": 29,
+        "unit": "%"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "lv-ef-category",
+        "grade": "reduced"
+      },
+      {
+        "condition": "lv-systolic-dysfunction",
+        "grade": "severely abnormal"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}

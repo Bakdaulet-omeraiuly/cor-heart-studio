@@ -1,0 +1,45 @@
+{
+  "id": "as-12",
+  "title": "Severe gradient with AVA 1.3 → high-flow alternative",
+  "category": "guideline",
+  "source": "ACC/AHA 2020 VHD guideline, doi:10.1161/CIR.0000000000000923",
+  "record": {
+    "patientId": "CASE-as-12",
+    "studyId": "CASE-as-12-A",
+    "synthetic": true,
+    "valveFindings": [
+      {
+        "valve": "aortic_valve",
+        "condition": "stenosis",
+        "peakVelocity": {
+          "value": 4.2,
+          "unit": "m/s"
+        },
+        "valveArea": {
+          "value": 1.3,
+          "unit": "cm2"
+        }
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "aortic-stenosis",
+        "grade": "severe"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "differential": [
+      {
+        "condition": "aortic-stenosis-high-flow",
+        "basis": "possible"
+      }
+    ],
+    "missing": [
+      "observations.strokeVolume"
+    ]
+  },
+  "reviewedByClinician": false
+}

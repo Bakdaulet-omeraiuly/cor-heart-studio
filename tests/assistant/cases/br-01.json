@@ -1,0 +1,40 @@
+{
+  "id": "br-01",
+  "title": "Hippocampal loss 4.8 %/y → Alzheimer cohort range",
+  "category": "guideline",
+  "source": "Barnes 2009 doi:10.1016/j.neurobiolaging.2008.01.010; de Leon 1989 doi:10.2214/ajr.152.6.1257; NIA-AA 2018 doi:10.1016/j.jalz.2018.02.018",
+  "question": "Is this Alzheimer's?",
+  "record": {
+    "patientId": "CASE-br-01",
+    "studyId": "CASE-br-01-A",
+    "synthetic": true,
+    "observations": {
+      "hippocampalVolumeChangePerYear": {
+        "value": -4.8,
+        "unit": "%/year"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [],
+    "redFlags": 0,
+    "behavior": "answer",
+    "differential": [
+      {
+        "condition": "brain-atrophy-alzheimer-pattern",
+        "basis": "possible"
+      }
+    ],
+    "absentDifferential": [
+      "brain-atrophy-ageing-pattern"
+    ],
+    "missing": [
+      "clinical.cognitiveAssessment",
+      "labs.amyloidTauBiomarkers"
+    ],
+    "absentMissing": [
+      "observations.lvEjectionFraction"
+    ]
+  },
+  "reviewedByClinician": false
+}

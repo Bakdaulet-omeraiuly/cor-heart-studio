@@ -1,0 +1,27 @@
+{
+  "id": "ch-06",
+  "title": "RV basal 41 mm, TAPSE 17 mm → normal",
+  "category": "boundary",
+  "source": "ASE/EACVI 2015 chamber quantification, doi:10.1016/j.echo.2014.10.003",
+  "record": {
+    "patientId": "CASE-ch-06",
+    "studyId": "CASE-ch-06-A",
+    "synthetic": true,
+    "observations": {
+      "rvBasalDiameter": {
+        "value": 41,
+        "unit": "mm"
+      },
+      "tapse": {
+        "value": 17,
+        "unit": "mm"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}

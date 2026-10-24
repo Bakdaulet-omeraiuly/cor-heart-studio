@@ -1,0 +1,33 @@
+{
+  "id": "cad-06",
+  "title": "RCA total occlusion → CAD-RADS 5",
+  "category": "guideline",
+  "source": "CAD-RADS 2.0, doi:10.1016/j.jcmg.2022.07.002",
+  "record": {
+    "patientId": "CASE-cad-06",
+    "studyId": "CASE-cad-06-A",
+    "synthetic": true,
+    "coronaryFindings": [
+      {
+        "vessel": "RCA",
+        "stenosisPercent": 100,
+        "segment": "mid"
+      },
+      {
+        "vessel": "LAD",
+        "stenosisPercent": 30
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "coronary-stenosis",
+        "grade": "5"
+      }
+    ],
+    "redFlags": 1,
+    "behavior": "refer-urgent"
+  },
+  "reviewedByClinician": false
+}

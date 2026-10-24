@@ -1,0 +1,62 @@
+{
+  "id": "lv-13",
+  "title": "Concentric LVH (IVS 15, PW 14, LVEDD 48, BSA 2.0, SBP 165)",
+  "category": "guideline",
+  "source": "ASE/EACVI 2015 chamber quantification, doi:10.1016/j.echo.2014.10.003",
+  "record": {
+    "patientId": "CASE-lv-13",
+    "studyId": "CASE-lv-13-A",
+    "synthetic": true,
+    "demographics": {
+      "biologicalSex": "male",
+      "heightCm": {
+        "value": 180,
+        "unit": "cm"
+      },
+      "weightKg": {
+        "value": 80,
+        "unit": "kg"
+      }
+    },
+    "observations": {
+      "ivsThickness": {
+        "value": 15,
+        "unit": "mm"
+      },
+      "lvPosteriorWallThickness": {
+        "value": 14,
+        "unit": "mm"
+      },
+      "lvEndDiastolicDiameter": {
+        "value": 48,
+        "unit": "mm"
+      },
+      "systolicBP": {
+        "value": 165,
+        "unit": "mmHg"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "lv-hypertrophy",
+        "grade": "concentric"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "differential": [
+      {
+        "condition": "hypertensive-heart-disease",
+        "basis": "supported"
+      },
+      {
+        "condition": "hypertrophic-cardiomyopathy",
+        "basis": "possible"
+      }
+    ]
+  },
+  "notes": "LVM = 0.8·1.04·[(1.5+4.8+1.4)³ − 4.8³] + 0.6 = 288.4 g; LVMI 144.2 g/m² > 115; RWT 2·14/48 = 0.58 > 0.42.",
+  "reviewedByClinician": false
+}

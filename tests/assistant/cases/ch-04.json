@@ -1,0 +1,28 @@
+{
+  "id": "ch-04",
+  "title": "LA volume without height/weight → not graded",
+  "category": "incomplete",
+  "source": "ASE/EACVI 2015 chamber quantification, doi:10.1016/j.echo.2014.10.003",
+  "question": "Is the left atrium enlarged?",
+  "record": {
+    "patientId": "CASE-ch-04",
+    "studyId": "CASE-ch-04-A",
+    "synthetic": true,
+    "observations": {
+      "laVolume": {
+        "value": 90,
+        "unit": "mL"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [],
+    "redFlags": 0,
+    "behavior": "state-missing",
+    "missing": [
+      "demographics.heightCm",
+      "demographics.weightKg"
+    ]
+  },
+  "reviewedByClinician": false
+}

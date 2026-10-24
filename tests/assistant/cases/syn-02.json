@@ -1,0 +1,133 @@
+{
+  "id": "syn-02",
+  "title": "SYN-002 LV enlargement, reduced EF, moderate MR",
+  "category": "synthetic-sample",
+  "source": "ESC 2021 HF doi:10.1093/eurheartj/ehab368; AHA/ACC/HFSA 2022 doi:10.1161/CIR.0000000000001063",
+  "record": {
+    "patientId": "SYN-002",
+    "studyId": "STUDY-002-A",
+    "displayName": "Synthetic 02 · LV enlargement, reduced EF",
+    "synthetic": true,
+    "studyDate": "2026-03-05",
+    "diagnoses": [
+      {
+        "text": "Dilated cardiomyopathy",
+        "source": "synthetic clinician assessment"
+      }
+    ],
+    "observations": {
+      "heartRate": {
+        "value": 92,
+        "unit": "bpm",
+        "source": "synthetic measurement"
+      },
+      "systolicBP": {
+        "value": 110,
+        "unit": "mmHg",
+        "source": "synthetic measurement"
+      },
+      "diastolicBP": {
+        "value": 72,
+        "unit": "mmHg",
+        "source": "synthetic measurement"
+      },
+      "lvEjectionFraction": {
+        "value": 32,
+        "unit": "%",
+        "source": "synthetic echo report"
+      },
+      "lvEndDiastolicVolume": {
+        "value": 180,
+        "unit": "mL",
+        "source": "synthetic echo report"
+      },
+      "lvEndSystolicVolume": {
+        "value": 122.4,
+        "unit": "mL",
+        "source": "synthetic echo report"
+      },
+      "lvEndDiastolicDiameter": {
+        "value": 65,
+        "unit": "mm",
+        "source": "synthetic echo report",
+        "phase": "end_diastole",
+        "method": "reported linear dimension"
+      },
+      "ivsThickness": {
+        "value": 8,
+        "unit": "mm",
+        "source": "synthetic echo report"
+      },
+      "lvPosteriorWallThickness": {
+        "value": 8,
+        "unit": "mm",
+        "source": "synthetic echo report"
+      },
+      "laVolume": {
+        "value": 64,
+        "unit": "mL",
+        "source": "synthetic echo report"
+      }
+    },
+    "valveFindings": [
+      {
+        "valve": "mitral_valve",
+        "condition": "regurgitation",
+        "severity": "moderate",
+        "source": "synthetic clinician assessment"
+      }
+    ],
+    "symptoms": [
+      "Exertional breathlessness"
+    ],
+    "clinicianNotes": "Fictional demonstration record. No imaging is supplied."
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "lv-ef-category",
+        "grade": "reduced"
+      },
+      {
+        "condition": "lv-systolic-dysfunction",
+        "grade": "moderately abnormal"
+      },
+      {
+        "condition": "lv-dilatation",
+        "grade": "dilated"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "findings": [
+      {
+        "condition": "mitral-regurgitation",
+        "basis": "supported",
+        "grade": "moderate"
+      }
+    ],
+    "differential": [
+      {
+        "condition": "heart-failure",
+        "basis": "possible"
+      },
+      {
+        "condition": "dilated-cardiomyopathy",
+        "basis": "possible"
+      },
+      {
+        "condition": "secondary-mitral-regurgitation",
+        "basis": "possible"
+      },
+      {
+        "condition": "ischaemic-cardiomyopathy",
+        "basis": "possible"
+      }
+    ],
+    "missing": [
+      "labs.natriureticPeptide",
+      "coronaryFindings"
+    ]
+  },
+  "reviewedByClinician": false
+}

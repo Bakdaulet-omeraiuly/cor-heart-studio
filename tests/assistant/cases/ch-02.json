@@ -1,0 +1,44 @@
+{
+  "id": "ch-02",
+  "title": "LAVI 35 mL/m² → mild enlargement",
+  "category": "boundary",
+  "source": "ASE/EACVI 2015 chamber quantification, doi:10.1016/j.echo.2014.10.003",
+  "record": {
+    "patientId": "CASE-ch-02",
+    "studyId": "CASE-ch-02-A",
+    "synthetic": true,
+    "demographics": {
+      "heightCm": {
+        "value": 180,
+        "unit": "cm"
+      },
+      "weightKg": {
+        "value": 80,
+        "unit": "kg"
+      }
+    },
+    "observations": {
+      "laVolume": {
+        "value": 70,
+        "unit": "mL"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "la-enlargement",
+        "grade": "mild"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "differential": [
+      {
+        "condition": "raised-lv-filling-pressure",
+        "basis": "possible"
+      }
+    ]
+  },
+  "reviewedByClinician": false
+}

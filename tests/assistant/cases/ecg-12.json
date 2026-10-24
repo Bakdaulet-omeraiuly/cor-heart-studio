@@ -1,0 +1,44 @@
+{
+  "id": "ecg-12",
+  "title": "SYN-006 sparse record: HR 104 only",
+  "category": "synthetic-sample",
+  "source": "ACC/AHA/HRS 2015 SVT, doi:10.1016/j.jacc.2015.08.856",
+  "record": {
+    "patientId": "SYN-006",
+    "studyId": "STUDY-006-A",
+    "displayName": "Synthetic 06 · Sparse record",
+    "synthetic": true,
+    "diagnoses": [
+      {
+        "text": "Palpitations under evaluation",
+        "source": "synthetic referral note"
+      }
+    ],
+    "observations": {
+      "heartRate": {
+        "value": 104,
+        "unit": "bpm",
+        "source": "synthetic measurement"
+      }
+    },
+    "symptoms": [
+      "Palpitations",
+      "Dizziness"
+    ],
+    "clinicianNotes": "Fictional sparse record: no dimensions, volumes or valve data. Everything else is shown as unknown."
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "tachycardia",
+        "grade": null
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "state-missing",
+    "missing": [
+      "observations.lvEjectionFraction"
+    ]
+  },
+  "reviewedByClinician": false
+}

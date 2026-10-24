@@ -1,0 +1,31 @@
+{
+  "id": "tr-01",
+  "title": "Tricuspid regurgitation reported moderate",
+  "category": "synthetic",
+  "source": "ACC/AHA 2020 VHD guideline, doi:10.1161/CIR.0000000000000923",
+  "record": {
+    "patientId": "CASE-tr-01",
+    "studyId": "CASE-tr-01-A",
+    "synthetic": true,
+    "valveFindings": [
+      {
+        "valve": "tricuspid",
+        "condition": "regurgitation",
+        "severity": "moderate"
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [],
+    "redFlags": 0,
+    "behavior": "answer",
+    "findings": [
+      {
+        "condition": "tricuspid-regurgitation",
+        "basis": "supported",
+        "grade": "moderate"
+      }
+    ]
+  },
+  "reviewedByClinician": false
+}

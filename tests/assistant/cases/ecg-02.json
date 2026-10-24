@@ -1,0 +1,44 @@
+{
+  "id": "ecg-02",
+  "title": "QTc 450 ms (man) → prolonged",
+  "category": "boundary",
+  "source": "AHA/ACCF/HRS 2009 Part IV, doi:10.1016/j.jacc.2008.12.014",
+  "record": {
+    "patientId": "CASE-ecg-02",
+    "studyId": "CASE-ecg-02-A",
+    "synthetic": true,
+    "ecg": {
+      "qtc": {
+        "value": 450,
+        "unit": "ms"
+      }
+    },
+    "demographics": {
+      "biologicalSex": "male"
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "qtc",
+        "grade": "prolonged"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "differential": [
+      {
+        "condition": "electrolyte-disturbance",
+        "basis": "possible"
+      },
+      {
+        "condition": "congenital-long-qt",
+        "basis": "possible"
+      }
+    ],
+    "missing": [
+      "labs.potassium"
+    ]
+  },
+  "reviewedByClinician": false
+}

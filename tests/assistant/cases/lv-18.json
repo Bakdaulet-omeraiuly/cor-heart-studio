@@ -1,0 +1,67 @@
+{
+  "id": "lv-18",
+  "title": "Inferior wall-motion abnormality with RCA 85 % stenosis",
+  "category": "guideline",
+  "source": "CAD-RADS 2.0, doi:10.1016/j.jcmg.2022.07.002",
+  "record": {
+    "patientId": "CASE-lv-18",
+    "studyId": "CASE-lv-18-A",
+    "synthetic": true,
+    "observations": {
+      "lvEjectionFraction": {
+        "value": 58,
+        "unit": "%"
+      }
+    },
+    "echo": {
+      "regionalWallMotion": [
+        {
+          "segment": 4,
+          "motion": "hypokinetic"
+        },
+        {
+          "segment": 10,
+          "motion": "hypokinetic"
+        }
+      ]
+    },
+    "coronaryFindings": [
+      {
+        "vessel": "RCA",
+        "segment": "mid",
+        "stenosisPercent": 85
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "lv-ef-category",
+        "grade": "preserved"
+      },
+      {
+        "condition": "coronary-stenosis",
+        "grade": "4A"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "findings": [
+      {
+        "condition": "regional-wall-motion-abnormality",
+        "basis": "supported",
+        "grade": "hypokinetic"
+      }
+    ],
+    "differential": [
+      {
+        "condition": "ischaemic-heart-disease",
+        "basis": "supported"
+      }
+    ],
+    "missing": [
+      "additionalInvestigations.functionalTest"
+    ]
+  },
+  "reviewedByClinician": false
+}

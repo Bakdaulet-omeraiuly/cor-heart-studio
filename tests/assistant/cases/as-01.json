@@ -1,0 +1,45 @@
+{
+  "id": "as-01",
+  "title": "Severe AS, concordant (Vmax 4.3, ΔPm 48, AVA 0.8)",
+  "category": "guideline",
+  "source": "ACC/AHA 2020 VHD guideline, doi:10.1161/CIR.0000000000000923",
+  "question": "How severe is the aortic stenosis, and on what basis?",
+  "record": {
+    "patientId": "CASE-as-01",
+    "studyId": "CASE-as-01-A",
+    "synthetic": true,
+    "valveFindings": [
+      {
+        "valve": "aortic_valve",
+        "condition": "stenosis",
+        "severity": "severe",
+        "peakVelocity": {
+          "value": 4.3,
+          "unit": "m/s"
+        },
+        "meanGradient": {
+          "value": 48,
+          "unit": "mmHg"
+        },
+        "valveArea": {
+          "value": 0.8,
+          "unit": "cm2"
+        }
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "aortic-stenosis",
+        "grade": "severe"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "missing": [
+      "observations.lvEjectionFraction"
+    ]
+  },
+  "reviewedByClinician": false
+}

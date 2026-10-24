@@ -1,0 +1,177 @@
+{
+  "id": "syn-03",
+  "title": "SYN-003 concentric wall thickening, SBP 162",
+  "category": "synthetic-sample",
+  "source": "ASE/EACVI 2015 chamber quantification, doi:10.1016/j.echo.2014.10.003",
+  "record": {
+    "patientId": "SYN-003",
+    "studyId": "STUDY-003-A",
+    "displayName": "Synthetic 03 · Concentric wall thickening",
+    "synthetic": true,
+    "studyDate": "2026-03-09",
+    "diagnoses": [
+      {
+        "text": "Concentric left ventricular hypertrophy",
+        "source": "synthetic clinician assessment"
+      },
+      {
+        "text": "Hypertension",
+        "source": "synthetic history"
+      }
+    ],
+    "observations": {
+      "heartRate": {
+        "value": 64,
+        "unit": "bpm",
+        "source": "synthetic measurement"
+      },
+      "systolicBP": {
+        "value": 162,
+        "unit": "mmHg",
+        "source": "synthetic measurement"
+      },
+      "diastolicBP": {
+        "value": 94,
+        "unit": "mmHg",
+        "source": "synthetic measurement"
+      },
+      "lvEndDiastolicDiameter": {
+        "value": 44,
+        "unit": "mm",
+        "source": "synthetic echo report",
+        "phase": "end_diastole"
+      },
+      "lvEndDiastolicVolume": {
+        "value": 95,
+        "unit": "mL",
+        "source": "synthetic echo report"
+      },
+      "lvEndSystolicVolume": {
+        "value": 32,
+        "unit": "mL",
+        "source": "synthetic echo report"
+      },
+      "lvEjectionFraction": {
+        "value": 66,
+        "unit": "%",
+        "source": "synthetic echo report"
+      },
+      "ivsThickness": {
+        "value": 15,
+        "unit": "mm",
+        "source": "synthetic echo report",
+        "phase": "end_diastole"
+      },
+      "lvPosteriorWallThickness": {
+        "value": 14,
+        "unit": "mm",
+        "source": "synthetic echo report",
+        "phase": "end_diastole"
+      },
+      "laVolume": {
+        "value": 52,
+        "unit": "mL",
+        "source": "synthetic echo report"
+      }
+    },
+    "echo": {
+      "wallThickness": [
+        {
+          "region": "anterior",
+          "value": 14,
+          "unit": "mm",
+          "phase": "end_diastole",
+          "method": "2D",
+          "source": "synthetic echo report"
+        },
+        {
+          "region": "lateral",
+          "value": 14,
+          "unit": "mm",
+          "phase": "end_diastole",
+          "method": "2D",
+          "source": "synthetic echo report"
+        },
+        {
+          "region": "inferior",
+          "value": 14,
+          "unit": "mm",
+          "phase": "end_diastole",
+          "method": "2D",
+          "source": "synthetic echo report"
+        }
+      ],
+      "diastolicFunction": {
+        "grade": "II",
+        "description": "Pseudonormal filling pattern (synthetic)",
+        "source": "synthetic echo report"
+      }
+    },
+    "ecg": {
+      "rhythm": "Sinus rhythm",
+      "stChanges": [
+        {
+          "leads": [
+            "V5",
+            "V6"
+          ],
+          "description": "Lateral ST-T changes (synthetic text only)"
+        }
+      ],
+      "prInterval": {
+        "value": 172,
+        "unit": "ms",
+        "source": "synthetic ECG report"
+      },
+      "qrsDuration": {
+        "value": 104,
+        "unit": "ms",
+        "source": "synthetic ECG report"
+      },
+      "qtInterval": {
+        "value": 420,
+        "unit": "ms",
+        "source": "synthetic ECG report"
+      }
+    },
+    "symptoms": [
+      "Occasional headaches"
+    ],
+    "clinicianNotes": "Fictional demonstration record. Blood pressure is displayed only and does not change geometry."
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "lv-ef-category",
+        "grade": "preserved"
+      },
+      {
+        "condition": "qtc",
+        "grade": "normal"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "findings": [
+      {
+        "condition": "lv-increased-wall-thickness",
+        "basis": "supported",
+        "grade": "increased"
+      }
+    ],
+    "differential": [
+      {
+        "condition": "hypertensive-heart-disease",
+        "basis": "supported"
+      },
+      {
+        "condition": "hypertrophic-cardiomyopathy",
+        "basis": "possible"
+      }
+    ],
+    "missing": [
+      "demographics.heightCm"
+    ]
+  },
+  "reviewedByClinician": false
+}

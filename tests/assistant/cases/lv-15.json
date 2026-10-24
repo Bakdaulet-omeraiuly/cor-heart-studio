@@ -1,0 +1,52 @@
+{
+  "id": "lv-15",
+  "title": "Eccentric LVH with dilatation (IVS 11, PW 10, LVEDD 64, BSA 2.0)",
+  "category": "guideline",
+  "source": "ASE/EACVI 2015 chamber quantification, doi:10.1016/j.echo.2014.10.003",
+  "record": {
+    "patientId": "CASE-lv-15",
+    "studyId": "CASE-lv-15-A",
+    "synthetic": true,
+    "demographics": {
+      "biologicalSex": "male",
+      "heightCm": {
+        "value": 180,
+        "unit": "cm"
+      },
+      "weightKg": {
+        "value": 80,
+        "unit": "kg"
+      }
+    },
+    "observations": {
+      "ivsThickness": {
+        "value": 11,
+        "unit": "mm"
+      },
+      "lvPosteriorWallThickness": {
+        "value": 10,
+        "unit": "mm"
+      },
+      "lvEndDiastolicDiameter": {
+        "value": 64,
+        "unit": "mm"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "lv-hypertrophy",
+        "grade": "eccentric"
+      },
+      {
+        "condition": "lv-dilatation",
+        "grade": "dilated"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "notes": "LVMI 146.7 g/m², RWT 0.31.",
+  "reviewedByClinician": false
+}

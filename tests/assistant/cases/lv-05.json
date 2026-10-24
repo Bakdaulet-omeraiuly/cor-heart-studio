@@ -1,0 +1,31 @@
+{
+  "id": "lv-05",
+  "title": "EF 52 % (man) → preserved, normal",
+  "category": "boundary",
+  "source": "ASE/EACVI 2015 chamber quantification, doi:10.1016/j.echo.2014.10.003",
+  "record": {
+    "patientId": "CASE-lv-05",
+    "studyId": "CASE-lv-05-A",
+    "synthetic": true,
+    "observations": {
+      "lvEjectionFraction": {
+        "value": 52,
+        "unit": "%"
+      }
+    },
+    "demographics": {
+      "biologicalSex": "male"
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "lv-ef-category",
+        "grade": "preserved"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}

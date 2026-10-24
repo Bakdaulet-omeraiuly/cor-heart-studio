@@ -1,0 +1,35 @@
+{
+  "id": "as-16",
+  "title": "Vmax without a unit is not used",
+  "category": "incomplete",
+  "source": "ACC/AHA 2020 VHD guideline, doi:10.1161/CIR.0000000000000923",
+  "record": {
+    "patientId": "CASE-as-16",
+    "studyId": "CASE-as-16-A",
+    "synthetic": true,
+    "valveFindings": [
+      {
+        "valve": "aortic_valve",
+        "condition": "stenosis",
+        "severity": "severe",
+        "peakVelocity": 4.5
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [],
+    "redFlags": 0,
+    "behavior": "state-missing",
+    "findings": [
+      {
+        "condition": "aortic-stenosis",
+        "basis": "supported",
+        "grade": "severe"
+      }
+    ],
+    "missing": [
+      "valveFindings[aortic_valve stenosis].peakVelocity"
+    ]
+  },
+  "reviewedByClinician": false
+}

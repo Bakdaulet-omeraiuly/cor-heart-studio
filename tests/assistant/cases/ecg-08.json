@@ -1,0 +1,35 @@
+{
+  "id": "ecg-08",
+  "title": "QT 380 ms at 90 bpm (man): Bazett 465 vs Fridericia 435",
+  "category": "guideline",
+  "source": "AHA/ACCF/HRS 2009 Part IV, doi:10.1016/j.jacc.2008.12.014",
+  "record": {
+    "patientId": "CASE-ecg-08",
+    "studyId": "CASE-ecg-08-A",
+    "synthetic": true,
+    "demographics": {
+      "biologicalSex": "male"
+    },
+    "ecg": {
+      "qtInterval": {
+        "value": 380,
+        "unit": "ms"
+      },
+      "heartRate": {
+        "value": 90,
+        "unit": "bpm"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "qtc",
+        "grade": "formula-dependent"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}

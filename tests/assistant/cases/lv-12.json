@@ -1,0 +1,31 @@
+{
+  "id": "lv-12",
+  "title": "LVEDD 52.3 mm (woman) → dilated",
+  "category": "boundary",
+  "source": "ASE/EACVI 2015 chamber quantification, doi:10.1016/j.echo.2014.10.003",
+  "record": {
+    "patientId": "CASE-lv-12",
+    "studyId": "CASE-lv-12-A",
+    "synthetic": true,
+    "demographics": {
+      "biologicalSex": "female"
+    },
+    "observations": {
+      "lvEndDiastolicDiameter": {
+        "value": 52.3,
+        "unit": "mm"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "lv-dilatation",
+        "grade": "dilated"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}

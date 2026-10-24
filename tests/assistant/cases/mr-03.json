@@ -1,0 +1,42 @@
+{
+  "id": "mr-03",
+  "title": "MR EROA 0.40 cm², RVol 65 mL, RF 55 % → severe",
+  "category": "guideline",
+  "source": "ACC/AHA 2020 VHD guideline, doi:10.1161/CIR.0000000000000923",
+  "record": {
+    "patientId": "CASE-mr-03",
+    "studyId": "CASE-mr-03-A",
+    "synthetic": true,
+    "doppler": [
+      {
+        "measurement": "EROA",
+        "value": 0.4,
+        "unit": "cm2",
+        "valve": "mitral"
+      },
+      {
+        "measurement": "regurgitant volume",
+        "value": 65,
+        "unit": "mL",
+        "valve": "mitral"
+      },
+      {
+        "measurement": "regurgitant fraction",
+        "value": 55,
+        "unit": "%",
+        "valve": "mitral"
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "mitral-regurgitation",
+        "grade": "severe"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}

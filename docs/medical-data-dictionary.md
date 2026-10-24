@@ -52,6 +52,8 @@ Conventions
 | `observations.cardiacOutput` | Cardiac output | L/min | `l/min`, `ml/min` | ≥ 0 … ≤ 60 | `cardiac_output_l_min` | display only | Displayed. |
 | `observations.globalLongitudinalStrain` | Global longitudinal strain | % | `%`, `percent` | ≥ -60 … ≤ 60 | `gls_percent` | display only | Displayed next to a labelled qualitative cue; never expanded into a strain field. |
 | `observations.pasp` | Pulmonary artery systolic pressure (estimated) | mmHg | `mmhg` | ≥ 0 … ≤ 250 | `pasp_mmhg` | display only | Displayed with method and location. |
+| `observations.hippocampalVolumeChangePerYear` | Hippocampal volume change per year | %/year | `%/year`, `%/y`, `%/yr`, `%/a`, `%peryear`, `percent/year` | ≥ -100 … ≤ 200 | `—` | display only | Annualised change between two MRI scans (negative = atrophy). Compared with cohort ranges by the diagnosis engine; never an individual forecast. |
+| `observations.ventricularVolumeChangePerYear` | Ventricular volume change per year | %/year | `%/year`, `%/y`, `%/yr`, `%/a`, `%peryear`, `percent/year` | ≥ -100 … ≤ 200 | `—` | display only | Annualised lateral-ventricle volume change between two scans (positive = expansion). Compared with cohort means by the diagnosis engine. |
 <!-- FIELDS:END -->
 
 `drives timing` = sets cycle frequency. `drives geometry` = may change the rendered anatomy through a

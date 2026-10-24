@@ -21,6 +21,7 @@ import { EcgWaveform } from "./EcgWaveform";
 
 const CATEGORY_LABEL: Record<FieldCategory, string> = {
   vitals: "Vital signs", demographics: "Patient information", ecg: "ECG", echo_dimensions: "Echo — chamber dimensions", echo_function: "Echo — function", hemodynamics: "Hemodynamics",
+  brain_imaging: "Brain MRI — volume change",
 };
 const TABS: { id: InspectorTab; label: string }[] = [
   { id: "observations", label: "Observations" },

@@ -1,0 +1,33 @@
+{
+  "id": "ch-01",
+  "title": "LAVI 34.9 mL/m² → normal",
+  "category": "boundary",
+  "source": "ASE/EACVI 2015 chamber quantification, doi:10.1016/j.echo.2014.10.003",
+  "record": {
+    "patientId": "CASE-ch-01",
+    "studyId": "CASE-ch-01-A",
+    "synthetic": true,
+    "demographics": {
+      "heightCm": {
+        "value": 180,
+        "unit": "cm"
+      },
+      "weightKg": {
+        "value": 80,
+        "unit": "kg"
+      }
+    },
+    "observations": {
+      "laVolume": {
+        "value": 69.8,
+        "unit": "mL"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}

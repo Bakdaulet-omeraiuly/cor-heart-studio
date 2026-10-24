@@ -1,0 +1,42 @@
+{
+  "id": "lv-09",
+  "title": "Reported EF 60 % vs volume-derived 40 %",
+  "category": "guideline",
+  "source": "ASE/EACVI 2015 chamber quantification, doi:10.1016/j.echo.2014.10.003",
+  "record": {
+    "patientId": "CASE-lv-09",
+    "studyId": "CASE-lv-09-A",
+    "synthetic": true,
+    "observations": {
+      "lvEjectionFraction": {
+        "value": 60,
+        "unit": "%"
+      },
+      "lvEndDiastolicVolume": {
+        "value": 150,
+        "unit": "mL"
+      },
+      "lvEndSystolicVolume": {
+        "value": 90,
+        "unit": "mL"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "lv-ef-category",
+        "grade": "preserved"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "differential": [
+      {
+        "condition": "lvef-measurements-disagree",
+        "basis": "supported"
+      }
+    ]
+  },
+  "reviewedByClinician": false
+}

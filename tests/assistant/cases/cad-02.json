@@ -1,0 +1,31 @@
+{
+  "id": "cad-02",
+  "title": "LAD 50 % → CAD-RADS 3, functional test missing",
+  "category": "boundary",
+  "source": "CAD-RADS 2.0, doi:10.1016/j.jcmg.2022.07.002",
+  "record": {
+    "patientId": "CASE-cad-02",
+    "studyId": "CASE-cad-02-A",
+    "synthetic": true,
+    "coronaryFindings": [
+      {
+        "vessel": "LAD",
+        "stenosisPercent": 50
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "coronary-stenosis",
+        "grade": "3"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "missing": [
+      "additionalInvestigations.functionalTest"
+    ]
+  },
+  "reviewedByClinician": false
+}

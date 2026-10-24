@@ -1,0 +1,33 @@
+{
+  "id": "as-09",
+  "title": "Very severe AS (Vmax 5.2) → red flag",
+  "category": "guideline",
+  "source": "ACC/AHA 2020 VHD guideline, doi:10.1161/CIR.0000000000000923",
+  "question": "Anything urgent here?",
+  "record": {
+    "patientId": "CASE-as-09",
+    "studyId": "CASE-as-09-A",
+    "synthetic": true,
+    "valveFindings": [
+      {
+        "valve": "aortic_valve",
+        "condition": "stenosis",
+        "peakVelocity": {
+          "value": 5.2,
+          "unit": "m/s"
+        }
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "aortic-stenosis",
+        "grade": "severe"
+      }
+    ],
+    "redFlags": 1,
+    "behavior": "refer-urgent"
+  },
+  "reviewedByClinician": false
+}

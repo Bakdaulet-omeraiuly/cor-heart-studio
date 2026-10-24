@@ -1,0 +1,26 @@
+{
+  "id": "lv-10",
+  "title": "LVEDD 58.4 mm (man) → not dilated",
+  "category": "boundary",
+  "source": "ASE/EACVI 2015 chamber quantification, doi:10.1016/j.echo.2014.10.003",
+  "record": {
+    "patientId": "CASE-lv-10",
+    "studyId": "CASE-lv-10-A",
+    "synthetic": true,
+    "demographics": {
+      "biologicalSex": "male"
+    },
+    "observations": {
+      "lvEndDiastolicDiameter": {
+        "value": 58.4,
+        "unit": "mm"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}

@@ -1,0 +1,42 @@
+{
+  "id": "ar-01",
+  "title": "AR VC 0.45 cm, RVol 40 mL, RF 35 % → moderate",
+  "category": "guideline",
+  "source": "ACC/AHA 2020 VHD guideline, doi:10.1161/CIR.0000000000000923",
+  "record": {
+    "patientId": "CASE-ar-01",
+    "studyId": "CASE-ar-01-A",
+    "synthetic": true,
+    "doppler": [
+      {
+        "measurement": "vena contracta",
+        "value": 0.45,
+        "unit": "cm",
+        "valve": "aortic"
+      },
+      {
+        "measurement": "regurgitant volume",
+        "value": 40,
+        "unit": "mL",
+        "valve": "aortic"
+      },
+      {
+        "measurement": "regurgitant fraction",
+        "value": 35,
+        "unit": "%",
+        "valve": "aortic"
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "aortic-regurgitation",
+        "grade": "moderate"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}

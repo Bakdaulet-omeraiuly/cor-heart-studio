@@ -1,0 +1,118 @@
+{
+  "id": "cad-07",
+  "title": "SYN-008: LAD 75 %, RCA 40 %, LCx 20 %",
+  "category": "synthetic-sample",
+  "source": "CAD-RADS 2.0, doi:10.1016/j.jcmg.2022.07.002",
+  "record": {
+    "patientId": "SYN-008",
+    "studyId": "STUDY-008-A",
+    "displayName": "Synthetic 08 · Coronary artery disease",
+    "synthetic": true,
+    "studyDate": "2026-03-20",
+    "diagnoses": [
+      {
+        "text": "Obstructive coronary artery disease (coronary CT angiography)",
+        "source": "synthetic clinician assessment"
+      }
+    ],
+    "observations": {
+      "heartRate": {
+        "value": 74,
+        "unit": "bpm",
+        "source": "synthetic measurement"
+      },
+      "systolicBP": {
+        "value": 142,
+        "unit": "mmHg",
+        "source": "synthetic measurement"
+      },
+      "diastolicBP": {
+        "value": 86,
+        "unit": "mmHg",
+        "source": "synthetic measurement"
+      },
+      "lvEjectionFraction": {
+        "value": 55,
+        "unit": "%",
+        "source": "synthetic echo report"
+      },
+      "lvEndDiastolicDiameter": {
+        "value": 49,
+        "unit": "mm",
+        "source": "synthetic echo report"
+      }
+    },
+    "coronaryFindings": [
+      {
+        "vessel": "LAD",
+        "segment": "proximal",
+        "stenosisPercent": 75,
+        "plaque": "noncalcified",
+        "source": "synthetic coronary CTA report",
+        "method": "visual diameter stenosis"
+      },
+      {
+        "vessel": "RCA",
+        "segment": "mid",
+        "stenosisPercent": 40,
+        "plaque": "partially_calcified",
+        "source": "synthetic coronary CTA report",
+        "method": "visual diameter stenosis"
+      },
+      {
+        "vessel": "LCx",
+        "segment": "distal",
+        "stenosisPercent": 20,
+        "plaque": "calcified",
+        "source": "synthetic coronary CTA report",
+        "method": "visual diameter stenosis"
+      }
+    ],
+    "valveFindings": [],
+    "symptoms": [
+      "Exertional chest pressure"
+    ],
+    "clinicianNotes": "Fictional demonstration record. Lesion positions are the proximal / mid / distal thirds of the template's modelled vessels.",
+    "ecg": {
+      "rhythm": "Sinus rhythm",
+      "prInterval": {
+        "value": 164,
+        "unit": "ms",
+        "source": "synthetic ECG report"
+      },
+      "qrsDuration": {
+        "value": 98,
+        "unit": "ms",
+        "source": "synthetic ECG report"
+      },
+      "qtInterval": {
+        "value": 388,
+        "unit": "ms",
+        "source": "synthetic ECG report"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "lv-ef-category",
+        "grade": "preserved"
+      },
+      {
+        "condition": "coronary-stenosis",
+        "grade": "4A"
+      },
+      {
+        "condition": "qtc",
+        "grade": "normal"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "missing": [
+      "additionalInvestigations.functionalTest"
+    ]
+  },
+  "notes": "QT 388 ms at 74 bpm: Bazett 431, Fridericia 416 ms, both normal for either sex.",
+  "reviewedByClinician": false
+}

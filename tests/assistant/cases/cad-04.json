@@ -1,0 +1,28 @@
+{
+  "id": "cad-04",
+  "title": "Left main 50 % → CAD-RADS 4B, red flag",
+  "category": "guideline",
+  "source": "CAD-RADS 2.0, doi:10.1016/j.jcmg.2022.07.002",
+  "record": {
+    "patientId": "CASE-cad-04",
+    "studyId": "CASE-cad-04-A",
+    "synthetic": true,
+    "coronaryFindings": [
+      {
+        "vessel": "LM",
+        "stenosisPercent": 50
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "coronary-stenosis",
+        "grade": "4B"
+      }
+    ],
+    "redFlags": 1,
+    "behavior": "refer-urgent"
+  },
+  "reviewedByClinician": false
+}

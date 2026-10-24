@@ -1,0 +1,31 @@
+{
+  "id": "ecg-05",
+  "title": "QTc 455 ms, sex unknown → indeterminate",
+  "category": "incomplete",
+  "source": "AHA/ACCF/HRS 2009 Part IV, doi:10.1016/j.jacc.2008.12.014",
+  "record": {
+    "patientId": "CASE-ecg-05",
+    "studyId": "CASE-ecg-05-A",
+    "synthetic": true,
+    "ecg": {
+      "qtc": {
+        "value": 455,
+        "unit": "ms"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "qtc",
+        "grade": "indeterminate"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "state-missing",
+    "missing": [
+      "demographics.biologicalSex"
+    ]
+  },
+  "reviewedByClinician": false
+}

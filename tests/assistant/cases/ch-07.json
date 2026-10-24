@@ -1,0 +1,30 @@
+{
+  "id": "ch-07",
+  "title": "RA minor axis 45 mm → enlarged (supported: 2010 ASE limit, superseded)",
+  "category": "boundary",
+  "source": "ASE 2010 right heart, doi:10.1016/j.echo.2010.05.010 (limit superseded by ASE 2025 RA area / volume index)",
+  "record": {
+    "patientId": "CASE-ch-07",
+    "studyId": "CASE-ch-07-A",
+    "synthetic": true,
+    "observations": {
+      "raMinorDimension": {
+        "value": 45,
+        "unit": "mm"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [],
+    "redFlags": 0,
+    "behavior": "answer",
+    "findings": [
+      {
+        "condition": "ra-enlargement",
+        "basis": "supported",
+        "grade": "enlarged"
+      }
+    ]
+  },
+  "reviewedByClinician": false
+}

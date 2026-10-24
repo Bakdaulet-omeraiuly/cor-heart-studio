@@ -1,0 +1,76 @@
+{
+  "id": "as-11",
+  "title": "Paradoxical low-flow AS (EF 65, SVi 29, AVAi 0.35)",
+  "category": "guideline",
+  "source": "ACC/AHA 2020 VHD guideline, doi:10.1161/CIR.0000000000000923",
+  "record": {
+    "patientId": "CASE-as-11",
+    "studyId": "CASE-as-11-A",
+    "synthetic": true,
+    "demographics": {
+      "heightCm": {
+        "value": 180,
+        "unit": "cm"
+      },
+      "weightKg": {
+        "value": 80,
+        "unit": "kg"
+      }
+    },
+    "observations": {
+      "lvEjectionFraction": {
+        "value": 65,
+        "unit": "%"
+      },
+      "strokeVolume": {
+        "value": 58,
+        "unit": "mL"
+      }
+    },
+    "valveFindings": [
+      {
+        "valve": "aortic_valve",
+        "condition": "stenosis",
+        "peakVelocity": {
+          "value": 3.6,
+          "unit": "m/s"
+        },
+        "meanGradient": {
+          "value": 32,
+          "unit": "mmHg"
+        },
+        "valveArea": {
+          "value": 0.7,
+          "unit": "cm2"
+        }
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "aortic-stenosis",
+        "grade": "discordant"
+      },
+      {
+        "condition": "lv-ef-category",
+        "grade": "preserved"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "differential": [
+      {
+        "condition": "aortic-stenosis-paradoxical-low-flow",
+        "basis": "supported"
+      }
+    ],
+    "absentDifferential": [
+      "aortic-stenosis-classical-low-flow"
+    ],
+    "missing": [
+      "additionalInvestigations.ctCalciumScore"
+    ]
+  },
+  "reviewedByClinician": false
+}

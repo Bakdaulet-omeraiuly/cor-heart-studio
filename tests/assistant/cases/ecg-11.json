@@ -1,0 +1,31 @@
+{
+  "id": "ecg-11",
+  "title": "PR 200 ms, QRS 119 ms, HR 100 bpm → normal",
+  "category": "boundary",
+  "source": "ACC/AHA/HRS 2018 bradycardia, doi:10.1016/j.jacc.2018.10.044; AHA/ACCF/HRS 2009 Part III, doi:10.1016/j.jacc.2008.12.013; ACC/AHA/HRS 2015 SVT, doi:10.1016/j.jacc.2015.08.856",
+  "record": {
+    "patientId": "CASE-ecg-11",
+    "studyId": "CASE-ecg-11-A",
+    "synthetic": true,
+    "ecg": {
+      "prInterval": {
+        "value": 200,
+        "unit": "ms"
+      },
+      "qrsDuration": {
+        "value": 119,
+        "unit": "ms"
+      },
+      "heartRate": {
+        "value": 100,
+        "unit": "bpm"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}

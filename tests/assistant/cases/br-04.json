@@ -1,0 +1,32 @@
+{
+  "id": "br-04",
+  "title": "Ventricular expansion 9.5 %/y → Alzheimer cohort",
+  "category": "guideline",
+  "source": "Barnes 2009 doi:10.1016/j.neurobiolaging.2008.01.010; de Leon 1989 doi:10.2214/ajr.152.6.1257; NIA-AA 2018 doi:10.1016/j.jalz.2018.02.018",
+  "record": {
+    "patientId": "CASE-br-04",
+    "studyId": "CASE-br-04-A",
+    "synthetic": true,
+    "observations": {
+      "ventricularVolumeChangePerYear": {
+        "value": 9.5,
+        "unit": "%/year"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [],
+    "redFlags": 0,
+    "behavior": "answer",
+    "differential": [
+      {
+        "condition": "brain-atrophy-alzheimer-pattern",
+        "basis": "possible"
+      }
+    ],
+    "absentDifferential": [
+      "brain-atrophy-ageing-pattern"
+    ]
+  },
+  "reviewedByClinician": false
+}

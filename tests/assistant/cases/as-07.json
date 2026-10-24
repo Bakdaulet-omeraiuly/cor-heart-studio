@@ -1,0 +1,32 @@
+{
+  "id": "as-07",
+  "title": "AS boundary: ΔPm 39 mmHg (no Vmax) → moderate",
+  "category": "boundary",
+  "source": "ACC/AHA 2020 VHD guideline, doi:10.1161/CIR.0000000000000923",
+  "record": {
+    "patientId": "CASE-as-07",
+    "studyId": "CASE-as-07-A",
+    "synthetic": true,
+    "valveFindings": [
+      {
+        "valve": "aortic_valve",
+        "condition": "stenosis",
+        "meanGradient": {
+          "value": 39,
+          "unit": "mmHg"
+        }
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "aortic-stenosis",
+        "grade": "moderate"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}

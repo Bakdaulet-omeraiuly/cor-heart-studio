@@ -1,0 +1,31 @@
+{
+  "id": "ecg-03",
+  "title": "QTc 459 ms (woman) → normal",
+  "category": "boundary",
+  "source": "AHA/ACCF/HRS 2009 Part IV, doi:10.1016/j.jacc.2008.12.014",
+  "record": {
+    "patientId": "CASE-ecg-03",
+    "studyId": "CASE-ecg-03-A",
+    "synthetic": true,
+    "ecg": {
+      "qtc": {
+        "value": 459,
+        "unit": "ms"
+      }
+    },
+    "demographics": {
+      "biologicalSex": "female"
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "qtc",
+        "grade": "normal"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}

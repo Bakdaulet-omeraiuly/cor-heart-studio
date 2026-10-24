@@ -1,0 +1,43 @@
+{
+  "id": "as-17",
+  "title": "Reported severe but Vmax 3.3 / ΔPm 30 → moderate, mismatch flagged",
+  "category": "guideline",
+  "source": "ACC/AHA 2020 VHD guideline, doi:10.1161/CIR.0000000000000923",
+  "record": {
+    "patientId": "CASE-as-17",
+    "studyId": "CASE-as-17-A",
+    "synthetic": true,
+    "valveFindings": [
+      {
+        "valve": "aortic_valve",
+        "condition": "stenosis",
+        "severity": "severe",
+        "peakVelocity": {
+          "value": 3.3,
+          "unit": "m/s"
+        },
+        "meanGradient": {
+          "value": 30,
+          "unit": "mmHg"
+        }
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "aortic-stenosis",
+        "grade": "moderate"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "differential": [
+      {
+        "condition": "aortic-stenosis-grade-mismatch",
+        "basis": "supported"
+      }
+    ]
+  },
+  "reviewedByClinician": false
+}

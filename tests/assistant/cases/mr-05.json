@@ -1,0 +1,123 @@
+{
+  "id": "mr-05",
+  "title": "SYN-005: severe MR with posterior prolapse (reported)",
+  "category": "synthetic-sample",
+  "source": "ACC/AHA 2020 VHD guideline, doi:10.1161/CIR.0000000000000923",
+  "record": {
+    "patientId": "SYN-005",
+    "studyId": "STUDY-005-A",
+    "displayName": "Synthetic 05 · Mitral regurgitation (prolapse)",
+    "synthetic": true,
+    "studyDate": "2026-03-15",
+    "diagnoses": [
+      {
+        "text": "Severe primary mitral regurgitation with posterior leaflet prolapse",
+        "source": "synthetic clinician assessment"
+      }
+    ],
+    "observations": {
+      "heartRate": {
+        "value": 78,
+        "unit": "bpm",
+        "source": "synthetic measurement"
+      },
+      "systolicBP": {
+        "value": 124,
+        "unit": "mmHg",
+        "source": "synthetic measurement"
+      },
+      "diastolicBP": {
+        "value": 70,
+        "unit": "mmHg",
+        "source": "synthetic measurement"
+      },
+      "lvEndDiastolicDiameter": {
+        "value": 58,
+        "unit": "mm",
+        "source": "synthetic echo report"
+      },
+      "lvEndDiastolicVolume": {
+        "value": 160,
+        "unit": "mL",
+        "source": "synthetic echo report"
+      },
+      "lvEndSystolicVolume": {
+        "value": 61,
+        "unit": "mL",
+        "source": "synthetic echo report"
+      },
+      "lvEjectionFraction": {
+        "value": 62,
+        "unit": "%",
+        "source": "synthetic echo report"
+      },
+      "laVolume": {
+        "value": 85,
+        "unit": "mL",
+        "source": "synthetic echo report"
+      }
+    },
+    "valveFindings": [
+      {
+        "valve": "mitral_valve",
+        "condition": "regurgitation",
+        "severity": "severe",
+        "source": "synthetic clinician assessment"
+      },
+      {
+        "valve": "mitral_valve",
+        "condition": "prolapse",
+        "source": "synthetic clinician assessment",
+        "note": "posterior leaflet (P2)"
+      },
+      {
+        "valve": "tricuspid_valve",
+        "condition": "regurgitation",
+        "severity": "mild",
+        "source": "synthetic clinician assessment"
+      }
+    ],
+    "symptoms": [
+      "Palpitations",
+      "Fatigue"
+    ],
+    "clinicianNotes": "Fictional demonstration record. Reverse-flow particles are an illustrative cue, not measured flow."
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "lv-ef-category",
+        "grade": "preserved"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "findings": [
+      {
+        "condition": "mitral-regurgitation",
+        "basis": "supported",
+        "grade": "severe"
+      },
+      {
+        "condition": "mitral-valve-prolapse",
+        "basis": "supported"
+      },
+      {
+        "condition": "tricuspid-regurgitation",
+        "basis": "supported",
+        "grade": "mild"
+      }
+    ],
+    "differential": [
+      {
+        "condition": "primary-mitral-regurgitation",
+        "basis": "supported"
+      }
+    ],
+    "missing": [
+      "demographics.biologicalSex"
+    ]
+  },
+  "notes": "LVEDD 58 mm is dilated for women (> 52.2) but not for men (≤ 58.4): sex is asked for, no dilatation is reported.",
+  "reviewedByClinician": false
+}

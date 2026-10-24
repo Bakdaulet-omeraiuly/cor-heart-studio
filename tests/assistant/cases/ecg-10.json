@@ -1,0 +1,44 @@
+{
+  "id": "ecg-10",
+  "title": "PR 201 ms, QRS 120 ms, HR 45 bpm",
+  "category": "boundary",
+  "source": "ACC/AHA/HRS 2018 bradycardia, doi:10.1016/j.jacc.2018.10.044; AHA/ACCF/HRS 2009 Part III, doi:10.1016/j.jacc.2008.12.013",
+  "record": {
+    "patientId": "CASE-ecg-10",
+    "studyId": "CASE-ecg-10-A",
+    "synthetic": true,
+    "ecg": {
+      "prInterval": {
+        "value": 201,
+        "unit": "ms"
+      },
+      "qrsDuration": {
+        "value": 120,
+        "unit": "ms"
+      },
+      "heartRate": {
+        "value": 45,
+        "unit": "bpm"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "first-degree-av-block",
+        "grade": null
+      },
+      {
+        "condition": "wide-qrs",
+        "grade": null
+      },
+      {
+        "condition": "bradycardia",
+        "grade": null
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}
