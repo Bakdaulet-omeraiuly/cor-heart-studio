@@ -62,6 +62,16 @@ patient. No DICOM is processed in the app or deployed; no CFD or clinical thresh
 
 Tools used: code only (no Blender/Figma/Meshy/Tripo). License: MIT (see `LICENSE`).
 
+## Brain module
+
+"Brain" in the header opens a second organ module: one healthy adult brain (Mindboggle-101 subject
+MMRR-21-5) as a 3D model built from its MRI segmentation, next to the source T1 MRI in axial,
+coronal and sagittal views with the segmentation overlaid and one shared crosshair — the slices are
+the evidence for the 3D shape. 84 structures with voxel-count volumes; cortical regions are manual
+(DKT31), deep structures automatic (FreeSurfer aseg) and marked as such. Only the skull-stripped
+image is published, so no face can be rendered. Build: `python -m cor_pipeline.brain <subject_dir>
+<out_dir> --app` (see `pipeline/README.md`).
+
 ## Data credits
 
 The Tier B hearts (`public/models/ct/`, `src/scene/asset-adapters/ct/`, `public/samples/open-ct-patients.json`)
@@ -69,3 +79,10 @@ are derived from the TotalSegmentator dataset v1.0 — Wasserthal J. et al., "To
 Segmentation of 104 Anatomic Structures in CT Images", Radiology: Artificial Intelligence 2023 —
 https://zenodo.org/records/6802614, licensed CC BY 4.0. Changes: label masks were converted to meshes,
 measurements and the app's attribute contract by `pipeline/`. Only labels were used, never the CT images.
+
+The brain module (`public/brain/`) is derived from Mindboggle-101 release 3 — Klein A., Tourville J.,
+"101 labeled brain images and a consistent human cortical labeling protocol", Frontiers in
+Neuroscience 2012, doi:10.3389/fnins.2012.00171 — https://osf.io/nhtur/, licensed CC BY 4.0 (as listed
+on OSF). Subject MMRR-21-5 comes from the Multi-Modal MRI Reproducibility Resource (Landman et al.,
+NeuroImage 2011). Changes: labels converted to meshes and measurements, the skull-stripped T1 cropped
+and rescaled to 8 bit for display.

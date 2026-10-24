@@ -61,3 +61,18 @@ papillary points are snapped ≥ 3–5 mm inside their cavity.
 
 Not done yet: TotalSegmentator inference for unlabelled scans; aortic annulus radius tends to read
 small (0.74–1.08 cm on the five cases) because the root slab tapers.
+
+## Brain (Mindboggle-101): `cor_pipeline/brain.py`
+
+```bash
+# one subject's folder from the MMRR-21_volumes archive (osf.io/9ahyp), under ../data/mindboggle/
+.venv/bin/python -m cor_pipeline.brain ../data/mindboggle/MMRR-21_volumes/MMRR-21-5 ../data/out/brain-MMRR-21-5 --app
+```
+
+Uses `labels.DKT31.manual+aseg` (manual cortex + automatic FreeSurfer deep structures) and the
+skull-stripped `t1weighted_brain`. Per hemisphere one cortex mesh (outer surface of that hemisphere's
+labels) whose vertices carry the nearest cortical region (`_REGION`); every deep structure is its own
+mesh. Writes `brain-manifest.json` (84 structures: labels, method, colour, volume), `mri.u8.gz` /
+`labels.u8.gz` (cropped 8-bit volumes for the slice views, voxel→app matrix in the manifest).
+Not used: OASIS-TRT-20 subjects (OASIS data-use agreement forbids 3D head renderings and needs a
+signed DUA).

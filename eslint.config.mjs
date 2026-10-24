@@ -9,7 +9,7 @@ const eslintConfig = defineConfig([
     // three.js objects created once per component are mutated inside the R3F render loop (useFrame) on
     // purpose: per-frame values must never go through React state. The compiler's immutability rule
     // cannot distinguish that from mutating React state, so it is disabled for the scene layer only.
-    files: ["src/scene/**/*.tsx"],
+    files: ["src/scene/**/*.tsx", "src/brain/BrainCanvas.tsx"],
     rules: { "react-hooks/immutability": "off" },
   },
   // Override default ignores of eslint-config-next.

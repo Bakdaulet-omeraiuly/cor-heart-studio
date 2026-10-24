@@ -7,7 +7,7 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin", "cyr
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "COR Heart Studio",
+  title: "COR Studio",
   description: "Explainable 3D cardiac visualization of structured observations. Synthetic demo data; not a medical device.",
 };
 

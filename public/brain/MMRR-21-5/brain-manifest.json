@@ -1,0 +1,1616 @@
+{
+  "assetId": "cor-brain-mindboggle-MMRR-21-5",
+  "subject": "MMRR-21-5",
+  "modality": "MRI T1-weighted (skull-stripped)",
+  "units": "cm",
+  "axes": {
+    "x": "patient left",
+    "y": "superior",
+    "z": "anterior"
+  },
+  "bounds": {
+    "min": [
+      -6.997,
+      -6.841,
+      -8.628
+    ],
+    "max": [
+      6.991,
+      6.989,
+      8.68
+    ]
+  },
+  "provenance": {
+    "cortex": "Manual labels (DKT31 protocol), Mindboggle-101",
+    "subcortical": "Automatic labels (FreeSurfer aseg), shipped with Mindboggle-101",
+    "reviewedByClinician": false
+  },
+  "dataset": {
+    "name": "Mindboggle-101 release 3 (Klein & Tourville, Front. Neurosci. 2012, doi:10.3389/fnins.2012.00171)",
+    "url": "https://osf.io/nhtur/",
+    "license": "CC BY 4.0",
+    "source": "MMRR-21 (Multi-Modal MRI Reproducibility Resource, Landman et al. 2011), via Mindboggle-101"
+  },
+  "files": {
+    "low": {
+      "url": "brain-low.glb",
+      "bytes": 7288156
+    }
+  },
+  "volume": {
+    "mri": "mri.u8.gz",
+    "labels": "labels.u8.gz",
+    "dims": [
+      125,
+      183,
+      148
+    ],
+    "order": "C (i slowest, k fastest)",
+    "spacingMm": [
+      1.2,
+      1.0,
+      1.0
+    ],
+    "voxelToApp": [
+      [
+        -0.12,
+        0.0,
+        0.0,
+        7.44
+      ],
+      [
+        0.0,
+        0.0,
+        0.1,
+        -7.35
+      ],
+      [
+        0.0,
+        -0.1,
+        0.0,
+        9.1
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "orientation": "RPS"
+  },
+  "structures": [
+    {
+      "key": "ctx_lh_caudal_anterior_cingulate",
+      "name": "Caudal anterior cingulate (left)",
+      "labels": [
+        1002
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "cingulate",
+      "method": "manual",
+      "colour": [
+        0.671,
+        0.296,
+        0.328
+      ],
+      "index": 1,
+      "volumeMl": 5.08
+    },
+    {
+      "key": "ctx_lh_caudal_middle_frontal",
+      "name": "Caudal middle frontal (left)",
+      "labels": [
+        1003
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "frontal",
+      "method": "manual",
+      "colour": [
+        0.234,
+        0.406,
+        0.663
+      ],
+      "index": 2,
+      "volumeMl": 8.32
+    },
+    {
+      "key": "ctx_lh_cuneus",
+      "name": "Cuneus (left)",
+      "labels": [
+        1005
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "occipital",
+      "method": "manual",
+      "colour": [
+        0.484,
+        0.351,
+        0.64
+      ],
+      "index": 3,
+      "volumeMl": 4.13
+    },
+    {
+      "key": "ctx_lh_entorhinal",
+      "name": "Entorhinal (left)",
+      "labels": [
+        1006
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "temporal",
+      "method": "manual",
+      "colour": [
+        0.702,
+        0.452,
+        0.195
+      ],
+      "index": 4,
+      "volumeMl": 1.71
+    },
+    {
+      "key": "ctx_lh_fusiform",
+      "name": "Fusiform (left)",
+      "labels": [
+        1007
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "temporal",
+      "method": "manual",
+      "colour": [
+        0.783,
+        0.505,
+        0.217
+      ],
+      "index": 5,
+      "volumeMl": 6.85
+    },
+    {
+      "key": "ctx_lh_inferior_parietal",
+      "name": "Inferior parietal (left)",
+      "labels": [
+        1008
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "parietal",
+      "method": "manual",
+      "colour": [
+        0.234,
+        0.53,
+        0.351
+      ],
+      "index": 6,
+      "volumeMl": 11.86
+    },
+    {
+      "key": "ctx_lh_inferior_temporal",
+      "name": "Inferior temporal (left)",
+      "labels": [
+        1009
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "temporal",
+      "method": "manual",
+      "colour": [
+        0.864,
+        0.557,
+        0.24
+      ],
+      "index": 7,
+      "volumeMl": 12.73
+    },
+    {
+      "key": "ctx_lh_isthmus_cingulate",
+      "name": "Isthmus cingulate (left)",
+      "labels": [
+        1010
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "cingulate",
+      "method": "manual",
+      "colour": [
+        0.748,
+        0.331,
+        0.365
+      ],
+      "index": 8,
+      "volumeMl": 3.13
+    },
+    {
+      "key": "ctx_lh_lateral_occipital",
+      "name": "Lateral occipital (left)",
+      "labels": [
+        1011
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "occipital",
+      "method": "manual",
+      "colour": [
+        0.539,
+        0.392,
+        0.713
+      ],
+      "index": 9,
+      "volumeMl": 12.4
+    },
+    {
+      "key": "ctx_lh_lateral_orbitofrontal",
+      "name": "Lateral orbitofrontal (left)",
+      "labels": [
+        1012
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "frontal",
+      "method": "manual",
+      "colour": [
+        0.261,
+        0.452,
+        0.739
+      ],
+      "index": 10,
+      "volumeMl": 9.43
+    },
+    {
+      "key": "ctx_lh_lingual",
+      "name": "Lingual (left)",
+      "labels": [
+        1013
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "occipital",
+      "method": "manual",
+      "colour": [
+        0.595,
+        0.432,
+        0.787
+      ],
+      "index": 11,
+      "volumeMl": 6.23
+    },
+    {
+      "key": "ctx_lh_medial_orbitofrontal",
+      "name": "Medial orbitofrontal (left)",
+      "labels": [
+        1014
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "frontal",
+      "method": "manual",
+      "colour": [
+        0.288,
+        0.499,
+        0.816
+      ],
+      "index": 12,
+      "volumeMl": 4.78
+    },
+    {
+      "key": "ctx_lh_middle_temporal",
+      "name": "Middle temporal (left)",
+      "labels": [
+        1015
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "temporal",
+      "method": "manual",
+      "colour": [
+        0.945,
+        0.609,
+        0.263
+      ],
+      "index": 13,
+      "volumeMl": 15.66
+    },
+    {
+      "key": "ctx_lh_parahippocampal",
+      "name": "Parahippocampal (left)",
+      "labels": [
+        1016
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "temporal",
+      "method": "manual",
+      "colour": [
+        1.0,
+        0.661,
+        0.285
+      ],
+      "index": 14,
+      "volumeMl": 2.49
+    },
+    {
+      "key": "ctx_lh_paracentral",
+      "name": "Paracentral (left)",
+      "labels": [
+        1017
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "frontal",
+      "method": "manual",
+      "colour": [
+        0.315,
+        0.546,
+        0.892
+      ],
+      "index": 15,
+      "volumeMl": 3.67
+    },
+    {
+      "key": "ctx_lh_pars_opercularis",
+      "name": "Pars opercularis (left)",
+      "labels": [
+        1018
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "frontal",
+      "method": "manual",
+      "colour": [
+        0.342,
+        0.593,
+        0.969
+      ],
+      "index": 16,
+      "volumeMl": 4.91
+    },
+    {
+      "key": "ctx_lh_pars_orbitalis",
+      "name": "Pars orbitalis (left)",
+      "labels": [
+        1019
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "frontal",
+      "method": "manual",
+      "colour": [
+        0.234,
+        0.406,
+        0.663
+      ],
+      "index": 17,
+      "volumeMl": 2.47
+    },
+    {
+      "key": "ctx_lh_pars_triangularis",
+      "name": "Pars triangularis (left)",
+      "labels": [
+        1020
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "frontal",
+      "method": "manual",
+      "colour": [
+        0.261,
+        0.452,
+        0.739
+      ],
+      "index": 18,
+      "volumeMl": 2.19
+    },
+    {
+      "key": "ctx_lh_pericalcarine",
+      "name": "Pericalcarine (left)",
+      "labels": [
+        1021
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "occipital",
+      "method": "manual",
+      "colour": [
+        0.651,
+        0.473,
+        0.861
+      ],
+      "index": 19,
+      "volumeMl": 2.09
+    },
+    {
+      "key": "ctx_lh_postcentral",
+      "name": "Postcentral (left)",
+      "labels": [
+        1022
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "parietal",
+      "method": "manual",
+      "colour": [
+        0.261,
+        0.592,
+        0.392
+      ],
+      "index": 20,
+      "volumeMl": 8.83
+    },
+    {
+      "key": "ctx_lh_posterior_cingulate",
+      "name": "Posterior cingulate (left)",
+      "labels": [
+        1023
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "cingulate",
+      "method": "manual",
+      "colour": [
+        0.826,
+        0.365,
+        0.403
+      ],
+      "index": 21,
+      "volumeMl": 5.34
+    },
+    {
+      "key": "ctx_lh_precentral",
+      "name": "Precentral (left)",
+      "labels": [
+        1024
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "frontal",
+      "method": "manual",
+      "colour": [
+        0.288,
+        0.499,
+        0.816
+      ],
+      "index": 22,
+      "volumeMl": 13.88
+    },
+    {
+      "key": "ctx_lh_precuneus",
+      "name": "Precuneus (left)",
+      "labels": [
+        1025
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "parietal",
+      "method": "manual",
+      "colour": [
+        0.288,
+        0.653,
+        0.432
+      ],
+      "index": 23,
+      "volumeMl": 9.57
+    },
+    {
+      "key": "ctx_lh_rostral_anterior_cingulate",
+      "name": "Rostral anterior cingulate (left)",
+      "labels": [
+        1026
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "cingulate",
+      "method": "manual",
+      "colour": [
+        0.903,
+        0.399,
+        0.441
+      ],
+      "index": 24,
+      "volumeMl": 5.62
+    },
+    {
+      "key": "ctx_lh_rostral_middle_frontal",
+      "name": "Rostral middle frontal (left)",
+      "labels": [
+        1027
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "frontal",
+      "method": "manual",
+      "colour": [
+        0.315,
+        0.546,
+        0.892
+      ],
+      "index": 25,
+      "volumeMl": 10.68
+    },
+    {
+      "key": "ctx_lh_superior_frontal",
+      "name": "Superior frontal (left)",
+      "labels": [
+        1028
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "frontal",
+      "method": "manual",
+      "colour": [
+        0.342,
+        0.593,
+        0.969
+      ],
+      "index": 26,
+      "volumeMl": 26.28
+    },
+    {
+      "key": "ctx_lh_superior_parietal",
+      "name": "Superior parietal (left)",
+      "labels": [
+        1029
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "parietal",
+      "method": "manual",
+      "colour": [
+        0.315,
+        0.714,
+        0.473
+      ],
+      "index": 27,
+      "volumeMl": 9.4
+    },
+    {
+      "key": "ctx_lh_superior_temporal",
+      "name": "Superior temporal (left)",
+      "labels": [
+        1030
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "temporal",
+      "method": "manual",
+      "colour": [
+        0.702,
+        0.452,
+        0.195
+      ],
+      "index": 28,
+      "volumeMl": 16.62
+    },
+    {
+      "key": "ctx_lh_supramarginal",
+      "name": "Supramarginal (left)",
+      "labels": [
+        1031
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "parietal",
+      "method": "manual",
+      "colour": [
+        0.342,
+        0.775,
+        0.513
+      ],
+      "index": 29,
+      "volumeMl": 12.88
+    },
+    {
+      "key": "ctx_lh_transverse_temporal",
+      "name": "Transverse temporal (left)",
+      "labels": [
+        1034
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "temporal",
+      "method": "manual",
+      "colour": [
+        0.783,
+        0.505,
+        0.217
+      ],
+      "index": 30,
+      "volumeMl": 1.22
+    },
+    {
+      "key": "ctx_lh_insula",
+      "name": "Insula (left)",
+      "labels": [
+        1035
+      ],
+      "hemisphere": "left",
+      "group": "cortex",
+      "lobe": "insula",
+      "method": "manual",
+      "colour": [
+        0.663,
+        0.585,
+        0.234
+      ],
+      "index": 31,
+      "volumeMl": 7.36
+    },
+    {
+      "key": "ctx_rh_caudal_anterior_cingulate",
+      "name": "Caudal anterior cingulate (right)",
+      "labels": [
+        2002
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "cingulate",
+      "method": "manual",
+      "colour": [
+        0.671,
+        0.296,
+        0.328
+      ],
+      "index": 32,
+      "volumeMl": 2.15
+    },
+    {
+      "key": "ctx_rh_caudal_middle_frontal",
+      "name": "Caudal middle frontal (right)",
+      "labels": [
+        2003
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "frontal",
+      "method": "manual",
+      "colour": [
+        0.234,
+        0.406,
+        0.663
+      ],
+      "index": 33,
+      "volumeMl": 6.51
+    },
+    {
+      "key": "ctx_rh_cuneus",
+      "name": "Cuneus (right)",
+      "labels": [
+        2005
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "occipital",
+      "method": "manual",
+      "colour": [
+        0.484,
+        0.351,
+        0.64
+      ],
+      "index": 34,
+      "volumeMl": 4.24
+    },
+    {
+      "key": "ctx_rh_entorhinal",
+      "name": "Entorhinal (right)",
+      "labels": [
+        2006
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "temporal",
+      "method": "manual",
+      "colour": [
+        0.702,
+        0.452,
+        0.195
+      ],
+      "index": 35,
+      "volumeMl": 2.83
+    },
+    {
+      "key": "ctx_rh_fusiform",
+      "name": "Fusiform (right)",
+      "labels": [
+        2007
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "temporal",
+      "method": "manual",
+      "colour": [
+        0.783,
+        0.505,
+        0.217
+      ],
+      "index": 36,
+      "volumeMl": 7.17
+    },
+    {
+      "key": "ctx_rh_inferior_parietal",
+      "name": "Inferior parietal (right)",
+      "labels": [
+        2008
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "parietal",
+      "method": "manual",
+      "colour": [
+        0.234,
+        0.53,
+        0.351
+      ],
+      "index": 37,
+      "volumeMl": 12.09
+    },
+    {
+      "key": "ctx_rh_inferior_temporal",
+      "name": "Inferior temporal (right)",
+      "labels": [
+        2009
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "temporal",
+      "method": "manual",
+      "colour": [
+        0.864,
+        0.557,
+        0.24
+      ],
+      "index": 38,
+      "volumeMl": 11.33
+    },
+    {
+      "key": "ctx_rh_isthmus_cingulate",
+      "name": "Isthmus cingulate (right)",
+      "labels": [
+        2010
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "cingulate",
+      "method": "manual",
+      "colour": [
+        0.748,
+        0.331,
+        0.365
+      ],
+      "index": 39,
+      "volumeMl": 3.36
+    },
+    {
+      "key": "ctx_rh_lateral_occipital",
+      "name": "Lateral occipital (right)",
+      "labels": [
+        2011
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "occipital",
+      "method": "manual",
+      "colour": [
+        0.539,
+        0.392,
+        0.713
+      ],
+      "index": 40,
+      "volumeMl": 13.48
+    },
+    {
+      "key": "ctx_rh_lateral_orbitofrontal",
+      "name": "Lateral orbitofrontal (right)",
+      "labels": [
+        2012
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "frontal",
+      "method": "manual",
+      "colour": [
+        0.261,
+        0.452,
+        0.739
+      ],
+      "index": 41,
+      "volumeMl": 8.23
+    },
+    {
+      "key": "ctx_rh_lingual",
+      "name": "Lingual (right)",
+      "labels": [
+        2013
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "occipital",
+      "method": "manual",
+      "colour": [
+        0.595,
+        0.432,
+        0.787
+      ],
+      "index": 42,
+      "volumeMl": 6.03
+    },
+    {
+      "key": "ctx_rh_medial_orbitofrontal",
+      "name": "Medial orbitofrontal (right)",
+      "labels": [
+        2014
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "frontal",
+      "method": "manual",
+      "colour": [
+        0.288,
+        0.499,
+        0.816
+      ],
+      "index": 43,
+      "volumeMl": 3.23
+    },
+    {
+      "key": "ctx_rh_middle_temporal",
+      "name": "Middle temporal (right)",
+      "labels": [
+        2015
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "temporal",
+      "method": "manual",
+      "colour": [
+        0.945,
+        0.609,
+        0.263
+      ],
+      "index": 44,
+      "volumeMl": 16.36
+    },
+    {
+      "key": "ctx_rh_parahippocampal",
+      "name": "Parahippocampal (right)",
+      "labels": [
+        2016
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "temporal",
+      "method": "manual",
+      "colour": [
+        1.0,
+        0.661,
+        0.285
+      ],
+      "index": 45,
+      "volumeMl": 2.52
+    },
+    {
+      "key": "ctx_rh_paracentral",
+      "name": "Paracentral (right)",
+      "labels": [
+        2017
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "frontal",
+      "method": "manual",
+      "colour": [
+        0.315,
+        0.546,
+        0.892
+      ],
+      "index": 46,
+      "volumeMl": 3.81
+    },
+    {
+      "key": "ctx_rh_pars_opercularis",
+      "name": "Pars opercularis (right)",
+      "labels": [
+        2018
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "frontal",
+      "method": "manual",
+      "colour": [
+        0.342,
+        0.593,
+        0.969
+      ],
+      "index": 47,
+      "volumeMl": 5.74
+    },
+    {
+      "key": "ctx_rh_pars_orbitalis",
+      "name": "Pars orbitalis (right)",
+      "labels": [
+        2019
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "frontal",
+      "method": "manual",
+      "colour": [
+        0.234,
+        0.406,
+        0.663
+      ],
+      "index": 48,
+      "volumeMl": 1.86
+    },
+    {
+      "key": "ctx_rh_pars_triangularis",
+      "name": "Pars triangularis (right)",
+      "labels": [
+        2020
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "frontal",
+      "method": "manual",
+      "colour": [
+        0.261,
+        0.452,
+        0.739
+      ],
+      "index": 49,
+      "volumeMl": 5.64
+    },
+    {
+      "key": "ctx_rh_pericalcarine",
+      "name": "Pericalcarine (right)",
+      "labels": [
+        2021
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "occipital",
+      "method": "manual",
+      "colour": [
+        0.651,
+        0.473,
+        0.861
+      ],
+      "index": 50,
+      "volumeMl": 2.49
+    },
+    {
+      "key": "ctx_rh_postcentral",
+      "name": "Postcentral (right)",
+      "labels": [
+        2022
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "parietal",
+      "method": "manual",
+      "colour": [
+        0.261,
+        0.592,
+        0.392
+      ],
+      "index": 51,
+      "volumeMl": 9.1
+    },
+    {
+      "key": "ctx_rh_posterior_cingulate",
+      "name": "Posterior cingulate (right)",
+      "labels": [
+        2023
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "cingulate",
+      "method": "manual",
+      "colour": [
+        0.826,
+        0.365,
+        0.403
+      ],
+      "index": 52,
+      "volumeMl": 3.21
+    },
+    {
+      "key": "ctx_rh_precentral",
+      "name": "Precentral (right)",
+      "labels": [
+        2024
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "frontal",
+      "method": "manual",
+      "colour": [
+        0.288,
+        0.499,
+        0.816
+      ],
+      "index": 53,
+      "volumeMl": 13.34
+    },
+    {
+      "key": "ctx_rh_precuneus",
+      "name": "Precuneus (right)",
+      "labels": [
+        2025
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "parietal",
+      "method": "manual",
+      "colour": [
+        0.288,
+        0.653,
+        0.432
+      ],
+      "index": 54,
+      "volumeMl": 11.25
+    },
+    {
+      "key": "ctx_rh_rostral_anterior_cingulate",
+      "name": "Rostral anterior cingulate (right)",
+      "labels": [
+        2026
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "cingulate",
+      "method": "manual",
+      "colour": [
+        0.903,
+        0.399,
+        0.441
+      ],
+      "index": 55,
+      "volumeMl": 2.87
+    },
+    {
+      "key": "ctx_rh_rostral_middle_frontal",
+      "name": "Rostral middle frontal (right)",
+      "labels": [
+        2027
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "frontal",
+      "method": "manual",
+      "colour": [
+        0.315,
+        0.546,
+        0.892
+      ],
+      "index": 56,
+      "volumeMl": 11.43
+    },
+    {
+      "key": "ctx_rh_superior_frontal",
+      "name": "Superior frontal (right)",
+      "labels": [
+        2028
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "frontal",
+      "method": "manual",
+      "colour": [
+        0.342,
+        0.593,
+        0.969
+      ],
+      "index": 57,
+      "volumeMl": 31.08
+    },
+    {
+      "key": "ctx_rh_superior_parietal",
+      "name": "Superior parietal (right)",
+      "labels": [
+        2029
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "parietal",
+      "method": "manual",
+      "colour": [
+        0.315,
+        0.714,
+        0.473
+      ],
+      "index": 58,
+      "volumeMl": 11.18
+    },
+    {
+      "key": "ctx_rh_superior_temporal",
+      "name": "Superior temporal (right)",
+      "labels": [
+        2030
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "temporal",
+      "method": "manual",
+      "colour": [
+        0.702,
+        0.452,
+        0.195
+      ],
+      "index": 59,
+      "volumeMl": 15.48
+    },
+    {
+      "key": "ctx_rh_supramarginal",
+      "name": "Supramarginal (right)",
+      "labels": [
+        2031
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "parietal",
+      "method": "manual",
+      "colour": [
+        0.342,
+        0.775,
+        0.513
+      ],
+      "index": 60,
+      "volumeMl": 11.55
+    },
+    {
+      "key": "ctx_rh_transverse_temporal",
+      "name": "Transverse temporal (right)",
+      "labels": [
+        2034
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "temporal",
+      "method": "manual",
+      "colour": [
+        0.783,
+        0.505,
+        0.217
+      ],
+      "index": 61,
+      "volumeMl": 1.36
+    },
+    {
+      "key": "ctx_rh_insula",
+      "name": "Insula (right)",
+      "labels": [
+        2035
+      ],
+      "hemisphere": "right",
+      "group": "cortex",
+      "lobe": "insula",
+      "method": "manual",
+      "colour": [
+        0.663,
+        0.585,
+        0.234
+      ],
+      "index": 62,
+      "volumeMl": 6.58
+    },
+    {
+      "key": "thalamus_lh",
+      "name": "Thalamus (left)",
+      "labels": [
+        10
+      ],
+      "hemisphere": "left",
+      "group": "deep_grey",
+      "lobe": null,
+      "method": "automatic (FreeSurfer aseg)",
+      "colour": [
+        0.42,
+        0.72,
+        0.8
+      ],
+      "index": 63,
+      "volumeMl": 8.96
+    },
+    {
+      "key": "thalamus_rh",
+      "name": "Thalamus (right)",
+      "labels": [
+        49
+      ],
+      "hemisphere": "right",
+      "group": "deep_grey",
+      "lobe": null,
+      "method": "automatic (FreeSurfer aseg)",
+      "colour": [
+        0.42,
+        0.72,
+        0.8
+      ],
+      "index": 64,
+      "volumeMl": 8.11
+    },
+    {
+      "key": "caudate_lh",
+      "name": "Caudate (left)",
+      "labels": [
+        11
+      ],
+      "hemisphere": "left",
+      "group": "deep_grey",
+      "lobe": null,
+      "method": "automatic (FreeSurfer aseg)",
+      "colour": [
+        0.55,
+        0.8,
+        0.62
+      ],
+      "index": 65,
+      "volumeMl": 3.9
+    },
+    {
+      "key": "caudate_rh",
+      "name": "Caudate (right)",
+      "labels": [
+        50
+      ],
+      "hemisphere": "right",
+      "group": "deep_grey",
+      "lobe": null,
+      "method": "automatic (FreeSurfer aseg)",
+      "colour": [
+        0.55,
+        0.8,
+        0.62
+      ],
+      "index": 66,
+      "volumeMl": 4.1
+    },
+    {
+      "key": "putamen_lh",
+      "name": "Putamen (left)",
+      "labels": [
+        12
+      ],
+      "hemisphere": "left",
+      "group": "deep_grey",
+      "lobe": null,
+      "method": "automatic (FreeSurfer aseg)",
+      "colour": [
+        0.92,
+        0.66,
+        0.7
+      ],
+      "index": 67,
+      "volumeMl": 7.96
+    },
+    {
+      "key": "putamen_rh",
+      "name": "Putamen (right)",
+      "labels": [
+        51
+      ],
+      "hemisphere": "right",
+      "group": "deep_grey",
+      "lobe": null,
+      "method": "automatic (FreeSurfer aseg)",
+      "colour": [
+        0.92,
+        0.66,
+        0.7
+      ],
+      "index": 68,
+      "volumeMl": 7.4
+    },
+    {
+      "key": "pallidum_lh",
+      "name": "Globus pallidus (left)",
+      "labels": [
+        13
+      ],
+      "hemisphere": "left",
+      "group": "deep_grey",
+      "lobe": null,
+      "method": "automatic (FreeSurfer aseg)",
+      "colour": [
+        0.45,
+        0.55,
+        0.85
+      ],
+      "index": 69,
+      "volumeMl": 1.82
+    },
+    {
+      "key": "pallidum_rh",
+      "name": "Globus pallidus (right)",
+      "labels": [
+        52
+      ],
+      "hemisphere": "right",
+      "group": "deep_grey",
+      "lobe": null,
+      "method": "automatic (FreeSurfer aseg)",
+      "colour": [
+        0.45,
+        0.55,
+        0.85
+      ],
+      "index": 70,
+      "volumeMl": 1.72
+    },
+    {
+      "key": "hippocampus_lh",
+      "name": "Hippocampus (left)",
+      "labels": [
+        17
+      ],
+      "hemisphere": "left",
+      "group": "deep_grey",
+      "lobe": null,
+      "method": "automatic (FreeSurfer aseg)",
+      "colour": [
+        0.95,
+        0.85,
+        0.4
+      ],
+      "index": 71,
+      "volumeMl": 4.42
+    },
+    {
+      "key": "hippocampus_rh",
+      "name": "Hippocampus (right)",
+      "labels": [
+        53
+      ],
+      "hemisphere": "right",
+      "group": "deep_grey",
+      "lobe": null,
+      "method": "automatic (FreeSurfer aseg)",
+      "colour": [
+        0.95,
+        0.85,
+        0.4
+      ],
+      "index": 72,
+      "volumeMl": 4.54
+    },
+    {
+      "key": "amygdala_lh",
+      "name": "Amygdala (left)",
+      "labels": [
+        18
+      ],
+      "hemisphere": "left",
+      "group": "deep_grey",
+      "lobe": null,
+      "method": "automatic (FreeSurfer aseg)",
+      "colour": [
+        0.4,
+        0.75,
+        0.7
+      ],
+      "index": 73,
+      "volumeMl": 2.14
+    },
+    {
+      "key": "amygdala_rh",
+      "name": "Amygdala (right)",
+      "labels": [
+        54
+      ],
+      "hemisphere": "right",
+      "group": "deep_grey",
+      "lobe": null,
+      "method": "automatic (FreeSurfer aseg)",
+      "colour": [
+        0.4,
+        0.75,
+        0.7
+      ],
+      "index": 74,
+      "volumeMl": 2.37
+    },
+    {
+      "key": "accumbens_lh",
+      "name": "Nucleus accumbens (left)",
+      "labels": [
+        26
+      ],
+      "hemisphere": "left",
+      "group": "deep_grey",
+      "lobe": null,
+      "method": "automatic (FreeSurfer aseg)",
+      "colour": [
+        0.95,
+        0.6,
+        0.35
+      ],
+      "index": 75,
+      "volumeMl": 0.86
+    },
+    {
+      "key": "accumbens_rh",
+      "name": "Nucleus accumbens (right)",
+      "labels": [
+        58
+      ],
+      "hemisphere": "right",
+      "group": "deep_grey",
+      "lobe": null,
+      "method": "automatic (FreeSurfer aseg)",
+      "colour": [
+        0.95,
+        0.6,
+        0.35
+      ],
+      "index": 76,
+      "volumeMl": 0.82
+    },
+    {
+      "key": "lateral_ventricle_lh",
+      "name": "Lateral ventricle (left)",
+      "labels": [
+        4,
+        5
+      ],
+      "hemisphere": "left",
+      "group": "ventricles",
+      "lobe": null,
+      "method": "automatic (FreeSurfer aseg)",
+      "colour": [
+        0.4,
+        0.55,
+        0.9
+      ],
+      "index": 77,
+      "volumeMl": 8.7
+    },
+    {
+      "key": "lateral_ventricle_rh",
+      "name": "Lateral ventricle (right)",
+      "labels": [
+        43,
+        44
+      ],
+      "hemisphere": "right",
+      "group": "ventricles",
+      "lobe": null,
+      "method": "automatic (FreeSurfer aseg)",
+      "colour": [
+        0.4,
+        0.55,
+        0.9
+      ],
+      "index": 78,
+      "volumeMl": 7.69
+    },
+    {
+      "key": "cerebellum_lh",
+      "name": "Cerebellum (left)",
+      "labels": [
+        7,
+        8
+      ],
+      "hemisphere": "left",
+      "group": "cerebellum_brainstem",
+      "lobe": null,
+      "method": "automatic (FreeSurfer aseg)",
+      "colour": [
+        0.8,
+        0.62,
+        0.5
+      ],
+      "index": 79,
+      "volumeMl": 63.48
+    },
+    {
+      "key": "cerebellum_rh",
+      "name": "Cerebellum (right)",
+      "labels": [
+        46,
+        47
+      ],
+      "hemisphere": "right",
+      "group": "cerebellum_brainstem",
+      "lobe": null,
+      "method": "automatic (FreeSurfer aseg)",
+      "colour": [
+        0.8,
+        0.62,
+        0.5
+      ],
+      "index": 80,
+      "volumeMl": 65.77
+    },
+    {
+      "key": "brainstem",
+      "name": "Brainstem",
+      "labels": [
+        16
+      ],
+      "hemisphere": "midline",
+      "group": "cerebellum_brainstem",
+      "lobe": null,
+      "method": "automatic (FreeSurfer aseg)",
+      "colour": [
+        0.75,
+        0.55,
+        0.62
+      ],
+      "index": 81,
+      "volumeMl": 23.53
+    },
+    {
+      "key": "third_ventricle",
+      "name": "Third ventricle",
+      "labels": [
+        14
+      ],
+      "hemisphere": "midline",
+      "group": "ventricles",
+      "lobe": null,
+      "method": "automatic (FreeSurfer aseg)",
+      "colour": [
+        0.4,
+        0.55,
+        0.9
+      ],
+      "index": 82,
+      "volumeMl": 0.93
+    },
+    {
+      "key": "fourth_ventricle",
+      "name": "Fourth ventricle",
+      "labels": [
+        15
+      ],
+      "hemisphere": "midline",
+      "group": "ventricles",
+      "lobe": null,
+      "method": "automatic (FreeSurfer aseg)",
+      "colour": [
+        0.4,
+        0.55,
+        0.9
+      ],
+      "index": 83,
+      "volumeMl": 2.35
+    },
+    {
+      "key": "corpus_callosum",
+      "name": "Corpus callosum",
+      "labels": [
+        251,
+        252,
+        253,
+        254,
+        255
+      ],
+      "hemisphere": "midline",
+      "group": "white_matter",
+      "lobe": null,
+      "method": "automatic (FreeSurfer aseg)",
+      "colour": [
+        0.85,
+        0.85,
+        0.8
+      ],
+      "index": 84,
+      "volumeMl": 4.1
+    }
+  ],
+  "totals": {
+    "brainMl": 1275.5,
+    "cortexLeftMl": 247.8,
+    "cortexRightMl": 247.5
+  },
+  "knownLimitations": [
+    "Healthy adult volunteer from an open research dataset; not a patient, no diagnosis.",
+    "Cortical regions are manual labels on one MRI; deep structures are automatic (FreeSurfer) and not manually reviewed.",
+    "Surfaces are built from 1 mm voxel labels and smoothed; they are not FreeSurfer surface reconstructions.",
+    "Colours are diagrammatic (by lobe), not tissue colour.",
+    "Volumes are label voxel counts in the scan's native space (not head-size normalised)."
+  ]
+}

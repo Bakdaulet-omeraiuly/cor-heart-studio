@@ -21,7 +21,11 @@ export interface Layers {
   flow: boolean;
 }
 
+export type Module = "heart" | "brain";
+
 export interface AppState {
+  /** Organ module shown in the workspace. */
+  module: Module;
   entries: Record<string, PatientEntry>;
   order: string[];
   selectedKey: string | null;
@@ -62,6 +66,7 @@ export interface AppState {
 }
 
 export const useApp = create<AppState>((set, get) => ({
+  module: "heart",
   entries: {},
   order: [],
   selectedKey: null,
