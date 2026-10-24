@@ -47,8 +47,9 @@ describe("treatment evidence data", () => {
     for (const e of EVIDENCE.entries) {
       if (!e.effect) continue;
       const { likely, best, worst, quantity } = e.effect;
-      if (quantity === "lvmi_gm2") expect(best).toBeLessThanOrEqual(likely), expect(likely).toBeLessThanOrEqual(worst);
-      else expect(worst).toBeLessThanOrEqual(likely), expect(likely).toBeLessThanOrEqual(best);
+      const [low, high] = quantity === "lvmi_gm2" ? [best, worst] : [worst, best];
+      expect(low).toBeLessThanOrEqual(likely);
+      expect(likely).toBeLessThanOrEqual(high);
     }
   });
 

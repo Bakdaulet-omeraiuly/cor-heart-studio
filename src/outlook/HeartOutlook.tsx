@@ -19,6 +19,7 @@ import { useWebgl } from "@/components/workspace/HeartViewport";
 import { useOutlook, type HeartScenario } from "./outlookStore";
 import { HorizonControls, OutlookCaveat, SourceList, fmtSigned } from "./shared";
 import { TreatmentButtons } from "./TreatmentButtons";
+import { TreatmentChat } from "./TreatmentChat";
 
 const CompareCanvas = dynamic(() => import("@/scene/CompareCanvas"), { ssr: false });
 
@@ -112,7 +113,7 @@ function AorticStenosisOutlook({ entry }: { entry: PatientEntry }) {
       toolbar={<Button size="sm" title="Close-up of the aortic valve, frozen at peak ejection with the outer wall see-through" onClick={showValve}><Focus className="h-3.5 w-3.5" /> Aortic valve</Button>}
       cards={[<AsCard key="t" title="Today" p={now} />, <AsCard key="l" title={yearsLabel(years, pace)} p={later} />]}>
       <p className="text-[11px] text-faint">Average haemodynamic progression in adults with asymptomatic aortic stenosis.</p>
-      <div className="mt-2"><TreatmentButtons condition="as" /></div>
+      <div className="mt-2 space-y-2"><TreatmentChat condition="as" record={entry.patient.record} /><TreatmentButtons condition="as" /></div>
 
       <div className="mt-3 grid grid-cols-2 gap-2">
         <NumberField label="Valve area today" unit="cm²" value={ava0} step={0.05} min={0.3} max={4} hint={sourceHint(recorded.ava, avaOverride)}
@@ -222,7 +223,7 @@ function LvhOutlook({ entry }: { entry: PatientEntry }) {
       cards={[<LvhCard key="t" title="Today" p={now} lvidMm={inp.lvidMm} />, <LvhCard key="l" title={yearsLabel(years, pace)} p={later} lvidMm={inp.lvidMm} />]}>
       <p className="text-[11px] text-faint">Left ventricular mass in hypertrophy: natural course, or on the treatment buttons below.</p>
 
-      <div className="mt-3"><TreatmentButtons condition="lvh" /></div>
+      <div className="mt-3 space-y-2"><TreatmentChat condition="lvh" record={entry.patient.record} /><TreatmentButtons condition="lvh" /></div>
 
       <div className="mt-3 grid grid-cols-2 gap-2">
         <NumberField label="IVSd today" unit="mm" value={inp.ivsMm} step={0.5} min={5} max={35} hint={field("ivsMm")} onChange={(v) => set({ lvhOverrides: { ...lvhOverrides, ivsMm: v } })} />

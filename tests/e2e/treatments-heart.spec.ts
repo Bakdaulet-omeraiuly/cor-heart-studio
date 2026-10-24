@@ -42,3 +42,23 @@ test("LVH: the evidence for a button sits behind its info tip", async ({ page })
   await tip.focus();
   await expect(page.getByRole("tooltip").filter({ hasText: "LIFE echo substudy" })).toBeVisible();
 });
+
+test("LVH: a chat proposal becomes a button that moves the model, and an unconfigured server hides the chat", async ({ page }) => {
+  await openLvhOutlook(page);
+  await page.route("**/api/treatments", (route) =>
+    route.fulfill({ json: { ok: true, proposals: [{ id: "lvh-losartan", reason: "Regresses mass more than atenolol." }], note: "Clinician decision support, not a diagnosis." } }));
+  const natural = await lvmi(page);
+  await page.getByLabel("Ask the assistant which treatments to consider").fill("What should I consider?");
+  await page.getByRole("button", { name: "Ask" }).click();
+  const proposal = page.getByTestId("proposal-lvh-losartan");
+  await expect(proposal).toBeVisible();
+  await proposal.click();
+  await expect(page.getByTestId("treatment-lvh-losartan")).toHaveAttribute("aria-pressed", "true");
+  await expect.poll(() => lvmi(page)).toBeLessThan(natural - 10);
+
+  await page.unroute("**/api/treatments");
+  await page.route("**/api/treatments", (route) => route.fulfill({ status: 503, json: { ok: false, code: "not_configured" } }));
+  await page.getByRole("button", { name: "Ask" }).click();
+  await expect(page.getByTestId("treatment-chat-unavailable")).toBeVisible();
+  await expect(page.getByTestId("treatment-lvh-atenolol")).toBeVisible();
+});
