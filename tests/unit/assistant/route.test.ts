@@ -395,3 +395,48 @@ describe("POST /api/assistant — model errors", () => {
     expect(json.code).toBe("rate_limited");
   });
 });
+
+// ---------------------------------------------------------------------------
+// 8. Model id: default and ASSISTANT_MODEL override
+//
+// The route reads ASSISTANT_MODEL once at module load, so each case imports a
+// fresh copy of the route after setting the environment.
+// ---------------------------------------------------------------------------
+
+describe("POST /api/assistant — model id", () => {
+  const original = process.env.ASSISTANT_MODEL;
+
+  afterEach(() => {
+    if (original === undefined) delete process.env.ASSISTANT_MODEL;
+    else process.env.ASSISTANT_MODEL = original;
+    vi.resetModules();
+  });
+
+  /** Load a fresh route, answer one question, return the model sent to the API. */
+  async function modelSent(): Promise<string> {
+    vi.resetModules();
+    const route = await import("@/app/api/assistant/route");
+    const { create, client } = makeClient();
+    seedOneQuestion(create, guardSafeText(RECORD));
+    route.__setClientFactoryForTests(() => client);
+    try {
+      const res = await route.POST(
+        buildRequest({ question: "Grade?", record: RECORD, sessionId: "s-model" }),
+      );
+      expect(res.status).toBe(200);
+    } finally {
+      route.__resetClientFactoryForTests();
+    }
+    return create.mock.calls[0][0].model;
+  }
+
+  it("defaults to claude-sonnet-5-5", async () => {
+    delete process.env.ASSISTANT_MODEL;
+    expect(await modelSent()).toBe("claude-sonnet-5-5");
+  });
+
+  it("uses ASSISTANT_MODEL when it is set", async () => {
+    process.env.ASSISTANT_MODEL = "claude-override-test";
+    expect(await modelSent()).toBe("claude-override-test");
+  });
+});

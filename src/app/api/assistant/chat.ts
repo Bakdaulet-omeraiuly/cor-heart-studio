@@ -107,6 +107,8 @@ function toolBlocks(): Anthropic.Messages.Tool[] {
       name: tool.name,
       description: tool.description,
       input_schema: tool.input_schema,
+      // Pass `strict` through so the API enforces the tool's input schema.
+      strict: tool.strict,
     };
     return index === lastIndex
       ? { ...base, cache_control: { type: "ephemeral" } }

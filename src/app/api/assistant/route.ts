@@ -79,7 +79,7 @@ const DEFAULT_MAX_TOKENS = 1024;
  * The model id. Env-overridable (`ASSISTANT_MODEL`) so the eval script and future
  * tuning can swap models without a code change; defaults to the current Sonnet.
  */
-const DEFAULT_MODEL = process.env.ASSISTANT_MODEL ?? "claude-sonnet-4-5";
+const DEFAULT_MODEL = process.env.ASSISTANT_MODEL ?? "claude-sonnet-5-5";
 
 /**
  * The JSON response shapes the route returns (design.md "Data Models").

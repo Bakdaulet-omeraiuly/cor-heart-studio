@@ -7,7 +7,7 @@
 //
 // This file is built up across subtasks 3.1–3.4:
 //   - 3.1 (this one): `extractNumbers()` + the `NumberToken` type.
-//   - 3.2: `allowedNumbers()`, `matchNumber()` (precision rule, unit aliases).
+//   - 3.2: `allowedNumbers()`, `matchNumber()` (exact-value rule, unit aliases).
 //   - 3.3: `checkCitations()`, `guard()`.
 // The structure below (clearly sectioned, one exported piece per concern) is
 // meant to let those additions land without churn.
@@ -88,7 +88,12 @@ const RANGE_SEP = String.raw`\s*(?:\u2013|\u2014|-)\s*|\s+to\s+`;
 // purpose — otherwise a lone `\s?` after the number would eat the space in
 // "40 to 50" and starve the `\s+to\s+` range separator, splitting the range into
 // two separate numbers.
-const OPT_UNIT = String.raw`(?:\s?(${UNIT_ALT}|%))?`;
+//
+// The `(?![A-Za-z])` lookahead stops a unit from matching the first letters of
+// an ordinary word: without it "2020 guideline" would read as 2020 with unit `g`,
+// and "15 mmol" as 15 `mm`. When the lookahead fails the optional group is
+// skipped, so the number is still captured, just without a unit.
+const OPT_UNIT = String.raw`(?:\s?(${UNIT_ALT}|%)(?![A-Za-z]))?`;
 
 // The master token regex, assembled from the parts above:
 //   (number)(optional unit OR %)  possibly followed by  (range sep)(number)(optional unit OR %)
@@ -245,6 +250,11 @@ function canonicalUnit(unit: string): string {
  *   6. AHA segment numbers — unitless integers — from wall-motion and
  *      wall-thickness entries (`wallMotion[].segment`, `wallThickness[].region`
  *      and `.segments[]`).
+ *   7. Every number written in an evidence item's `source` (e.g. the year in
+ *      "ACC/AHA 2020") or `rule` id (e.g. the `01` in "R-VALVE-STEN-01"),
+ *      pulled out with `extractNumbers` so a reply that quotes the citation is
+ *      parsed exactly the same way. Range ends are both allowed; each carries
+ *      whatever unit the extractor found (usually none).
  *
  * Null/undefined numeric values are skipped. Non-finite numbers (NaN) never
  * make it in. Deduplication is not required — a longer list only costs a few
@@ -313,66 +323,45 @@ export function allowedNumbers(
     }
   }
 
+  // 7. Numbers quoted in the citation itself: guideline years, volume/page
+  //    numbers in `source`, and the digits of `rule` ids.
+  for (const finding of [...a.findings, ...a.differential]) {
+    for (const evidence of finding.evidence) {
+      for (const text of [evidence.source, evidence.rule]) {
+        for (const token of extractNumbers(text)) {
+          push(token.value, token.unit);
+          if (token.rangeWith !== undefined) push(token.rangeWith, token.unit);
+        }
+      }
+    }
+  }
+
   return allowed;
 }
 
 /**
- * Count the decimal places written in a token.
+ * Does a single written number (value + optional unit) match any allowed value?
  *
- * The guard's precision rule hinges on how precisely the model *wrote* a number,
- * which is not always recoverable from the parsed `value` (`55.0` parses to the
- * same `55` as a bare `55`). So we read the precision from `raw` where possible,
- * counting the digits after the first decimal separator (dot or comma). A
- * thousands-grouped integer like `12,345` has no decimal part and counts as 0.
- *
- * `end` selects which number in the `raw` string to measure: `"low"` (the first
- * number, the default) or `"high"` (the number after a range separator). This
- * lets a range token apply the written precision of each end independently.
- */
-function writtenDecimals(token: NumberToken, end: "low" | "high" = "low"): number {
-  // Pull the decimal separators out of `raw`. A dot is always decimal here; a
-  // comma is decimal only when it is NOT a thousands separator (comma followed
-  // by exactly three digits). We find every "decimal tail" and pick the one for
-  // the requested end.
-  const decimalTails: number[] = [];
-  // Matches a dot OR a non-grouping comma, then captures the trailing digits.
-  //   \.(\d+)            → dot decimal (always decimal)
-  //   ,(\d{1,2})(?!\d)   → comma decimal: 1–2 digits not part of a 3-group
-  const re = /\.(\d+)|,(\d{1,2})(?!\d)/g;
-  for (const m of token.raw.matchAll(re)) {
-    const digits = m[1] ?? m[2];
-    decimalTails.push(digits.length);
-  }
-
-  if (end === "low") {
-    return decimalTails[0] ?? 0;
-  }
-  // For the high end, prefer its own decimal tail. If the parse found only one
-  // tail (e.g. "0.80 to 1" — the high end has none), fall back to 0.
-  return decimalTails[1] ?? 0;
-}
-
-/**
- * Does a single written number (value + written precision + optional unit) match
- * any of the allowed values?
- *
- * Match rule (design.md):
- *   - Rounding the ALLOWED value to the number of decimals WRITTEN must equal the
- *     written value. So `1.3` (one decimal) matches an allowed `1.30`, because
- *     round(1.30, 1) === 1.3; `55` (zero decimals) matches an allowed `55.0`,
- *     because round(55.0, 0) === 55. Rounding to fewer decimals than stored is
- *     allowed; writing more decimals than the stored value justifies is not,
- *     because round(stored, writtenDecimals) will then differ from the written
- *     value (e.g. writing `0.85` against a stored `0.8` gives round(0.8, 2) =
- *     0.80 ≠ 0.85).
+ * Match rule — EXACT stored value:
+ *   - The written value must equal a stored value. Trailing zeros carry no new
+ *     information, so they are fine in either direction: `1.3` matches a stored
+ *     `1.30`, `1.30` matches a stored `1.3`, `55` matches `55.0` (each pair parses
+ *     to the same number).
+ *   - Rounding is NOT allowed, in either direction. `4 m/s` does not match a
+ *     stored `4.3 m/s`, and `0.9` does not match a stored `0.85`. A rounded value
+ *     reads as a different measurement, or as a guideline threshold the model
+ *     supplied on its own ("severe is Vmax of at least 4 m/s"), which is exactly
+ *     the kind of number the guard exists to stop.
  *   - Units are compared after alias folding. A written number WITHOUT a unit
  *     matches an allowed value regardless of the allowed value's unit. A written
  *     number WITH a unit only matches an allowed value carrying the same
  *     (alias-folded) unit.
+ *
+ * This is stricter than the original design note in design.md ("rounding to
+ * fewer decimals than stored is allowed"); the code is the source of truth.
  */
 function matchOne(
   value: number,
-  decimals: number,
   unit: string | undefined,
   allowed: { value: number; unit?: string }[],
 ): boolean {
@@ -386,33 +375,28 @@ function matchOne(
       if (canonicalUnit(candidate.unit) !== writtenUnit) return false;
     }
 
-    // Precision gate: round the stored value to the written precision and compare
-    // to the written value. Round-trip through a fixed decimal string to avoid
-    // binary-float artefacts (e.g. 1.005 → "1.01").
-    const roundedAllowed = Number(candidate.value.toFixed(decimals));
-    const roundedWritten = Number(value.toFixed(decimals));
-    return roundedAllowed === roundedWritten;
+    // Value gate: exact equality. Both sides come from decimal strings, so equal
+    // decimals (`1.3` / `1.30`) are the same double and compare equal.
+    return candidate.value === value;
   });
 }
 
 /**
  * Does a reply's numeric token match something the engine actually produced?
  *
- * A plain token matches when its value (at the written precision) and unit line
- * up with some allowed value. A range token (`rangeWith` set) is only accepted
- * when BOTH ends match some allowed value independently — each end uses its own
- * written precision, and both ends share the token's unit (the extractor attaches
- * one unit to the whole range).
+ * A plain token matches when its value and unit equal some allowed value (see
+ * `matchOne`). A range token (`rangeWith` set) is only accepted when BOTH ends
+ * match some allowed value independently; both ends share the token's unit (the
+ * extractor attaches one unit to the whole range).
  */
 export function matchNumber(
   t: NumberToken,
   allowed: { value: number; unit?: string }[],
 ): boolean {
-  const lowOk = matchOne(t.value, writtenDecimals(t, "low"), t.unit, allowed);
-  if (!lowOk) return false;
+  if (!matchOne(t.value, t.unit, allowed)) return false;
 
   if (t.rangeWith !== undefined) {
-    return matchOne(t.rangeWith, writtenDecimals(t, "high"), t.unit, allowed);
+    return matchOne(t.rangeWith, t.unit, allowed);
   }
 
   return true;

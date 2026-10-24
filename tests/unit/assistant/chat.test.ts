@@ -440,3 +440,28 @@ describe("runChat — abort signal", () => {
     expect(optionsOf(create, 1)?.signal).toBe(controller.signal);
   });
 });
+
+// ---------------------------------------------------------------------------
+// 8. strict passed through from toolDefinitions
+// ---------------------------------------------------------------------------
+
+describe("runChat — tool strict flag", () => {
+  it("sends strict from toolDefinitions on every tool", async () => {
+    const { create, client } = makeClient();
+    create.mockResolvedValueOnce(
+      makeMessage({
+        stopReason: "end_turn",
+        content: [textBlock("ok [F1]")],
+        usage: makeUsage(1),
+      }),
+    );
+
+    await runChat(makeDeps(client), "Q?", [], TOOL_RESULT);
+
+    const tools = paramsOf(create, 0).tools as Anthropic.Messages.Tool[];
+    expect(tools.map((t) => t.strict)).toEqual(
+      toolDefinitions.map((t) => t.strict),
+    );
+    expect(tools[0].strict).toBe(true);
+  });
+});

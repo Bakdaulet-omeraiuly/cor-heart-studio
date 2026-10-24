@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  allowedNumbers,
   extractNumbers,
   guard,
   matchNumber,
   type NumberToken,
 } from "@/app/api/assistant/guard";
 import { withIds } from "@/app/api/assistant/ids";
+import { AORTIC_STENOSIS } from "@/app/api/assistant/__fixtures__/assess";
 import type { Assessment } from "@/app/api/assistant/engine";
 import type {
   NormalizedObservation,
@@ -263,7 +265,7 @@ describe("matchNumber — precision and units", () => {
     want: boolean;
   }[] = [
     {
-      name: "1.3 matches allowed 1.30 (fewer decimals written than stored)",
+      name: "1.3 matches a stored 1.30 (trailing zero)",
       token: num(1.3, undefined, undefined, "1.3"),
       allowed: [{ value: 1.3 }],
       want: true,
@@ -275,15 +277,39 @@ describe("matchNumber — precision and units", () => {
       want: true,
     },
     {
-      name: "rounding stored 0.8 down to one decimal is allowed",
+      name: "the exact stored value matches (0.8 vs 0.8)",
       token: num(0.8, undefined, undefined, "0.8"),
       allowed: [{ value: 0.8 }],
       want: true,
     },
     {
-      name: "writing more decimals than stored (0.85 vs 0.8) is rejected",
+      name: "a different value is rejected (0.85 vs 0.8)",
       token: num(0.85, undefined, undefined, "0.85"),
       allowed: [{ value: 0.8 }],
+      want: false,
+    },
+    {
+      name: "1.30 matches a stored 1.3 (trailing zero written)",
+      token: num(1.3, undefined, undefined, "1.30"),
+      allowed: [{ value: 1.3 }],
+      want: true,
+    },
+    {
+      name: "55.0 matches a stored 55 (trailing zero written)",
+      token: num(55, undefined, undefined, "55.0"),
+      allowed: [{ value: 55 }],
+      want: true,
+    },
+    {
+      name: "rounding down is rejected (4 m/s vs stored 4.3 m/s)",
+      token: num(4, "m/s", undefined, "4"),
+      allowed: [{ value: 4.3, unit: "m/s" }],
+      want: false,
+    },
+    {
+      name: "rounding up is rejected (0.9 vs stored 0.85)",
+      token: num(0.9, undefined, undefined, "0.9"),
+      allowed: [{ value: 0.85 }],
       want: false,
     },
     {
@@ -359,7 +385,7 @@ describe("guard — end to end", () => {
       expected: { ok: true },
     },
     {
-      name: "a decimal written to fewer places than stored passes (1.3 ← 1.30)",
+      name: "a stored decimal restated exactly passes",
       text: "Peak velocity 1.3 m/s [E1].",
       expected: { ok: true },
     },
@@ -407,5 +433,51 @@ describe("guard — end to end", () => {
 
   it.each(cases)("$name", ({ text, expected }) => {
     expect(guard(text, IDED, PATIENT)).toEqual(expected);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Fixture cases: no rounded thresholds; citation numbers are allowed
+// ---------------------------------------------------------------------------
+
+describe("guard — SYN-004 aortic stenosis fixture", () => {
+  const ided = withIds(AORTIC_STENOSIS);
+  // No record values at all, so only the Assessment itself supplies numbers.
+  const empty: NormalizedPatient = {
+    ...PATIENT,
+    observations: {},
+    derived: [],
+    valveFindings: [],
+    coronaryFindings: [],
+    wallMotion: [],
+    wallThickness: [],
+  };
+
+  it("blocks a rounded threshold the model supplied (4 m/s vs stored 4.3 m/s)", () => {
+    expect(guard("severe is Vmax of at least 4 m/s [E1]", ided, empty)).toEqual({
+      ok: false,
+      reasons: ["number"],
+    });
+  });
+
+  it("passes the guideline year quoted from the evidence source", () => {
+    expect(guard("Graded per ACC/AHA 2020 guideline [F1].", ided, empty)).toEqual({
+      ok: true,
+    });
+  });
+
+  it("allows numbers from evidence sources and rule ids", () => {
+    const values = allowedNumbers(ided, empty).map((n) => n.value);
+    expect(values).toContain(2020); // "ACC/AHA 2020 …" source
+    expect(values).toContain(1); // "R-VALVE-STEN-01" rule id
+    expect(values).not.toContain(4);
+  });
+});
+
+describe("extractNumbers — units do not swallow the start of a word", () => {
+  it("reads '2020 guideline' as a unitless 2020", () => {
+    const [token] = extractNumbers("ACC/AHA 2020 guideline");
+    expect(token.value).toBe(2020);
+    expect(token.unit).toBeUndefined();
   });
 });
