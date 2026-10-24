@@ -1,0 +1,33 @@
+{
+  "id": "opt-07",
+  "title": "CAD-RADS 4A → no option yet (statin entry unverified)",
+  "category": "guideline",
+  "source": "CAD-RADS 2.0, doi:10.1016/j.jcmg.2022.07.002",
+  "record": {
+    "patientId": "CASE-opt-07",
+    "studyId": "CASE-opt-07-A",
+    "synthetic": true,
+    "coronaryFindings": [
+      {
+        "vessel": "LAD",
+        "stenosisPercent": 80,
+        "segment": "proximal"
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "coronary-stenosis",
+        "grade": "4A"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "options": [],
+    "missing": [
+      "additionalInvestigations.functionalTest"
+    ]
+  },
+  "reviewedByClinician": false
+}

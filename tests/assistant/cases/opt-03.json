@@ -1,0 +1,37 @@
+{
+  "id": "opt-03",
+  "title": "Boundary: LVEF 41 % with NYHA II → no ARNi option (mildly reduced range)",
+  "category": "boundary",
+  "source": "AHA/ACC/HFSA 2022 HF guideline §7.3.1 (ARNi, COR 1 / LOE A), doi:10.1161/CIR.0000000000001063",
+  "record": {
+    "patientId": "CASE-opt-03",
+    "studyId": "CASE-opt-03-A",
+    "synthetic": true,
+    "observations": {
+      "lvEjectionFraction": {
+        "value": 41,
+        "unit": "%"
+      }
+    },
+    "symptoms": [
+      "NYHA class II"
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "lv-ef-category",
+        "grade": "mildly reduced"
+      },
+      {
+        "condition": "lv-systolic-dysfunction",
+        "grade": "mildly abnormal"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "options": []
+  },
+  "notes": "The HFmrEF recommendations (SGLT2i 2a, other classes 2b) are in the catalogue but not yet verified (LOE), so none is shown.",
+  "reviewedByClinician": false
+}

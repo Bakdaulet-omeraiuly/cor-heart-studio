@@ -20,6 +20,8 @@ interface Case {
     absentMissing?: string[];
     redFlags: number;
     behavior: string;
+    /** When present: the exact set of management options (finding, COR, LOE). */
+    options?: { findingCondition: string; cor: string; loe: string }[];
   };
 }
 
@@ -82,6 +84,10 @@ describe("case set (tests/assistant/cases)", () => {
       for (const m of e.missing ?? []) expect(missing, `missing ${m}`).toContain(m);
       for (const m of e.absentMissing ?? []) expect(missing, `not missing ${m}`).not.toContain(m);
       expect(a.redFlags.length, "red flags").toBe(e.redFlags);
+      if (e.options) {
+        const gotOptions = (a.options ?? []).map((x) => `${x.findingCondition}:${x.cor}:${x.loe}`).sort();
+        expect(gotOptions, "management options").toEqual(e.options.map((x) => `${x.findingCondition}:${x.cor}:${x.loe}`).sort());
+      }
       // every clinical statement cites a rule and a DOI; no invented numbers; disclaimer present
       for (const f of [...a.findings, ...a.differential]) for (const ev of f.evidence) expect(ev.source).toMatch(/doi:10\./);
       checkProvenance(a, c.record);

@@ -1,0 +1,43 @@
+{
+  "id": "opt-01",
+  "title": "HFrEF (LVEF 35 %) with NYHA class II → ARNi option (COR 1, LOE A)",
+  "category": "guideline",
+  "source": "AHA/ACC/HFSA 2022 HF guideline §7.3.1 (ARNi, COR 1 / LOE A), doi:10.1161/CIR.0000000000001063",
+  "question": "What does the guideline recommend for this LV function?",
+  "record": {
+    "patientId": "CASE-opt-01",
+    "studyId": "CASE-opt-01-A",
+    "synthetic": true,
+    "observations": {
+      "lvEjectionFraction": {
+        "value": 35,
+        "unit": "%"
+      }
+    },
+    "symptoms": [
+      "NYHA class II"
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "lv-ef-category",
+        "grade": "reduced"
+      },
+      {
+        "condition": "lv-systolic-dysfunction",
+        "grade": "moderately abnormal"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "options": [
+      {
+        "findingCondition": "lv-ef-category",
+        "cor": "1",
+        "loe": "A"
+      }
+    ]
+  },
+  "reviewedByClinician": false
+}

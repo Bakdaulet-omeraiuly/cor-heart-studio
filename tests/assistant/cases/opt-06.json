@@ -1,0 +1,37 @@
+{
+  "id": "opt-06",
+  "title": "Symptomatic severe AS → no option yet (AVR entry awaits LOE verification)",
+  "category": "guideline",
+  "source": "ACC/AHA 2020 VHD guideline, doi:10.1161/CIR.0000000000000923",
+  "record": {
+    "patientId": "CASE-opt-06",
+    "studyId": "CASE-opt-06-A",
+    "synthetic": true,
+    "valveFindings": [
+      {
+        "valve": "aortic_valve",
+        "condition": "stenosis",
+        "peakVelocity": {
+          "value": 4.6,
+          "unit": "m/s"
+        }
+      }
+    ],
+    "symptoms": [
+      "Exertional syncope"
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "aortic-stenosis",
+        "grade": "severe"
+      }
+    ],
+    "redFlags": 1,
+    "behavior": "refer-urgent",
+    "options": []
+  },
+  "notes": "ACC/AHA 2020 gives AVR COR 1 here; its LOE could not be confirmed from the table, so the entry stays verified: false.",
+  "reviewedByClinician": false
+}

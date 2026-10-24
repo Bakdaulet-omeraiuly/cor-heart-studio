@@ -1,0 +1,42 @@
+{
+  "id": "opt-02",
+  "title": "Boundary: LVEF 40 % with NYHA III → ARNi option",
+  "category": "boundary",
+  "source": "AHA/ACC/HFSA 2022 HF guideline §7.3.1 (ARNi, COR 1 / LOE A), doi:10.1161/CIR.0000000000001063",
+  "record": {
+    "patientId": "CASE-opt-02",
+    "studyId": "CASE-opt-02-A",
+    "synthetic": true,
+    "observations": {
+      "lvEjectionFraction": {
+        "value": 40,
+        "unit": "%"
+      }
+    },
+    "symptoms": [
+      "NYHA III"
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "lv-ef-category",
+        "grade": "reduced"
+      },
+      {
+        "condition": "lv-systolic-dysfunction",
+        "grade": "moderately abnormal"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "options": [
+      {
+        "findingCondition": "lv-ef-category",
+        "cor": "1",
+        "loe": "A"
+      }
+    ]
+  },
+  "reviewedByClinician": false
+}
