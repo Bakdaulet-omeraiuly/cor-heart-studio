@@ -40,14 +40,14 @@
   "files": {
     "high": {
       "url": "/models/template/rodero-01/heart-high.glb",
-      "bytes": 8597100,
+      "bytes": 8723096,
       "triangles": [
         300000
       ]
     },
     "low": {
       "url": "/models/template/rodero-01/heart-low.glb",
-      "bytes": 3556980,
+      "bytes": 3682976,
       "triangles": [
         119996
       ]
@@ -390,35 +390,35 @@
         "proximalDiameterMm": 4.5,
         "distalDiameterMm": 4.5,
         "distalAssumed": false,
-        "lengthMm": 10.0
+        "lengthMm": 9.3
       },
       "2": {
         "name": "LAD",
         "proximalDiameterMm": 3.7,
         "distalDiameterMm": 1.9,
         "distalAssumed": false,
-        "lengthMm": 168.9
+        "lengthMm": 212.7
       },
       "3": {
         "name": "LCx",
         "proximalDiameterMm": 3.4,
         "distalDiameterMm": 1.8,
         "distalAssumed": true,
-        "lengthMm": 65.7
+        "lengthMm": 41.8
       },
       "4": {
         "name": "RCA",
         "proximalDiameterMm": 3.9,
         "distalDiameterMm": 2.0,
         "distalAssumed": true,
-        "lengthMm": 60.6
+        "lengthMm": 156.9
       },
       "5": {
         "name": "PDA",
         "proximalDiameterMm": 2.0,
         "distalDiameterMm": 1.4,
         "distalAssumed": true,
-        "lengthMm": 73.0
+        "lengthMm": 85.2
       }
     },
     "diameterSource": "Dodge JT et al. Circulation 1992;86:232-46, doi:10.1161/01.cir.86.1.232",

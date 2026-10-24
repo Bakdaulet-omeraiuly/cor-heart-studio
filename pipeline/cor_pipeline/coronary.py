@@ -29,6 +29,7 @@ VESSELS = {  # id: (name, proximal diameter mm, distal diameter mm, distal-is-as
     5: ("PDA", 2.0, 1.4, True),
 }
 SEGMENTS = 14  # ring resolution
+LM_LENGTH_MM = 10.0  # typical left main length (assumption; not in the Dodge abstract)
 
 
 def _graph(mesh: trimesh.Trimesh, cost: np.ndarray):
@@ -107,14 +108,16 @@ def _tube(center: np.ndarray, radius: np.ndarray, vessel: int, t0: float, t1: fl
 def route(mesh: trimesh.Trimesh, s: dict[str, np.ndarray], frame_dirs: dict[str, np.ndarray], ostia: dict[str, np.ndarray], apex: np.ndarray):
     """Vessel centrelines (RAS mm) on the epicardium.
 
-    s: per-vertex samples of the outer fields (lv_outer, rv_outer, la_outer, ra_outer, outer).
-    frame_dirs: 'anterior' and 'axis' (base -> apex) unit vectors in RAS.
+    s: per-vertex samples of the outer fields (lv_outer, rv_outer, la_outer, ra_outer, outer) and the cavity field.
+    frame_dirs: 'anterior' (the patient's anterior, RAS +y) and 'axis' (LV base -> apex) unit vectors in RAS.
     A groove's cost is continuous: |field A - field B| (mm), so the cheapest path runs along the bottom of the crease.
     """
     from scipy.spatial import cKDTree
 
     v = np.asarray(mesh.vertices)
-    epi = np.abs(s["outer"]) < 0.8
+    # the true outside: on the outer surface AND away from every blood pool. Without the second test the RV's
+    # septal endocardium counts (the RV cavity lies directly on the LV epicardium there) and the LAD runs inside the RV.
+    epi = (np.abs(s["outer"]) < 0.8) & (s["cavity"] > 0.9)
     vent = np.minimum(s["lv_outer"], s["rv_outer"])
     atria = np.minimum(s["la_outer"], s["ra_outer"])
     g_av = np.abs(vent - atria)
@@ -136,11 +139,18 @@ def route(mesh: trimesh.Trimesh, s: dict[str, np.ndarray], frame_dirs: dict[str,
     lm0 = nearest(ostia["left"], epi)
     rca0 = nearest(ostia["right"], epi)
     apex_v = nearest(apex, epi)
-    # LM ends where the anterior interventricular groove meets the AV groove, near the left ostium
+    # Left system: one path from the left ostium to the apex along the AV groove then the anterior
+    # interventricular groove; its first LM_LENGTH_MM is the left main (typical length, an assumption), the
+    # rest the LAD. The circumflex leaves at the end of the left main.
     junction = epi & (g_iv < 3) & (g_av < 6) & (ant > 0)
-    lad0 = nearest(v[lm0], junction) if junction.any() else nearest(v[lm0], epi & (g_iv < 3))
-    paths["LM"] = _path(_graph(mesh, cost(np.minimum(g_av, g_iv))), lm0, lad0)
-    paths["LAD"] = _path(_graph(mesh, cost(g_iv, np.where(ant < 0, 8.0, 0.0))), lad0, apex_v)
+    lad_entry = nearest(v[lm0], junction) if junction.any() else nearest(v[lm0], epi & (g_iv < 3))
+    left = _path(_graph(mesh, cost(np.minimum(g_av, g_iv))), lm0, lad_entry)
+    left += _path(_graph(mesh, cost(g_iv, np.where(ant < 0, 8.0, 0.0))), lad_entry, apex_v)[1:]
+    run = np.concatenate([[0], np.cumsum(np.linalg.norm(np.diff(v[left], axis=0), axis=1))])
+    split = max(2, int(np.searchsorted(run, LM_LENGTH_MM)))
+    paths["LM"] = left[:split + 1]
+    paths["LAD"] = left[split:]
+    lad0 = left[split]
     # crux: posterior meeting point of the interventricular and AV grooves, low on the base
     crux_mask = epi & (g_iv < 3) & (g_av < 6) & (ant < 0)
     crux = nearest(v[apex_v] * 0 + v[epi].mean(axis=0) - frame_dirs["anterior"] * 40, crux_mask) if crux_mask.any() else nearest(v[apex_v], epi)
@@ -151,7 +161,14 @@ def route(mesh: trimesh.Trimesh, s: dict[str, np.ndarray], frame_dirs: dict[str,
     lcx_end = int(lcx_cand[np.argmax(-v[lcx_cand, 0] - 0.3 * ant[lcx_cand])]) if len(lcx_cand) else crux
     paths["LCx"] = _path(_graph(mesh, cost(g_av, np.where(left_side, 0.0, 8.0))), lad0, lcx_end)
     # RCA: right AV groove from the right ostium round the acute margin to the crux
-    paths["RCA"] = _path(_graph(mesh, cost(g_av, np.where(left_side, 8.0, 0.0))), rca0, crux)
+    # ... via the acute margin: the rightmost (RAS +x) point of the right AV groove
+    rav = np.flatnonzero(epi & (g_av < 3) & ~left_side)
+    adj_r = _graph(mesh, cost(g_av, np.where(left_side, 8.0, 0.0)))
+    if len(rav):
+        margin = int(rav[np.argmax(v[rav, 0])])
+        paths["RCA"] = _path(adj_r, rca0, margin)[:-1] + _path(adj_r, margin, crux)
+    else:
+        paths["RCA"] = _path(adj_r, rca0, crux)
     # PDA: posterior interventricular groove from the crux toward the apex, about two thirds of the way
     pda_target = nearest(v[crux] + (v[apex_v] - v[crux]) * 0.7, epi & (g_iv < 3)) if (epi & (g_iv < 3)).any() else apex_v
     paths["PDA"] = _path(_graph(mesh, cost(g_iv, np.where(ant > 0, 8.0, 0.0))), crux, pda_target)

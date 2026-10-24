@@ -495,11 +495,11 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
     coronary = None
     if with_coronaries:
         from scipy.spatial import cKDTree
-        from .coronary import VESSELS, build_vessels, route
+        from .coronary import VESSELS, _smooth, build_vessels, route
         hi = meshes[lods[0][0]]
         to_ras_dir = lambda d: _unit(np.asarray(d, dtype=float) @ RAS_TO_APP)
         to_ras_pt = lambda p: np.asarray(p, dtype=float) @ RAS_TO_APP * 100 + frame.centre_mm
-        samples = {k: grid.sample(fields[k], hi.vertices) for k in ("lv_outer", "rv_outer", "la_outer", "ra_outer", "outer")}
+        samples = {k: grid.sample(fields[k], hi.vertices) for k in ("lv_outer", "rv_outer", "la_outer", "ra_outer", "outer", "cavity")}
         apex_app = lv["base"] + lv["axis"] * lv["epiApexAlong"]
         # ostia from the aortic root itself: flow direction = valve centre -> aortic lumen centroid; the left
         # ostium sits in the left (posterior) sinus, the right ostium in the right (anterior) sinus, ~1 cm above the annulus
@@ -510,7 +510,7 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
         ostia_ras = {"left": ao_c + flow * 10 + lat([-1.0, -0.5, 0]) * r_mm,   # RAS: -x = left, -y = posterior
                      "right": ao_c + flow * 10 + lat([1.0, 1.0, 0]) * r_mm}      # right and anterior
         ostia_app = {k: frame.point(p) for k, p in ostia_ras.items()}
-        centrelines, _ = route(hi, samples, {"anterior": to_ras_dir(lv["anteriorDir"]), "axis": to_ras_dir(lv["axis"])},
+        centrelines, debug = route(hi, samples, {"anterior": np.array([0.0, 1.0, 0.0]), "axis": to_ras_dir(lv["axis"])},
                                ostia_ras, to_ras_pt(apex_app))
         def normals_at(pts):
             # outward direction = gradient of the epicardial distance field (robust where the mesh normals are not)
@@ -523,11 +523,15 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
             for _ in range(3):
                 pts = pts - normals_at(pts) * grid.sample(fields["outer"], pts)[:, None]
             return pts
+        import os
+        if os.environ.get("COR_CORONARY_DEBUG"):
+            np.savez_compressed(os.environ["COR_CORONARY_DEBUG"], v=hi.vertices, faces=hi.faces, outer=samples["outer"],
+                                **{f"g_{k}": x for k, x in debug.items()}, **{f"path_{k}": c for k, c in centrelines.items()})
         centrelines = {k: surface_at(c) for k, c in centrelines.items()}
         pos, nrm, faces, t, r, vid = build_vessels(centrelines, normals_at)
         line_tree = cKDTree(np.concatenate(list(centrelines.values())))
         coronary = {"pos": pos, "nrm": nrm, "faces": faces, "t": t, "r": r, "vid": vid, "line_tree": line_tree,
-                    "lengthsMm": {k: round(float(np.linalg.norm(np.diff(c, axis=0), axis=1).sum()), 1) for k, c in centrelines.items()},
+                    "lengthsMm": {k: round(float(np.linalg.norm(np.diff(_smooth(c), axis=0), axis=1).sum()), 1) for k, c in centrelines.items()},
                     "vessels": VESSELS}
 
     glbs, tissue_by_lod, points_by_lod = {}, {}, {}
