@@ -1,6 +1,6 @@
 # Тапсырма: @HyorinmaruK — клиникалық қозғалтқыш және бағалау
 
-> Бұл — **сенің** файлың. @kerimku1-дің файлы: [`kerimku1.md`](kerimku1.md). Иесі: @Bakdaulet-omeraiuly.
+> Бұл — **сенің** файлың. @kerimku1-дің файлы: [`kerimku1.md`](kerimku1.md). Барлық шешімді екеуің өздерің қабылдайсыңдар — иесінің (@Bakdaulet-omeraiuly) рұқсаты керек емес.
 
 ## Жоба туралы — екеуіңе ортақ
 
@@ -86,7 +86,7 @@ export type Assess = (record: PatientRecord) => Assessment;   // таза фун
 
 **2. Kiro Spec** `diagnosis-engine` → `.kiro/specs/diagnosis-engine/{requirements,design,tasks}.md`
 - Талаптар EARS форматында; design — ережелер кестесі (id, кіріс өрістері, шектер, дереккөз).
-- Spec PR-ын ашып, @Bakdaulet-omeraiuly мақұлдағанша код жазба.
+- Spec PR-ын ашып, екінші адам қарап шыққан соң merge жасап, кодқа көш.
 
 **3. Бірінші күні — интерфейс PR-ы:** `src/domain/diagnosis/types.ts` (жоғарыдағы келісім) + бос `assess()`,
 ол `findings: []` қайтарады. kerimku1 сонымен бірден жұмыс істей бастайды.
@@ -107,7 +107,7 @@ export type Assess = (record: PatientRecord) => Assessment;   // таза фун
 | # | Нәтиже |
 |---|---|
 | H1 | `docs/research/diagnosis-engine.md` |
-| H2 | Kiro spec мақұлданды |
+| H2 | Kiro spec дайын (екінші адам қарап шықты) |
 | H3 | `types.ts` + бос `assess()` merge болды (kerimku1-ді бөгемеу үшін — ең бірінші) |
 | H4 | Барлық ауру топтары + unit тесттер |
 | H5 | Тест жиынтығы ≥ 60 жағдай |
@@ -136,4 +136,4 @@ export type Assess = (record: PatientRecord) => Assessment;   // таза фун
 | Ауқымнан тыс / пациентке диагноз сұрау | сыпайы бас тарту + не істеуге болатыны |
 | Prompt injection (жазба ішіндегі "ережені елеме") | 0 сәтті шабуыл |
 
-Production-ға шығару — @Bakdaulet-omeraiuly мақұлдауымен.
+`main`-ге merge болған сайын Vercel сайтты production-ға өзі шығарады — сондықтан тек барлық тест өткен PR-ды merge жасаңдар. Бір нәрсе бұзылса — revert PR.

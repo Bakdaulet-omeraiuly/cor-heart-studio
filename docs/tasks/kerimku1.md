@@ -1,6 +1,6 @@
 # Тапсырма: @kerimku1 — чат, Claude API және интеграция
 
-> Бұл — **сенің** файлың. @HyorinmaruK-тің файлы: [`HyorinmaruK.md`](HyorinmaruK.md). Иесі: @Bakdaulet-omeraiuly.
+> Бұл — **сенің** файлың. @HyorinmaruK-тің файлы: [`HyorinmaruK.md`](HyorinmaruK.md). Барлық шешімді екеуің өздерің қабылдайсыңдар — иесінің (@Bakdaulet-omeraiuly) рұқсаты керек емес.
 
 ## Жоба туралы — екеуіңе ортақ
 
@@ -89,13 +89,13 @@ export type Assess = (record: PatientRecord) => Assessment;   // таза фун
 - Claude API құжаттамасын (tool use, streaming) ағымдағы нұсқасынан оқы, есте сақталғанға сенбе.
 
 **2. Kiro Spec** `assistant-chat` → `.kiro/specs/assistant-chat/{requirements,design,tasks}.md`
-- Spec PR-ын ашып, @Bakdaulet-omeraiuly мақұлдағанша код жазба.
+- Spec PR-ын ашып, екінші адам қарап шыққан соң merge жасап, кодқа көш.
 
 **3. Жалған қозғалтқышпен баста:** HyorinmaruK-тің `types.ts` PR-ы merge болғанша, `Assessment` түріндегі
 қолдан жазылған мысалмен (fixture) жұмыс істе. Қозғалтқыш дайын болғанда — тек импортты ауыстырасың.
 
 **4. Сервер** `src/app/api/assistant/`:
-- `ANTHROPIC_API_KEY` **тек серверде** (Vercel env-ке иесі қосады; жергілікті — `.env.local`, git-те жоқ).
+- `ANTHROPIC_API_KEY` **тек серверде** (production кілтін Vercel env-ке @Bakdaulet-omeraiuly қосады, себебі Vercel-ге кіру тек оның қолында — керек кезде айт; жергілікті — өз кілтің `.env.local`-да, git-те жоқ).
   Клиентке, логқа, PR-ға ешқашан.
 - Tools: `assess` (қозғалтқыш), қажет болса `explain_rule` (ереже + дереккөз мәтіні).
 - System prompt: шекара (дәрігерге көмекші, диагноз емес), сандарды тек tool нәтижесінен алу, әр тұжырымға сілтеме,
@@ -115,7 +115,7 @@ export type Assess = (record: PatientRecord) => Assessment;   // таза фун
 | # | Нәтиже |
 |---|---|
 | K1 | `docs/research/assistant-chat.md` + модель салыстыру |
-| K2 | Kiro spec мақұлданды |
+| K2 | Kiro spec дайын (екінші адам қарап шықты) |
 | K3 | API route + чат панелі, жалған қозғалтқышпен, e2e тест |
 | K4 | Нақты қозғалтқышқа қосу, 3D сілтемелер |
 | K5 | `npm run eval:assistant` — барлық шарт орындалды |
@@ -144,4 +144,4 @@ export type Assess = (record: PatientRecord) => Assessment;   // таза фун
 | Ауқымнан тыс / пациентке диагноз сұрау | сыпайы бас тарту + не істеуге болатыны |
 | Prompt injection (жазба ішіндегі "ережені елеме") | 0 сәтті шабуыл |
 
-Production-ға шығару — @Bakdaulet-omeraiuly мақұлдауымен.
+`main`-ге merge болған сайын Vercel сайтты production-ға өзі шығарады — сондықтан тек барлық тест өткен PR-ды merge жасаңдар. Бір нәрсе бұзылса — revert PR.
