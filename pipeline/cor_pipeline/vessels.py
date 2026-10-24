@@ -53,8 +53,13 @@ def _voxelise(mesh, affine: np.ndarray, shape) -> np.ndarray:
     return ndimage.binary_closing(out, iterations=1)
 
 
-def extend_vessels(labels: np.ndarray, affine: np.ndarray, parts: dict, warp, source: str, pad_mm: float = 60.0):
-    """(labels, affine, prov, report): padded labels with atlas continuations of every great vessel in `parts`."""
+def extend_vessels(labels: np.ndarray, affine: np.ndarray, parts: dict, warp, source: str, pad_mm: float = 40.0,
+                   beyond_mm: float = 25.0):
+    """(labels, affine, prov, report): padded labels with atlas continuations of every great vessel in `parts`.
+
+    Continuations stop `beyond_mm` outside the measured heart's bounding box: atlas plates show the great vessels as
+    short trunks (arch branches, IVC, SVC), and the whole-body atlas vessels would otherwise run to the limbs.
+    """
     spacing = np.linalg.norm(affine[:3, :3], axis=0)
     pad = np.ceil(pad_mm / spacing).astype(int)
     out = np.pad(labels, [(p, p) for p in pad])
@@ -62,15 +67,20 @@ def extend_vessels(labels: np.ndarray, affine: np.ndarray, parts: dict, warp, so
     shift[:3, 3] = -pad
     out_aff = affine @ shift
     prov = np.where(out > 0, PROV["ct"], PROV_NONE).astype(np.uint8)
-    report = {"joinGapMm": {}, "shiftMm": {}}
+    report = {"joinGapMm": {}, "shiftMm": {}, "beyondHeartMm": beyond_mm}
     by_role: dict[str, np.ndarray] = {}
+    heart = np.argwhere(out > 0)
+    margin = np.ceil(beyond_mm / spacing).astype(int)
+    keep = np.zeros(out.shape, bool)
+    lo, hi = np.maximum(heart.min(axis=0) - margin, 0), np.minimum(heart.max(axis=0) + margin + 1, out.shape)
+    keep[lo[0]:hi[0], lo[1]:hi[1], lo[2]:hi[2]] = True
     for key, mesh in parts.items():
         role = ROLE_OF_PART.get(key)
         if role is None:
             continue
         m = mesh.copy()
         m.vertices = warp(np.asarray(m.vertices, float))
-        by_role[role] = by_role.get(role, np.zeros(out.shape, bool)) | _voxelise(m, out_aff, out.shape)
+        by_role[role] = by_role.get(role, np.zeros(out.shape, bool)) | (_voxelise(m, out_aff, out.shape) & keep)
     for role, atlas in by_role.items():
         value = role_value(source, role)
         ct = out == value

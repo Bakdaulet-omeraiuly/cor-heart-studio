@@ -19,7 +19,7 @@ from scipy import ndimage
 from scipy.spatial import cKDTree
 from skimage import measure
 
-from .fidelity import boundary_points, summarise, surface_metrics
+from .fidelity import boundary_points, gate, summarise, surface_metrics
 from .labels import GREAT_VEINS, LABEL_MAPS
 from .mesh import RAS_TO_APP
 
@@ -417,42 +417,70 @@ FIDELITY_POOLS = [
 ]
 
 
-def heart_fidelity(mesh: trimesh.Trimesh, fields, grid: "FineGrid", masks, affine) -> dict:
+def heart_fidelity(mesh: trimesh.Trimesh, fields, grid: "FineGrid", masks, affine, prov: np.ndarray | None = None) -> dict:
     """COR-Fit report for the rendered tissue mesh (RAS mm), against the labels it was built from.
 
     A vertex lies on the cavity side where |cavity| < |outer| (the solid is max(outer, -cavity) = 0);
     the structure is the field component that is smallest there. Only imaging-derived surfaces are
     measured: every blood pool and the LV epicardium. Other outer walls are a fixed offset (not from
-    imaging) and are listed as such.
+    imaging) and are listed as such. With `prov`, only measured (source) voxels are scored: atlas
+    continuations are left out, and so are the faces a measured voxel shares with its own continuation
+    (they are interior to the reconstructed vessel). No measured voxel is dropped.
     """
+    from .vessels import PROV
     v = np.asarray(mesh.vertices)
     tol = float(np.linalg.norm(affine[:3, :3], axis=0).max())  # one voxel
+    measured = np.ones(next(iter(masks.values())).shape, bool) if prov is None else prov == PROV["ct"]
+    m_ = {k: m & measured for k, m in masks.items()}
+    added = {k: m & ~measured for k, m in masks.items()}
+    # faces a measured voxel shares with *any* atlas continuation are interior to the reconstructed heart
+    # (a cut vessel end, a vein inlet on an atrium): no rendered surface exists there any more
+    covered = np.logical_or.reduce(list(added.values()))
+    added = {k: covered for k in masks}
     pools = [k for k, _ in FIDELITY_POOLS]
-    pool_vals = np.stack([grid.sample(fields[k], v) for k in pools], axis=1)
-    outer_keys = ["lv_outer"] + [f"{k}_outer" for k in pools[1:]]
+    # great veins take part in the nearest-structure test (so their surfaces are never given to a chamber) but
+    # are not scored: no source labels them
+    unscored = ["vena_cava", "pulmonary_veins"]
+    pool_vals = np.stack([grid.sample(fields[k], v) for k in pools + unscored], axis=1)
+    outer_keys = ["lv_outer"] + [f"{k}_outer" for k in pools[1:] + unscored]
     outer_vals = np.stack([grid.sample(fields[k], v) for k in outer_keys], axis=1)
     endo = np.abs(grid.sample(fields["cavity"], v)) < np.abs(grid.sample(fields["outer"], v))
     pool_id, outer_id = pool_vals.argmin(axis=1), outer_vals.argmin(axis=1)
 
+    def on_measured(mask):
+        """Vertices whose nearest voxel *of this structure* is measured: the atlas part of a vessel is never
+        scored on the mesh side, even where it passes close to another measured structure."""
+        if prov is None:
+            return np.ones(len(v), bool)
+        from scipy.spatial import cKDTree
+        idx = np.argwhere(mask)
+        if not len(idx):
+            return np.zeros(len(v), bool)
+        near = cKDTree(idx @ affine[:3, :3].T + affine[:3, 3]).query(v)[1]
+        return measured[tuple(idx[near].T)]
+
     rows = []
     for i, (key, name) in enumerate(FIDELITY_POOLS):
-        others = np.logical_or.reduce([masks[k] for k in pools if k != key])
-        m = surface_metrics(mesh, np.flatnonzero(endo & (pool_id == i)), boundary_points(masks[key], affine, exclude=others), tol)
+        others = np.logical_or.reduce([masks[k] for k in pools if k != key]) | added[key]
+        m = surface_metrics(mesh, np.flatnonzero(endo & (pool_id == i) & on_measured(masks[key])), boundary_points(m_[key], affine, exclude=others), tol)
         rows.append({"key": key, "name": name, "source": "CT label boundary", **(m or {"nsdPercent": None})})
-    lv = masks["lv_cavity"] | masks["lv_myocardium"]
+    lv = m_["lv_cavity"] | m_["lv_myocardium"]
     others = np.logical_or.reduce([masks[k] for k in pools[1:]])
-    m = surface_metrics(mesh, np.flatnonzero(~endo & (outer_id == 0)), boundary_points(lv, affine, exclude=others), tol)
+    m = surface_metrics(mesh, np.flatnonzero(~endo & (outer_id == 0) & on_measured(masks["lv_cavity"] | masks["lv_myocardium"])),
+                        boundary_points(lv, affine, exclude=others), tol)
     rows.append({"key": "lv_epicardium", "name": "LV epicardium (myocardium outer)", "source": "CT label boundary", **(m or {"nsdPercent": None})})
     if all(f"{k}_wall" in masks for k in pools[1:]):
         # measured walls (Rodero meshes): each outer wall against the boundary of its own pool + wall label
         for i, (key, name) in enumerate(FIDELITY_POOLS[1:], start=1):
-            own = masks[key] | masks[f"{key}_wall"]
-            rest = np.logical_or.reduce([masks["lv_cavity"] | masks["lv_myocardium"]] + [masks[k] | masks[f"{k}_wall"] for k in pools[1:] if k != key])
-            m = surface_metrics(mesh, np.flatnonzero(~endo & (outer_id == i)), boundary_points(own, affine, exclude=rest), tol)
+            own = m_[key] | m_[f"{key}_wall"]
+            rest = np.logical_or.reduce([masks["lv_cavity"] | masks["lv_myocardium"]] + [masks[k] | masks[f"{k}_wall"] for k in pools[1:] if k != key]) | added[key]
+            m = surface_metrics(mesh, np.flatnonzero(~endo & (outer_id == i) & on_measured(masks[key] | masks[f"{key}_wall"])),
+                                boundary_points(own, affine, exclude=rest), tol)
             rows.append({"key": f"{key}_outer", "name": f"{name} outer wall", "source": "source mesh wall", **(m or {"nsdPercent": None})})
     else:
         rows.append({"key": "other_walls", "name": "RV, atrial and vessel outer walls", "source": "fixed thickness, not from imaging", "nsdPercent": None})
-    return {"toleranceMm": round(tol, 2), "structures": rows, "overall": summarise(rows, round(tol, 2))}
+    scored = int(np.count_nonzero(np.logical_or.reduce(list(m_.values()))))
+    return {"toleranceMm": round(tol, 2), "structures": rows, "overall": summarise(rows, round(tol, 2)), "scoredSourceVoxels": scored}
 
 
 def _atlas_coronaries(hi, samples, grid, fields, valves, lv, to_ras_pt, aortic_ras, apex_app, surface_at, normals_at):
@@ -696,15 +724,21 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
     # COR-Fit: measured agreement of every rendered imaging-derived surface with its source labels
     fidelity = {
         "method": "COR-Fit v1: symmetric surface distance between the rendered mesh and the voxel boundary of its source label (docs/cor-fit.md)",
-        "lods": {lod: heart_fidelity(mesh, fields, grid, masks, affine) for lod, mesh in meshes.items()},
+        "lods": {lod: heart_fidelity(mesh, fields, grid, masks, affine, prov) for lod, mesh in meshes.items()},
         "volume": {
             "lvCavityMeshMl": round(float(lv_cav_mesh.volume), 1),
             "lvCavityLabelMl": round(ml("lv_cavity"), 1),
             "errorPercent": round(float(100 * (lv_cav_mesh.volume - ml("lv_cavity")) / ml("lv_cavity")), 2),
         },
     }
+    # the publication gate (docs/cor-fit.md) on the measured layers of the first LOD; a template that misses it is
+    # still shipped, labelled, with the reason (never by scoring less)
+    first_fit = fidelity["lods"][lods[0][0]]
+    problems = gate(first_fit["overall"], [fidelity["volume"]["errorPercent"]])
+    fidelity.update({"measuredOnly": True, "scoredSourceVoxels": first_fit["scoredSourceVoxels"],
+                     "belowGate": bool(problems), "reason": "; ".join(problems)})
 
-    measured_walls = all(f"{r}_wall" in masks for r in WALL_MM)
+    measured_walls = all(f"{r}_wall" in masks for r in WALL_MM if r not in ("vena_cava", "pulmonary_veins"))
     limitations = [
         "Shape from a CT segmentation, not reviewed by a clinician",
         "Single phase, cardiac phase unknown: motion is the template's illustrative motion",
@@ -730,6 +764,7 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
         "axes": {"x": "patient left", "y": "superior", "z": "anterior"},
         "anatomicalOrientation": "Patient frame from the CT affine; anterior view looks along -Z",
         "center": [0, 0, 0],
+        "frameCentreRasMm": _r(frame.centre_mm),
         "bounds": {"min": _r(pts.min(axis=0)), "max": _r(pts.max(axis=0))},
         "provenanceTier": "B",
         "provenance": {

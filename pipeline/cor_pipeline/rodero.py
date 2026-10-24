@@ -206,6 +206,17 @@ def case_labels(vtk_path: str, voxel_mm: float = 0.75):
     return out, LPS_TO_RAS @ affine, d
 
 
+def build_template(labels: np.ndarray, affine: np.ndarray, case: str = "01", lods=(("high", 300_000), ("low", 120_000))):
+    """Atlas-grade Rodero template (docs/atlas-heart.md): (glbs, manifest, proxy, qa, prov)."""
+    from .atlas_heart import build_atlas_heart
+    dataset = {**DATASET, "knownLimitations": [
+        "Healthy adult template (Rodero 2021 case %s), not this patient's anatomy" % case,
+        "Great vessels continue past the source mesh cuts as the BodyParts3D atlas fitted to this heart (CC BY-SA), not imaged",
+    ]}
+    glbs, manifest, proxy, qa, _, prov = build_atlas_heart(labels, affine, "rodero2021", f"rodero-{case}", dataset, lods=lods)
+    return glbs, manifest, proxy, qa, prov
+
+
 def main():
     import argparse
     import json
@@ -227,11 +238,7 @@ def main():
     else:
         labels, affine, _ = case_labels(args.vtk)
         np.savez_compressed(cached, labels=labels, affine=affine)
-    dataset = {**DATASET, "knownLimitations": [
-        "Healthy adult template (Rodero 2021 case %s), not this patient's anatomy" % args.case,
-        "Great arteries and vein inlets end as short stumps where the source mesh is cut",
-    ]}
-    glbs, manifest, proxy, qa, _ = build_asset(labels, affine, "rodero2021", f"rodero-{args.case}", dataset, with_coronaries=True)
+    glbs, manifest, proxy, qa, _ = build_template(labels, affine, args.case)
     manifest["assetId"] = f"cor-template-rodero-{args.case}"
     manifest["provenance"]["geometry"] = f"CT-derived healthy template (Rodero 2021 case {args.case}, CC BY 4.0)"
     for lod, data in glbs.items():

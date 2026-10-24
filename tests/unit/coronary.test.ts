@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { cadRads, stenosisCategory } from "@/domain/coronary";
+import { cadRads, DISPLAY_NAME, stenosisCategory } from "@/domain/coronary";
+import roderoManifest from "@/scene/asset-adapters/template/rodero-01.manifest.json";
 import { mapPatientToVisual } from "@/domain/mapping/mapPatientToVisual";
 import { HEART_ASSETS, PROCEDURAL_ASSET_ID, RODERO_TEMPLATE_ID } from "@/scene/asset-adapters/registry";
 import { minimal, norm, samplePatients } from "./helpers";
@@ -54,6 +55,9 @@ describe("coronary mapping", () => {
 });
 
 describe("vessel naming", () => {
-  // flipped to a real test in Task 6, once the template manifest lists the atlas vessels
-  it.todo("DISPLAY_NAME covers every manifest vessel id");
+  it("DISPLAY_NAME covers every manifest vessel id", () => {
+    const ids = Object.keys((roderoManifest as { coronary: { vessels: Record<string, unknown> } }).coronary.vessels).map(Number);
+    expect(ids.length).toBeGreaterThan(15);
+    for (const id of ids) expect(DISPLAY_NAME[id], `vessel ${id}`).toBeTruthy();
+  });
 });

@@ -80,3 +80,15 @@ def test_detached_continuation_is_shifted_onto_the_ct_end():
     assert ndimage.label(out == AORTA)[1] == 1
     assert report["joinGapMm"]["aorta"] <= 1.0
     assert report["shiftMm"]["aorta"] >= 9.0
+
+
+def test_continuations_stop_near_the_heart():
+    """Whole-body atlas vessels (IVC, subclavian) are cut ~2.5 cm beyond the measured heart, as atlas plates show them."""
+    lab, aff = ct_volume()
+    long = trimesh.creation.cylinder(radius=6.0, height=200.0, sections=32)
+    long.apply_translation([30, 30, 140])                      # runs 150 mm above the scan top
+    out, out_aff, prov, report = extend_vessels(lab, aff, {"aortic_arch": long}, lambda p: p, "rodero2021",
+                                                pad_mm=70, beyond_mm=25)
+    z_top_mm = (np.argwhere(out == AORTA)[:, 2].max() - 70)     # back to the original grid (1 mm voxels)
+    heart_top = np.argwhere(lab > 0)[:, 2].max()
+    assert z_top_mm - heart_top <= 26

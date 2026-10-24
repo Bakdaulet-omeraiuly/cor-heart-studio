@@ -28,6 +28,7 @@ HEART_FILES = [
     "heart_ventricle_right",
     "aorta",
     "pulmonary_artery",
+    "inferior_vena_cava",  # dataset label used for the atlas-grade heart (vena cava, provenance "dataset")
 ]
 
 
