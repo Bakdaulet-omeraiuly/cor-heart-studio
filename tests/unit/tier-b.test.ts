@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { mapPatientToVisual } from "@/domain/mapping/mapPatientToVisual";
 import { entryFromRaw, type PatientEntry } from "@/lib/patients";
 import { deformPoint, frameParams, restParams } from "@/scene/animation/deform";
-import { HEART_ASSETS, PROCEDURAL_ASSET_ID, getHeartAssetSpec, specForPatient } from "@/scene/asset-adapters/registry";
+import { HEART_ASSETS, PROCEDURAL_ASSET_ID, RODERO_TEMPLATE_ID, getDefaultTemplate, getHeartAssetSpec, setDefaultTemplate, specForPatient } from "@/scene/asset-adapters/registry";
 import { meshVolume } from "../../scripts/heart-asset/surface-nets";
 import { ROOT, minimal, norm, obs, readText, samplePatients } from "./helpers";
 
@@ -37,8 +37,10 @@ describe("asset registry", () => {
   });
 
   it("unknown ids fall back to the procedural heart", () => {
-    expect(getHeartAssetSpec("nope").id).toBe(PROCEDURAL_ASSET_ID);
-    expect(getHeartAssetSpec(undefined).id).toBe(PROCEDURAL_ASSET_ID);
+    expect(getDefaultTemplate()).toBe(RODERO_TEMPLATE_ID);
+    expect(getHeartAssetSpec("nope").id).toBe(RODERO_TEMPLATE_ID);
+    expect(getHeartAssetSpec(undefined).id).toBe(RODERO_TEMPLATE_ID);
+    expect(HEART_ASSETS[RODERO_TEMPLATE_ID].tier).toBe("A");
   });
 });
 
@@ -54,10 +56,15 @@ describe("record -> asset", () => {
     }
   });
 
-  it("synthetic samples and unreferenced meshes keep the procedural heart", () => {
-    for (const r of samplePatients()) expect(entry(r).assetId).toBe(PROCEDURAL_ASSET_ID);
+  it("synthetic samples and unreferenced meshes use the session template (CT anatomy by default)", () => {
+    for (const r of samplePatients()) expect(entry(r).assetId).toBe(RODERO_TEMPLATE_ID);
     const p = norm(minimal({ imaging: { assets: [{ kind: "mesh", reference: "somebody-elses-mesh" }] } }));
-    expect(specForPatient(p).id).toBe(PROCEDURAL_ASSET_ID);
+    expect(specForPatient(p).id).toBe(RODERO_TEMPLATE_ID);
+    setDefaultTemplate(PROCEDURAL_ASSET_ID);
+    try {
+      expect(specForPatient(p).id).toBe(PROCEDURAL_ASSET_ID);
+      for (const r of openCt()) expect(getHeartAssetSpec(entry(r).assetId).tier).toBe("B"); // own CT meshes kept
+    } finally { setDefaultTemplate(RODERO_TEMPLATE_ID); }
   });
 
   it("a CT heart without echo numbers is shown at its own measured size (no rescaling)", () => {
@@ -71,8 +78,8 @@ describe("record -> asset", () => {
 });
 
 describe("deformation on CT LV cavities", () => {
-  for (const spec of ctSpecs) {
-    const caseId = spec.id.replace("cor-ct-", "");
+  for (const spec of [...ctSpecs, HEART_ASSETS[RODERO_TEMPLATE_ID]]) {
+    const caseId = spec.id.replace("cor-ct-", "").replace("cor-template-", "");
     const fixture = JSON.parse(readText(`tests/fixtures/ct/${caseId}-lv-cavity-proxy.json`)) as { positions: number[]; indices: number[] };
     const P0 = new Float32Array(fixture.positions);
     const I = new Uint32Array(fixture.indices);

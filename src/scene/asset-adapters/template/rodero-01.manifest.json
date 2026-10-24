@@ -1,0 +1,747 @@
+{
+  "manifestVersion": "1.0.0",
+  "assetId": "cor-template-rodero-01",
+  "assetVersion": "1.0.0",
+  "source": "CT segmentation (rodero2021), case rodero-01, built by pipeline/cor_pipeline/asset.py",
+  "author": "COR Heart Studio project (generated code)",
+  "license": "CC BY 4.0",
+  "attribution": "Rodero 2021 virtual cohort of adult healthy four-chamber heart meshes from CT \u2014 https://zenodo.org/records/4590294",
+  "redistribution": "Derived from the dataset above; follow its license",
+  "units": "cm",
+  "axes": {
+    "x": "patient left",
+    "y": "superior",
+    "z": "anterior"
+  },
+  "anatomicalOrientation": "Patient frame from the CT affine; anterior view looks along -Z",
+  "center": [
+    0,
+    0,
+    0
+  ],
+  "bounds": {
+    "min": [
+      -6.7119,
+      -6.176,
+      -5.2867
+    ],
+    "max": [
+      6.7119,
+      6.176,
+      5.2867
+    ]
+  },
+  "provenanceTier": "A",
+  "provenance": {
+    "geometry": "CT-derived healthy template (Rodero 2021 case 01, CC BY 4.0)",
+    "reviewedByClinician": false,
+    "motion": "illustrative (template handles); single-phase CT"
+  },
+  "files": {
+    "high": {
+      "url": "/models/template/rodero-01/heart-high.glb",
+      "bytes": 8388248,
+      "triangles": [
+        300000
+      ]
+    },
+    "low": {
+      "url": "/models/template/rodero-01/heart-low.glb",
+      "bytes": 3348128,
+      "triangles": [
+        119996
+      ]
+    }
+  },
+  "attributes": {
+    "_weights": "uint8 normalized vec4: deformation membership (lv, rv, la, ra); remainder = anchored vessels",
+    "_tissue": "uint8 normalized vec4: x wall depth (0 epicardium .. 1 endocardium), y epicardial fat (always 0), z tissue kind byte, w region byte",
+    "tissueKinds": {
+      "myocardium": 0,
+      "greatArtery": 1,
+      "greatVein": 2,
+      "coronaryArtery": 3,
+      "coronaryVein": 4
+    },
+    "regions": [
+      "lv",
+      "rv",
+      "la",
+      "ra",
+      "aorta",
+      "pulmonary_artery",
+      "vena_cava",
+      "pulmonary_veins",
+      "coronary_vessels"
+    ]
+  },
+  "structureToMesh": {
+    "myocardium": {
+      "mesh": "heart_tissue",
+      "note": "all walls from the source mesh"
+    },
+    "lv": {
+      "mesh": "heart_tissue",
+      "region": 0
+    },
+    "rv": {
+      "mesh": "heart_tissue",
+      "region": 1
+    },
+    "la": {
+      "mesh": "heart_tissue",
+      "region": 2
+    },
+    "ra": {
+      "mesh": "heart_tissue",
+      "region": 3
+    },
+    "aorta": {
+      "mesh": "heart_tissue",
+      "region": 4
+    },
+    "pulmonary_artery": {
+      "mesh": "heart_tissue",
+      "region": 5
+    },
+    "vena_cava": {
+      "mesh": null,
+      "region": null,
+      "absent": true,
+      "note": "not in the segmentation labels"
+    },
+    "pulmonary_veins": {
+      "mesh": null,
+      "region": null,
+      "absent": true,
+      "note": "not in the segmentation labels"
+    },
+    "coronary_vessels": {
+      "mesh": null,
+      "region": null,
+      "absent": true,
+      "note": "not in the segmentation labels"
+    },
+    "mitral_valve": {
+      "runtime": "valve generator"
+    },
+    "aortic_valve": {
+      "runtime": "valve generator"
+    },
+    "tricuspid_valve": {
+      "runtime": "valve generator"
+    },
+    "pulmonary_valve": {
+      "runtime": "valve generator"
+    }
+  },
+  "deformation": {
+    "method": "Same vertex-shader handles as the procedural asset, on chamber frames measured from the segmentation",
+    "lv": {
+      "base": [
+        1.3806,
+        0.3923,
+        -2.6547
+      ],
+      "axis": [
+        0.483,
+        -0.6723,
+        0.561
+      ],
+      "septalDir": [
+        -0.7097,
+        0.0747,
+        0.7005
+      ],
+      "anteriorDir": [
+        0.5129,
+        0.7365,
+        0.441
+      ],
+      "cavityBaseAlong": 0.0,
+      "cavityApexAlong": 8.1014,
+      "epiApexAlong": 8.5572,
+      "meanCavityRadius": 2.387,
+      "meanWallThickness": 1.0792
+    },
+    "rv": {
+      "center": [
+        -0.3175,
+        -1.3755,
+        2.2721
+      ],
+      "axis": [
+        0.483,
+        -0.6723,
+        0.561
+      ],
+      "septalDir": [
+        0.7097,
+        -0.0747,
+        -0.7005
+      ],
+      "wall": 0.3
+    },
+    "la": {
+      "center": [
+        -1.6431,
+        2.3476,
+        -3.4205
+      ]
+    },
+    "ra": {
+      "center": [
+        -4.2735,
+        -0.5687,
+        -0.7201
+      ]
+    },
+    "segmentConvention": "AHA 17-segment; angle measured around the LV long axis from the septal direction toward anterior"
+  },
+  "valves": {
+    "mitral_valve": {
+      "center": [
+        1.1724,
+        0.1336,
+        -2.7855
+      ],
+      "normal": [
+        0.662,
+        -0.4561,
+        0.5948
+      ],
+      "radius": 1.2796,
+      "fromImaging": true
+    },
+    "aortic_valve": {
+      "center": [
+        -0.2925,
+        1.7604,
+        -0.9687
+      ],
+      "normal": [
+        -0.7221,
+        -0.5575,
+        0.4096
+      ],
+      "radius": 0.792,
+      "fromImaging": true
+    },
+    "tricuspid_valve": {
+      "center": [
+        -2.6545,
+        -1.6886,
+        0.3194
+      ],
+      "normal": [
+        0.6971,
+        -0.4353,
+        0.5698
+      ],
+      "radius": 1.9417,
+      "fromImaging": true
+    },
+    "pulmonary_valve": {
+      "center": [
+        0.613,
+        4.5767,
+        0.9268
+      ],
+      "normal": [
+        -0.6548,
+        0.3254,
+        0.6822
+      ],
+      "radius": 0.7198,
+      "fromImaging": true
+    }
+  },
+  "papillary": {
+    "anterolateral": {
+      "base": [
+        5.4,
+        -2.3891,
+        -0.6002
+      ],
+      "tip": [
+        3.675,
+        -1.1891,
+        -1.5002
+      ]
+    },
+    "posteromedial": {
+      "base": [
+        2.775,
+        -4.4141,
+        -0.7502
+      ],
+      "tip": [
+        2.175,
+        -2.3141,
+        -1.5752
+      ]
+    },
+    "rvAnterior": {
+      "base": [
+        -0.45,
+        -2.0891,
+        3.6748
+      ],
+      "tip": [
+        -0.375,
+        -1.5641,
+        2.6248
+      ]
+    }
+  },
+  "coronaryOstia": {
+    "left": [
+      -0.3222,
+      0.8535,
+      -0.3025
+    ],
+    "right": [
+      -0.6134,
+      1.5126,
+      0.0815
+    ]
+  },
+  "anchors": {
+    "lv": [
+      5.6014,
+      -2.3176,
+      -3.0376
+    ],
+    "rv": [
+      2.5915,
+      -4.951,
+      4.7237
+    ],
+    "la": [
+      -3.4524,
+      4.8577,
+      -4.3371
+    ],
+    "ra": [
+      -6.7015,
+      -1.8562,
+      -0.7826
+    ],
+    "apex": [
+      5.4169,
+      -5.2261,
+      2.034
+    ],
+    "aorta": [
+      -4.0304,
+      3.6368,
+      0.9143
+    ],
+    "pulmonary_artery": [
+      -1.2205,
+      5.0485,
+      2.3448
+    ],
+    "vena_cava": [
+      -4.479,
+      4.2883,
+      -0.7612
+    ],
+    "pulmonary_veins": [
+      -0.6639,
+      5.5171,
+      -4.4605
+    ],
+    "coronary_vessels": [
+      3.0596,
+      0.8265,
+      1.4741
+    ],
+    "myocardium": [
+      5.4058,
+      -2.0453,
+      -3.2648
+    ],
+    "mitral_valve": [
+      1.1724,
+      0.1336,
+      -2.7855
+    ],
+    "aortic_valve": [
+      -0.2925,
+      1.7604,
+      -0.9687
+    ],
+    "tricuspid_valve": [
+      -2.6545,
+      -1.6886,
+      0.3194
+    ],
+    "pulmonary_valve": [
+      0.613,
+      4.5767,
+      0.9268
+    ]
+  },
+  "baseline": {
+    "note": "Measured from this segmentation (cardiac phase unknown). Not a clinical report.",
+    "lvEndDiastolicVolumeMl": 122.0,
+    "lvEpicardialVolumeMl": 285.3,
+    "lvEndDiastolicDiameterMm": 46.2,
+    "ivsThicknessMm": 12.2,
+    "lvPosteriorWallThicknessMm": 11.5,
+    "laVolumeMl": 70.0,
+    "rvBasalDiameterMm": 65.0,
+    "raMinorDimensionMm": 40.6,
+    "measurementLevelAlong": 2.4304
+  },
+  "morphTargets": [],
+  "layers": [
+    "outer",
+    "chambers",
+    "vessels",
+    "valves",
+    "overlays"
+  ],
+  "cutaway": "Clip plane with back-face section shading; closed solid mesh so wall thickness reads in section",
+  "animationChannels": [
+    "ventricular volume",
+    "longitudinal shortening",
+    "torsion",
+    "atrial volume",
+    "valve opening"
+  ],
+  "knownLimitations": [
+    "Shape from a CT segmentation, not reviewed by a clinician",
+    "Single phase, cardiac phase unknown: motion is the template's illustrative motion",
+    "All chamber and great-artery walls come from the source mesh",
+    "No coronary arteries, veins, venae cavae or pulmonary veins in the labels; their label anchors are placed on the atria",
+    "Valves are generated at runtime at the label-derived annulus; leaflets are illustrative",
+    "Papillary muscles and coronary ostia positions are illustrative (placed from the LV frame)",
+    "No epicardial fat in the labels",
+    "Healthy adult template (Rodero 2021 case 01), not this patient's anatomy",
+    "Great arteries and vein inlets end as short stumps where the source mesh is cut"
+  ],
+  "fidelity": {
+    "method": "COR-Fit v1: symmetric surface distance between the rendered mesh and the voxel boundary of its source label (docs/cor-fit.md)",
+    "lods": {
+      "high": {
+        "toleranceMm": 0.75,
+        "structures": [
+          {
+            "key": "lv_cavity",
+            "name": "LV cavity (endocardium)",
+            "source": "CT label boundary",
+            "nsdPercent": 99.9,
+            "meanMm": 0.17,
+            "hd95Mm": 0.4,
+            "maxMm": 1.17,
+            "meshToLabelPercent": 100.0,
+            "labelToMeshPercent": 99.9,
+            "points": 54323
+          },
+          {
+            "key": "rv",
+            "name": "RV blood pool",
+            "source": "CT label boundary",
+            "nsdPercent": 99.8,
+            "meanMm": 0.17,
+            "hd95Mm": 0.4,
+            "maxMm": 1.62,
+            "meshToLabelPercent": 100.0,
+            "labelToMeshPercent": 99.8,
+            "points": 59973
+          },
+          {
+            "key": "la",
+            "name": "Left atrium",
+            "source": "CT label boundary",
+            "nsdPercent": 95.2,
+            "meanMm": 0.28,
+            "hd95Mm": 1.18,
+            "maxMm": 6.19,
+            "meshToLabelPercent": 100.0,
+            "labelToMeshPercent": 93.6,
+            "points": 54036
+          },
+          {
+            "key": "ra",
+            "name": "Right atrium",
+            "source": "CT label boundary",
+            "nsdPercent": 98.5,
+            "meanMm": 0.21,
+            "hd95Mm": 0.45,
+            "maxMm": 6.69,
+            "meshToLabelPercent": 100.0,
+            "labelToMeshPercent": 97.9,
+            "points": 56946
+          },
+          {
+            "key": "aorta",
+            "name": "Aorta lumen",
+            "source": "CT label boundary",
+            "nsdPercent": 83.7,
+            "meanMm": 0.96,
+            "hd95Mm": 7.0,
+            "maxMm": 16.27,
+            "meshToLabelPercent": 100.0,
+            "labelToMeshPercent": 80.9,
+            "points": 46886
+          },
+          {
+            "key": "pulmonary_artery",
+            "name": "Pulmonary artery lumen",
+            "source": "CT label boundary",
+            "nsdPercent": 66.7,
+            "meanMm": 1.39,
+            "hd95Mm": 6.69,
+            "maxMm": 9.65,
+            "meshToLabelPercent": 100.0,
+            "labelToMeshPercent": 65.5,
+            "points": 41412
+          },
+          {
+            "key": "lv_epicardium",
+            "name": "LV epicardium (myocardium outer)",
+            "source": "CT label boundary",
+            "nsdPercent": 99.3,
+            "meanMm": 0.19,
+            "hd95Mm": 0.45,
+            "maxMm": 3.14,
+            "meshToLabelPercent": 99.7,
+            "labelToMeshPercent": 99.1,
+            "points": 60149
+          },
+          {
+            "key": "rv_outer",
+            "name": "RV blood pool outer wall",
+            "source": "source mesh wall",
+            "nsdPercent": 90.5,
+            "meanMm": 0.66,
+            "hd95Mm": 11.78,
+            "maxMm": 22.44,
+            "meshToLabelPercent": 79.8,
+            "labelToMeshPercent": 95.4,
+            "points": 58435
+          },
+          {
+            "key": "la_outer",
+            "name": "Left atrium outer wall",
+            "source": "source mesh wall",
+            "nsdPercent": 89.8,
+            "meanMm": 0.57,
+            "hd95Mm": 7.15,
+            "maxMm": 19.93,
+            "meshToLabelPercent": 84.8,
+            "labelToMeshPercent": 91.7,
+            "points": 55455
+          },
+          {
+            "key": "ra_outer",
+            "name": "Right atrium outer wall",
+            "source": "source mesh wall",
+            "nsdPercent": 96.4,
+            "meanMm": 0.3,
+            "hd95Mm": 0.81,
+            "maxMm": 13.31,
+            "meshToLabelPercent": 94.9,
+            "labelToMeshPercent": 96.9,
+            "points": 54263
+          },
+          {
+            "key": "aorta_outer",
+            "name": "Aorta lumen outer wall",
+            "source": "source mesh wall",
+            "nsdPercent": 65.8,
+            "meanMm": 2.09,
+            "hd95Mm": 10.24,
+            "maxMm": 17.21,
+            "meshToLabelPercent": 71.8,
+            "labelToMeshPercent": 64.9,
+            "points": 45848
+          },
+          {
+            "key": "pulmonary_artery_outer",
+            "name": "Pulmonary artery lumen outer wall",
+            "source": "source mesh wall",
+            "nsdPercent": 66.4,
+            "meanMm": 1.49,
+            "hd95Mm": 7.03,
+            "maxMm": 10.0,
+            "meshToLabelPercent": 99.2,
+            "labelToMeshPercent": 64.9,
+            "points": 41860
+          }
+        ],
+        "overall": {
+          "nsdPercent": 89.1,
+          "meanMm": 0.64,
+          "hd95MmWorst": 11.78,
+          "toleranceMm": 0.75,
+          "structures": 12
+        }
+      },
+      "low": {
+        "toleranceMm": 0.75,
+        "structures": [
+          {
+            "key": "lv_cavity",
+            "name": "LV cavity (endocardium)",
+            "source": "CT label boundary",
+            "nsdPercent": 99.9,
+            "meanMm": 0.18,
+            "hd95Mm": 0.4,
+            "maxMm": 1.18,
+            "meshToLabelPercent": 100.0,
+            "labelToMeshPercent": 99.9,
+            "points": 45404
+          },
+          {
+            "key": "rv",
+            "name": "RV blood pool",
+            "source": "CT label boundary",
+            "nsdPercent": 99.8,
+            "meanMm": 0.17,
+            "hd95Mm": 0.4,
+            "maxMm": 1.61,
+            "meshToLabelPercent": 100.0,
+            "labelToMeshPercent": 99.8,
+            "points": 47713
+          },
+          {
+            "key": "la",
+            "name": "Left atrium",
+            "source": "CT label boundary",
+            "nsdPercent": 94.4,
+            "meanMm": 0.3,
+            "hd95Mm": 1.18,
+            "maxMm": 6.17,
+            "meshToLabelPercent": 100.0,
+            "labelToMeshPercent": 93.6,
+            "points": 45665
+          },
+          {
+            "key": "ra",
+            "name": "Right atrium",
+            "source": "CT label boundary",
+            "nsdPercent": 98.2,
+            "meanMm": 0.22,
+            "hd95Mm": 0.45,
+            "maxMm": 6.68,
+            "meshToLabelPercent": 100.0,
+            "labelToMeshPercent": 97.9,
+            "points": 46310
+          },
+          {
+            "key": "aorta",
+            "name": "Aorta lumen",
+            "source": "CT label boundary",
+            "nsdPercent": 82.2,
+            "meanMm": 1.03,
+            "hd95Mm": 6.99,
+            "maxMm": 16.25,
+            "meshToLabelPercent": 100.0,
+            "labelToMeshPercent": 81.0,
+            "points": 42801
+          },
+          {
+            "key": "pulmonary_artery",
+            "name": "Pulmonary artery lumen",
+            "source": "CT label boundary",
+            "nsdPercent": 66.0,
+            "meanMm": 1.42,
+            "hd95Mm": 6.68,
+            "maxMm": 9.64,
+            "meshToLabelPercent": 100.0,
+            "labelToMeshPercent": 65.5,
+            "points": 40645
+          },
+          {
+            "key": "lv_epicardium",
+            "name": "LV epicardium (myocardium outer)",
+            "source": "CT label boundary",
+            "nsdPercent": 99.0,
+            "meanMm": 0.2,
+            "hd95Mm": 0.46,
+            "maxMm": 3.03,
+            "meshToLabelPercent": 99.4,
+            "labelToMeshPercent": 99.0,
+            "points": 47960
+          },
+          {
+            "key": "rv_outer",
+            "name": "RV blood pool outer wall",
+            "source": "source mesh wall",
+            "nsdPercent": 91.8,
+            "meanMm": 0.53,
+            "hd95Mm": 14.75,
+            "maxMm": 22.51,
+            "meshToLabelPercent": 72.7,
+            "labelToMeshPercent": 95.4,
+            "points": 47522
+          },
+          {
+            "key": "la_outer",
+            "name": "Left atrium outer wall",
+            "source": "source mesh wall",
+            "nsdPercent": 90.7,
+            "meanMm": 0.47,
+            "hd95Mm": 7.49,
+            "maxMm": 20.05,
+            "meshToLabelPercent": 84.4,
+            "labelToMeshPercent": 91.7,
+            "points": 46535
+          },
+          {
+            "key": "ra_outer",
+            "name": "Right atrium outer wall",
+            "source": "source mesh wall",
+            "nsdPercent": 96.6,
+            "meanMm": 0.27,
+            "hd95Mm": 1.46,
+            "maxMm": 13.22,
+            "meshToLabelPercent": 94.3,
+            "labelToMeshPercent": 96.9,
+            "points": 45320
+          },
+          {
+            "key": "aorta_outer",
+            "name": "Aorta lumen outer wall",
+            "source": "source mesh wall",
+            "nsdPercent": 65.1,
+            "meanMm": 2.09,
+            "hd95Mm": 10.54,
+            "maxMm": 17.15,
+            "meshToLabelPercent": 66.2,
+            "labelToMeshPercent": 65.0,
+            "points": 42855
+          },
+          {
+            "key": "pulmonary_artery_outer",
+            "name": "Pulmonary artery lumen outer wall",
+            "source": "source mesh wall",
+            "nsdPercent": 65.2,
+            "meanMm": 1.56,
+            "hd95Mm": 7.05,
+            "maxMm": 9.98,
+            "meshToLabelPercent": 99.2,
+            "labelToMeshPercent": 64.5,
+            "points": 40854
+          }
+        ],
+        "overall": {
+          "nsdPercent": 88.1,
+          "meanMm": 0.67,
+          "hd95MmWorst": 14.75,
+          "toleranceMm": 0.75,
+          "structures": 12
+        }
+      }
+    },
+    "volume": {
+      "lvCavityMeshMl": 122.0,
+      "lvCavityLabelMl": 122.0,
+      "errorPercent": -0.04
+    }
+  }
+}

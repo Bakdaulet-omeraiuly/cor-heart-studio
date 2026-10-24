@@ -76,3 +76,22 @@ mesh. Writes `brain-manifest.json` (84 structures: labels, method, colour, volum
 `labels.u8.gz` (cropped 8-bit volumes for the slice views, voxel→app matrix in the manifest).
 Not used: OASIS-TRT-20 subjects (OASIS data-use agreement forbids 3D head renderings and needs a
 signed DUA).
+
+## Anatomy template: Rodero 2021 healthy CT meshes (CC BY 4.0)
+
+The default heart for records without their own mesh is a CT-derived healthy adult heart:
+Rodero C, Strocchi M, et al. *Linking statistical shape models and simulated function in the healthy adult
+human heart*, PLoS Comput Biol 2021, doi:10.1371/journal.pcbi.1008851, data zenodo.org/records/4590294.
+
+```bash
+curl -L -o ../data/rodero2021/raw/01.tar.gz "https://zenodo.org/records/4590294/files/01.tar.gz?download=1"
+tar -xzf ../data/rodero2021/raw/01.tar.gz -C ../data/rodero2021/raw/x01
+.venv/bin/python -m cor_pipeline.rodero ../data/rodero2021/raw/x01/01.vtk ../data/out/rodero-01 --case 01   # ~2 min
+```
+
+`rodero.py` reads the tetrahedral VTK (LPS mm), rasterises the element tags at 0.75 mm, takes the closed cavities
+as chamber blood pools (valve planes join the downstream pool), closes the open great-artery stumps on a coarse grid
+to get their lumen, and hands pools + **measured walls for every chamber and great artery** to `asset.py`.
+Case 01 COR-Fit at 0.75 mm: chambers and LV epicardium 95–99.9 %, great-artery stumps 66–84 % (the cut ends).
+No coronaries, fat, venae cavae or pulmonary veins in the source; valves are runtime-generated as before.
+Published to `public/models/template/rodero-01/` and `src/scene/asset-adapters/template/rodero-01.manifest.json`.

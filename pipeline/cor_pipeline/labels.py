@@ -45,4 +45,20 @@ TOTALSEG_V1_FILES = {
     7: "pulmonary_artery",
 }
 
-LABEL_MAPS = {"mmwhs": MMWHS, "totalseg_v1": TOTALSEG_V1}
+# Rodero 2021 four-chamber meshes, rasterised by rodero.py: every chamber and great-artery wall is measured.
+RODERO2021 = {
+    1: Structure("lv_cavity", "lv", "cavity"),
+    2: Structure("lv_myocardium", "lv", "wall"),
+    3: Structure("rv_cavity", "rv", "cavity"),
+    4: Structure("la_cavity", "la", "cavity"),
+    5: Structure("ra_cavity", "ra", "cavity"),
+    6: Structure("aorta", "aorta", "vessel"),
+    7: Structure("pulmonary_artery", "pulmonary_artery", "vessel"),
+    8: Structure("rv_wall", "rv", "wall"),
+    9: Structure("la_wall", "la", "wall"),
+    10: Structure("ra_wall", "ra", "wall"),
+    11: Structure("aorta_wall", "aorta", "wall"),
+    12: Structure("pulmonary_artery_wall", "pulmonary_artery", "wall"),
+}
+
+LABEL_MAPS = {"mmwhs": MMWHS, "totalseg_v1": TOTALSEG_V1, "rodero2021": RODERO2021}

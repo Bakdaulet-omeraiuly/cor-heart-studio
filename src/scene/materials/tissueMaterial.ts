@@ -106,18 +106,20 @@ export function createTissueMaterial(uniforms: TissueUniforms, opts: { clippingP
     color: 0xffffff,
     roughness: 0.5,
     metalness: 0,
-    clearcoat: 0.32,
-    clearcoatRoughness: 0.38,
-    sheen: 0.45,
-    sheenRoughness: 0.6,
-    sheenColor: new THREE.Color(0.55, 0.12, 0.1),
+    // wet serous surface (visceral pericardium): a thin, sharp coat over a rougher tissue base
+    clearcoat: 0.85,
+    clearcoatRoughness: 0.14,
+    sheen: 0.35,
+    sheenRoughness: 0.55,
+    sheenColor: new THREE.Color(0.6, 0.16, 0.12),
+    envMapIntensity: 1.25,
     side: opts.ghost ? THREE.FrontSide : THREE.DoubleSide,
     clippingPlanes: opts.clippingPlanes,
     transparent: !!opts.ghost,
     opacity: opts.ghost ? 0.22 : 1,
     depthWrite: !opts.ghost,
   });
-  mat.customProgramCacheKey = () => (opts.ghost ? "cor-tissue-ghost-v1" : "cor-tissue-v1");
+  mat.customProgramCacheKey = () => (opts.ghost ? "cor-tissue-ghost-v2" : "cor-tissue-v2");
   mat.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms);
     shader.vertexShader = shader.vertexShader
@@ -165,20 +167,29 @@ export function createTissueMaterial(uniforms: TissueUniforms, opts: { clippingP
         float n1 = fbm3(vRest * 3.1);
         float n2 = vnoise(vRest * 11.0);
         if (uMode < 0.5) {
-          // natural tissue
-          vec3 myo = vec3(0.34, 0.062, 0.052) * (0.82 + 0.34 * n1);
-          // faint circumferential fibre striation
-          myo *= 0.94 + 0.06 * sin(lc.z * 0.9 + lc.x * 6.0 + n2 * 2.0);
-          vec3 endo = vec3(0.50, 0.17, 0.15) * (0.88 + 0.24 * n1);
+          // natural tissue: dark, mottled myocardium seen through a thin translucent epicardium
+          float mottle = fbm3(vRest * 1.3 + 7.0);
+          vec3 myo = mix(vec3(0.20, 0.03, 0.035), vec3(0.32, 0.06, 0.05), mottle) * (0.84 + 0.32 * n1);
+          myo = mix(myo, vec3(0.22, 0.04, 0.07), smoothstep(0.62, 0.85, fbm3(vRest * 0.8 - 3.0)) * 0.45); // bluish congested patches
+          vec3 endo = vec3(0.46, 0.13, 0.12) * (0.88 + 0.24 * n1);
           col = inner ? endo : myo;
-          vec3 artery = vec3(0.74, 0.55, 0.50) * (0.92 + 0.12 * n1);
-          vec3 vein = vec3(0.34, 0.13, 0.21) * (0.9 + 0.15 * n1);
+          // subepicardial venules: thin dark branching lines from ridged noise (outer myocardium only)
+          float rid = 1.0 - abs(2.0 * fbm3(vRest * 2.6 + 11.0) - 1.0);
+          float venule = smoothstep(0.955, 0.99, rid) * smoothstep(0.35, 0.6, fbm3(vRest * 0.9 + 5.0)) * (1.0 - fat) * (inner ? 0.0 : 1.0);
+          col = mix(col, vec3(0.16, 0.035, 0.09), venule * 0.55);
+          // great arteries: pale yellow-white adventitia with fatty flecks; great veins: dark blue-purple
+          vec3 artery = mix(vec3(0.74, 0.58, 0.47), vec3(0.86, 0.72, 0.46), smoothstep(0.5, 0.8, fbm3(vRest * 4.0))) * (0.86 + 0.2 * n1);
+          vec3 vein = vec3(0.30, 0.12, 0.24) * (0.9 + 0.15 * n1);
           if (kind > 0.5 && kind < 2.5) col = mix(col, kind < 1.5 ? artery : vein, smoothstep(0.3, 0.75, vStatic));
-          if (kind > 2.5 && kind < 3.5) col = vec3(0.56, 0.10, 0.08) * (0.9 + 0.2 * n2);
-          if (kind > 3.5) col = vec3(0.24, 0.07, 0.15) * (0.9 + 0.2 * n2);
-          float lob = smoothstep(0.35, 0.75, fbm3(vRest * 5.5));
-          vec3 fatCol = mix(vec3(0.74, 0.55, 0.24), vec3(0.88, 0.72, 0.38), lob);
-          col = mix(col, fatCol, fat * 0.92);
+          if (kind > 2.5 && kind < 3.5) col = vec3(0.74, 0.38, 0.32) * (0.9 + 0.2 * n2); // coronary artery: pale pink-tan wall
+          if (kind > 3.5) col = vec3(0.30, 0.10, 0.22) * (0.9 + 0.2 * n2);            // coronary vein: dark blood seen through a thin wall
+          // epicardial fat: lobulated yellow, brighter at lobule centres, thin edges let the muscle show through
+          float lob = fbm3(vRest * 6.5);
+          vec3 fatCol = mix(vec3(0.78, 0.56, 0.20), vec3(0.95, 0.80, 0.42), smoothstep(0.3, 0.8, lob));
+          col = mix(col, fatCol, smoothstep(0.05, 0.6, fat) * 0.95);
+          // crevice darkening where fat meets muscle and inside the cavities (cheap ambient occlusion)
+          col *= 1.0 - 0.28 * smoothstep(0.02, 0.25, fat) * (1.0 - smoothstep(0.25, 0.7, fat));
+          if (inner) col *= 0.85;
         } else {
           col = regionColor(region) * (0.85 + 0.15 * n1);
           if (inner) col *= 0.82;
@@ -217,9 +228,9 @@ export function createTissueMaterial(uniforms: TissueUniforms, opts: { clippingP
       `)
       .replace("#include <roughnessmap_fragment>", /* glsl */ `
         float roughnessFactor = roughness;
-        roughnessFactor = mix(0.46, 0.34, step(0.5, depth));
-        roughnessFactor = mix(roughnessFactor, 0.62, fat);
-        roughnessFactor += 0.08 * (n1 - 0.5);
+        roughnessFactor = mix(0.5, 0.36, step(0.5, depth));
+        roughnessFactor = mix(roughnessFactor, 0.32, fat);
+        roughnessFactor += 0.1 * (n1 - 0.5);
         if (!gl_FrontFacing) roughnessFactor = 0.9;
       `)
       .replace("#include <normal_fragment_maps>", /* glsl */ `
@@ -233,13 +244,33 @@ export function createTissueMaterial(uniforms: TissueUniforms, opts: { clippingP
           vec3 gv = (viewMatrix * vec4(g, 0.0)).xyz;
           float amp = gl_FrontFacing ? (inner ? 0.35 : 0.55) : 0.0;
           normal = normalize(normal - amp * (gv - dot(gv, normal) * normal));
+          // fat lobules: coarser rounded relief
+          vec3 qf = vRest * 6.5;
+          float f0 = fbm3(qf);
+          vec3 gf = vec3(fbm3(qf + vec3(0.12, 0, 0)) - f0, fbm3(qf + vec3(0, 0.12, 0)) - f0, fbm3(qf + vec3(0, 0, 0.12)) - f0) / 0.12;
+          vec3 gfv = (viewMatrix * vec4(gf, 0.0)).xyz;
+          float fa = gl_FrontFacing && uMode < 0.5 ? 0.09 * smoothstep(0.1, 0.6, vTissue.y) : 0.0;
+          normal = normalize(normal - fa * (gfv - dot(gfv, normal) * normal));
         }
+      `)
+      .replace("#include <lights_physical_fragment>", /* glsl */ `
+        #include <lights_physical_fragment>
+        #ifdef USE_CLEARCOAT
+          // thin vessels are mostly seen at grazing angles, where a strong coat hides the wall colour
+          material.clearcoat *= kind > 2.5 ? 0.35 : (fat > 0.3 ? 0.8 : 1.0);
+          material.clearcoatRoughness = clamp(material.clearcoatRoughness + 0.12 * (n2 - 0.5), 0.06, 0.4);
+        #endif
       `)
       .replace("#include <emissivemap_fragment>", /* glsl */ `
         #include <emissivemap_fragment>
         if (!gl_FrontFacing) totalEmissiveRadiance += diffuseColor.rgb * 0.55;
         // warm wrap term approximating light bleeding through thin tissue
         totalEmissiveRadiance += diffuseColor.rgb * vec3(0.10, 0.025, 0.02) * (1.0 - fat) * (uMode < 0.5 ? 1.0 : 0.0);
+        // forward scattering at grazing angles: thin tissue edges glow red, fat edges warm yellow
+        if (gl_FrontFacing && uMode < 0.5) {
+          float rim = pow(1.0 - clamp(dot(normal, normalize(vViewPosition)), 0.0, 1.0), 3.0);
+          totalEmissiveRadiance += mix(vec3(0.20, 0.025, 0.02), vec3(0.22, 0.14, 0.04), fat) * rim * 0.6;
+        }
       `);
   };
   return mat;
