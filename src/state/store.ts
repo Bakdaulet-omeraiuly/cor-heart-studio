@@ -2,7 +2,8 @@
 // Session-only application state. Patient data never touches URLs, analytics, console or persistent storage.
 import { create } from "zustand";
 import type { StructureId } from "@/domain/mapping/types";
-import type { PatientEntry } from "@/lib/patients";
+import { entryFromNormalized, type PatientEntry } from "@/lib/patients";
+import { getDefaultTemplate, setDefaultTemplate, type TemplateId } from "@/scene/asset-adapters/registry";
 
 export type DisplayMode = "natural" | "clinical";
 export type CutAxis = "coronal" | "sagittal" | "short_axis" | "four_chamber";
@@ -58,7 +59,10 @@ export interface AppState {
   theme: "dark" | "light";
   dialog: null | { kind: "import" } | { kind: "editor"; key: string | null };
   sharedScale: boolean;
+  /** Anatomy template for records without their own mesh. */
+  template: TemplateId;
 
+  setTemplate: (id: TemplateId) => void;
   upsertEntries: (entries: PatientEntry[]) => void;
   removeEntry: (key: string) => void;
   select: (key: string | null) => void;
@@ -98,7 +102,17 @@ export const useApp = create<AppState>((set, get) => ({
   theme: "dark",
   dialog: null,
   sharedScale: false,
+  template: getDefaultTemplate(),
 
+  setTemplate: (id) => {
+    setDefaultTemplate(id);
+    // records drawn on a template are re-mapped onto the new one (their own CT meshes are kept)
+    set((s) => ({
+      template: id,
+      entries: Object.fromEntries(Object.entries(s.entries).map(([k, e]) => [k, entryFromNormalized(e.patient, e.origin, e.addedAt)])),
+      selectedStructure: null, selectedSegment: null,
+    }));
+  },
   upsertEntries: (list) => set((s) => {
     const entries = { ...s.entries };
     const order = [...s.order];

@@ -52,10 +52,11 @@ def _unit(v):
 
 
 def structure_masks(labels: np.ndarray, source: str) -> dict[str, np.ndarray]:
-    """Boolean masks keyed by role: lv_cavity, lv_myocardium, rv, la, ra, aorta, pulmonary_artery."""
+    """Boolean masks keyed by role: lv_cavity, lv_myocardium, rv, la, ra, aorta, pulmonary_artery (+ <region>_wall when measured)."""
     masks = {}
     for value, structure in LABEL_MAPS[source].items():
-        role = structure.key if structure.region == "lv" else structure.region
+        # LV keeps cavity / myocardium keys; other regions: blood pool under the region name, measured wall as <region>_wall
+        role = structure.key if structure.region == "lv" else (f"{structure.region}_wall" if structure.kind == "wall" else structure.region)
         masks[role] = masks.get(role, False) | (labels == value)
     return masks
 
@@ -115,9 +116,11 @@ def build_fields(masks: dict[str, np.ndarray], grid: FineGrid) -> dict[str, np.n
     f["lv_outer"] = np.minimum(grid.sdf(lv_solid), f["lv_cavity"] - LV_MIN_WALL_MM)
     for role in ("rv", "la", "ra", "aorta", "pulmonary_artery"):
         f[role] = grid.sdf(fine[role])
-        # Fixed-thickness wall, but only where this blood pool is nearer than the LV epicardium
-        # (Voronoi split): the synthetic wall can never cover the imaged LV outer surface.
-        f[f"{role}_outer"] = np.maximum(f[role] - WALL_MM[role], f[role] - f["lv_outer"])
+        # Measured wall when the source has one (Rodero meshes); otherwise a fixed-thickness wall. Either way only
+        # where this blood pool is nearer than the LV epicardium (Voronoi split), so it never covers the LV outer surface.
+        wall = f"{role}_wall"
+        own = grid.sdf(fine[role] | fine[wall]) if wall in fine else f[role] - WALL_MM[role]
+        f[f"{role}_outer"] = np.maximum(own, f[role] - f["lv_outer"])
     f["outer"] = np.minimum.reduce([f["lv_outer"]] + [f[f"{r}_outer"] for r in WALL_MM])
     f["cavity"] = np.minimum.reduce([f["lv_cavity"]] + [f[r] for r in WALL_MM])
     f["solid"] = np.maximum(f["outer"], -f["cavity"])
@@ -434,7 +437,15 @@ def heart_fidelity(mesh: trimesh.Trimesh, fields, grid: "FineGrid", masks, affin
     others = np.logical_or.reduce([masks[k] for k in pools[1:]])
     m = surface_metrics(mesh, np.flatnonzero(~endo & (outer_id == 0)), boundary_points(lv, affine, exclude=others), tol)
     rows.append({"key": "lv_epicardium", "name": "LV epicardium (myocardium outer)", "source": "CT label boundary", **(m or {"nsdPercent": None})})
-    rows.append({"key": "other_walls", "name": "RV, atrial and vessel outer walls", "source": "fixed thickness, not from imaging", "nsdPercent": None})
+    if all(f"{k}_wall" in masks for k in pools[1:]):
+        # measured walls (Rodero meshes): each outer wall against the boundary of its own pool + wall label
+        for i, (key, name) in enumerate(FIDELITY_POOLS[1:], start=1):
+            own = masks[key] | masks[f"{key}_wall"]
+            rest = np.logical_or.reduce([masks["lv_cavity"] | masks["lv_myocardium"]] + [masks[k] | masks[f"{k}_wall"] for k in pools[1:] if k != key])
+            m = surface_metrics(mesh, np.flatnonzero(~endo & (outer_id == i)), boundary_points(own, affine, exclude=rest), tol)
+            rows.append({"key": f"{key}_outer", "name": f"{name} outer wall", "source": "source mesh wall", **(m or {"nsdPercent": None})})
+    else:
+        rows.append({"key": "other_walls", "name": "RV, atrial and vessel outer walls", "source": "fixed thickness, not from imaging", "nsdPercent": None})
     return {"toleranceMm": round(tol, 2), "structures": rows, "overall": summarise(rows, round(tol, 2))}
 
 
@@ -550,9 +561,11 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
         },
     }
 
+    measured_walls = all(f"{r}_wall" in masks for r in WALL_MM)
     limitations = [
         "Shape from a CT segmentation, not reviewed by a clinician",
         "Single phase, cardiac phase unknown: motion is the template's illustrative motion",
+        "All chamber and great-artery walls come from the source mesh" if measured_walls else
         f"Only the LV wall is from imaging; RV ({WALL_MM['rv']} mm), atrial ({WALL_MM['la']} mm) and vessel walls are a fixed thickness",
         "No coronary arteries, veins, venae cavae or pulmonary veins in the labels; their label anchors are placed on the atria",
         "Valves are generated at runtime at the label-derived annulus; leaflets are illustrative",
@@ -588,7 +601,7 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
             "regions": ["lv", "rv", "la", "ra", "aorta", "pulmonary_artery", "vena_cava", "pulmonary_veins", "coronary_vessels"],
         },
         "structureToMesh": {
-            "myocardium": {"mesh": "heart_tissue", "note": "LV wall from imaging; other walls fixed thickness"},
+            "myocardium": {"mesh": "heart_tissue", "note": "all walls from the source mesh" if measured_walls else "LV wall from imaging; other walls fixed thickness"},
             **{k: {"mesh": "heart_tissue", "region": v} for k, v in REGION.items()},
             **{k: {"mesh": None, "region": None, "absent": True, "note": "not in the segmentation labels"}
                for k in ("vena_cava", "pulmonary_veins", "coronary_vessels")},
@@ -599,7 +612,7 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
             "method": "Same vertex-shader handles as the procedural asset, on chamber frames measured from the segmentation",
             "lv": {k: _r(lv[k]) for k in ("base", "axis", "septalDir", "anteriorDir", "cavityBaseAlong", "cavityApexAlong",
                                           "epiApexAlong", "meanCavityRadius", "meanWallThickness")},
-            "rv": {"center": _r(rv_c), "axis": _r(lv["axis"]), "septalDir": _r(rv_sep), "wall": WALL_MM["rv"] / 10},
+            "rv": {"center": _r(rv_c), "axis": _r(lv["axis"]), "septalDir": _r(rv_sep), "wall": WALL_MM["rv"] / 10},  # handle radius, not a measurement
             "la": {"center": _r(la_c)},
             "ra": {"center": _r(ra_c)},
             "segmentConvention": "AHA 17-segment; angle measured around the LV long axis from the septal direction toward anterior",
