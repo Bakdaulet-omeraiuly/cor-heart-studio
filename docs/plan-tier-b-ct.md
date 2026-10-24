@@ -1,6 +1,10 @@
 # Next phase: patient-specific heart from CT (Tier B) — handoff plan
 
-Status 2026-10-24: **decided, not started.** Read this first in a new session.
+Status 2026-10-24: **in progress.** Working data now: **TotalSegmentator v1 dataset** (Zenodo 6802614,
+CC BY 4.0, per-chamber labels, fetched per case without registration). MM-WHS CT stays the planned
+higher-quality source once its access/terms are sorted. Step 2 + 4 (meshes, volumes, QA) work on 5 real
+cardiac CTs (s0270 s0335 s0338 s0356 s0368) → `data/out/<case>/`. Next: step 3 (attribute contract).
+Read this first in a new session.
 
 ## Decisions (made with the user)
 
