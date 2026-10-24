@@ -2,15 +2,15 @@
 
 /* Design tokens. Dark is the default; light is opt-in via [data-theme="light"]. */
 :root {
-  --bg: #0b0d10;
-  --panel: #12151a;
-  --panel-2: #181c22;
-  --panel-3: #20252d;
-  --border: #262c35;
-  --border-strong: #353d48;
+  --bg: #08090b;
+  --panel: #0e1013;
+  --panel-2: #14171b;
+  --panel-3: #1b1f24;
+  --border: #22262c;
+  --border-strong: #30353d;
   --text: #e8eaed;
-  --muted: #9aa3ae;
-  --faint: #6b7480;
+  --muted: #a2aab5;
+  --faint: #848e9a;
   --accent: #e8836b;
   --accent-ink: #1a0d09;
   --focus: #7cb4ff;
@@ -34,8 +34,8 @@
   --border: #dde1e7;
   --border-strong: #c7cdd6;
   --text: #15191f;
-  --muted: #535c68;
-  --faint: #7a838f;
+  --muted: #4f5864;
+  --faint: #626b77;
   --accent: #c4553c;
   --accent-ink: #ffffff;
   --focus: #1f6fe0;
@@ -84,6 +84,8 @@ body {
 
 /* scrollbars */
 .scroll-thin { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
 
 /* structure-anchored labels projected from 3D anchors */
 .structure-label {

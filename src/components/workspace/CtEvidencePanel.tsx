@@ -2,7 +2,7 @@
 // Right-hand evidence panel for Tier B hearts: the source CT in three planes with the segmentation the
 // 3D shape was built from. Same slice views as the brain module.
 import { Loader2 } from "lucide-react";
-import { Segmented } from "../ui/primitives";
+import { PanelHeader, Segmented } from "../ui/primitives";
 import { SliceView } from "@/imaging/SliceView";
 import type { SliceVolume } from "@/imaging/types";
 import { useCtSlices, useCtVolume } from "@/scene/ctSlices";
@@ -30,14 +30,10 @@ export function CtEvidencePanel({ spec }: { spec: HeartAssetSpec }) {
   const active = p && (Object.keys(p) as (keyof typeof p)[]).find((k) => p[k].windowCenter === s.windowCenter && p[k].windowWidth === s.windowWidth);
   return (
     <section className="hidden w-[min(34%,460px)] min-w-[300px] shrink-0 flex-col border-l border-line bg-black md:flex" aria-label="Source CT with segmentation" data-testid="ct-evidence">
-      <div className="flex h-9 shrink-0 items-center gap-2 border-b border-line bg-panel px-3">
-        <h2 className="whitespace-nowrap text-[11px] font-medium uppercase tracking-wider text-muted" title={im.modality}>Source CT</h2>
-        <span className="hidden min-w-0 truncate text-[11px] text-faint 2xl:inline">{im.modality}</span>
-        <div className="ml-auto">
-          <Segmented<"fill" | "outline" | "off"> label="Segmentation overlay" value={s.overlay} onChange={(v) => s.set({ overlay: v })}
-            options={[{ value: "fill", label: "Fill" }, { value: "outline", label: "Outline" }, { value: "off", label: "Off" }]} />
-        </div>
-      </div>
+      <PanelHeader title="Source CT" aside={
+        <Segmented<"fill" | "outline" | "off"> label="Segmentation overlay" value={s.overlay} onChange={(v) => s.set({ overlay: v })}
+          options={[{ value: "fill", label: "Fill" }, { value: "outline", label: "Outline" }, { value: "off", label: "Off" }]} />
+      } />
       {!vol ? (
         <div className="flex flex-1 items-center justify-center text-[12px] text-muted" role={error ? "alert" : "status"}>
           {error ? `CT failed to load: ${error}` : <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Loading CT…</span>}

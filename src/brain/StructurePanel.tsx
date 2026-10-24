@@ -2,7 +2,7 @@
 // Structure tree: every labelled structure with its measured volume and how it was labelled.
 import { useMemo, useState } from "react";
 import { ChevronRight, Eye, EyeOff, Search } from "lucide-react";
-import { cx } from "@/components/ui/primitives";
+import { PanelHeader, cx } from "@/components/ui/primitives";
 import { useBrain } from "./brainStore";
 import { flatIndex, type Vec3 } from "@/imaging/sliceGeometry";
 import type { BrainData } from "./useBrainData";
@@ -51,7 +51,7 @@ export function StructurePanel({ data }: { data: BrainData }) {
 
   return (
     <aside className="flex h-full min-h-0 flex-col" aria-label="Brain structures">
-      <div className="flex h-9 shrink-0 items-center border-b border-line px-3 text-[11px] font-medium uppercase tracking-wider text-muted">Structures <span className="num ml-auto font-normal normal-case tracking-normal text-faint">{structures.length}</span></div>
+      <PanelHeader title="Structures" count={structures.length} />
       <label className="flex items-center gap-2 border-b border-line px-3 py-2">
         <Search className="h-3.5 w-3.5 text-faint" aria-hidden />
         <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Find structure" aria-label="Find structure" className="w-full bg-transparent text-[12px] outline-none placeholder:text-faint" />

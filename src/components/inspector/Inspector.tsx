@@ -32,11 +32,11 @@ export function Inspector() {
   return (
     <aside aria-label="Inspector" className="flex h-full min-h-0 flex-col">
       <Header entry={entry} />
-      <div role="tablist" aria-label="Inspector sections" className="flex gap-1 border-b border-line px-3">
+      <div role="tablist" aria-label="Inspector sections" className="no-scrollbar flex gap-1 overflow-x-auto border-b border-line px-3">
         {TABS.map((t) => (
           <button key={t.id} role="tab" id={`tab-${t.id}`} aria-selected={s.inspectorTab === t.id} aria-controls={`panel-${t.id}`}
             onClick={() => s.set({ inspectorTab: t.id })}
-            className={cx("-mb-px border-b-2 px-2 py-2 text-[12px] font-medium transition-colors", s.inspectorTab === t.id ? "border-accent text-ink" : "border-transparent text-muted hover:text-ink")}>
+            className={cx("-mb-px whitespace-nowrap border-b-2 px-2 py-2 text-[12px] font-medium transition-colors", s.inspectorTab === t.id ? "border-accent text-ink" : "border-transparent text-muted hover:text-ink")}>
             {t.label}{t.id === "changes" && <span className="num ml-1 text-faint">{entry.visual.changes.length}</span>}
             {t.id === "warnings" && warnCount > 0 && <span className="num ml-1 text-warn">{warnCount}</span>}
           </button>
@@ -60,8 +60,8 @@ function Header({ entry }: { entry: PatientEntry }) {
     <div className="border-b border-line p-3">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <h2 className="truncate text-[15px] font-semibold">{patientTitle(p)}</h2>
-          <p className="num text-[11px] text-faint">patientId {p.patientId} · studyId {p.studyId}{p.studyDate ? ` · ${p.studyDate}` : ""}</p>
+          <h2 className="truncate text-[13px] font-semibold">{patientTitle(p)}</h2>
+          <p className="num truncate text-[11px] text-faint" title={`patientId ${p.patientId} · studyId ${p.studyId}`}>{p.patientId} · {p.studyId}{p.studyDate ? ` · ${p.studyDate}` : ""}</p>
         </div>
         <IconButton label="Download normalized JSON" onClick={() => download(`${p.patientId}_${p.studyId}.normalized.json`, JSON.stringify({ original: p.original, normalized: { observations: p.observations, derived: p.derived, valveFindings: p.valveFindings, wallMotion: p.wallMotion, wallThickness: p.wallThickness, issues: p.issues }, visual: entry.visual }, null, 2))}>
           <Download className="h-4 w-4" />
@@ -208,7 +208,7 @@ function ContextLists({ entry }: { entry: PatientEntry }) {
         </section>
       ) : null}
       {list("Doppler", r.doppler?.map((d) => `${d.measurement}: ${fmt(d.value)} ${d.unit ?? ""}${d.sampleLocation ? ` @ ${d.sampleLocation}` : ""}${d.referenceDirection ? ` (${d.referenceDirection})` : ""}`))}
-      {list("CT / MRI findings", r.imaging?.findings?.map((f) => `${f.modality}: ${f.finding}${f.segment ? ` (segment ${f.segment})` : f.location ? ` (${f.location})` : ""}`))}
+      {list("CT / MRI findings", r.imaging?.findings?.map((f) => `${f.modality}: ${f.finding}${f.value != null ? ` — ${f.value}${f.unit ? ` ${f.unit}` : ""}` : ""}${f.segment ? ` (segment ${f.segment})` : f.location ? ` (${f.location})` : ""}`))}
       {list("Imaging attachments (reference only — not reconstructed)", r.imaging?.assets?.map((a) => `${a.kind}: ${a.reference}${a.format ? ` · ${a.format}` : ""}`))}
       {list("Additional investigations", r.additionalInvestigations?.map((x) => `${x.type.replace(/_/g, " ")}: ${x.summary}`))}
       {r.clinicalConclusion && list("Clinical conclusion (attributed, as supplied)", [r.clinicalConclusion.interpretation, r.clinicalConclusion.recommendedFollowUp && `Follow-up (as supplied): ${r.clinicalConclusion.recommendedFollowUp}`, r.clinicalConclusion.author && `— ${r.clinicalConclusion.author}`])}

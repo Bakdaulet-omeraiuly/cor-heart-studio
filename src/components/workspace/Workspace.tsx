@@ -11,6 +11,7 @@ import { PatientEditor } from "../patient/PatientEditor";
 import { CompareWorkspace } from "../comparison/CompareWorkspace";
 import { IconButton } from "../ui/primitives";
 import { HeartViewport } from "./HeartViewport";
+import { ContextBar } from "./ContextBar";
 
 const BrainWorkspace = dynamic(() => import("@/brain/BrainWorkspace").then((m) => m.BrainWorkspace), { ssr: false });
 
@@ -35,13 +36,12 @@ export default function Workspace() {
 
   return (
     <div className="flex h-dvh flex-col">
-      <header className="flex h-12 shrink-0 items-center gap-3 border-b border-line bg-panel px-3">
-        <div className="flex items-center gap-2">
+      <header className="flex h-11 shrink-0 items-center gap-3 border-b border-line bg-panel pl-3 pr-2">
+        <div className="flex shrink-0 items-center gap-2">
           <span className="flex h-6 w-6 items-center justify-center rounded-md bg-accent text-[11px] font-bold text-accent-ink" aria-hidden>C</span>
           <h1 className="text-[14px] font-semibold tracking-tight">COR Studio</h1>
-          <span className="hidden rounded-md border border-line px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-faint xl:inline">Visualization demo · not a medical device</span>
         </div>
-        <nav className="ml-2 flex h-full items-stretch" aria-label="Organ module">
+        <nav className="flex h-full shrink-0 items-stretch" aria-label="Organ module" role="tablist">
           {MODULES.map((m) => (
             <button
               key={m.id}
@@ -54,16 +54,19 @@ export default function Workspace() {
             </button>
           ))}
         </nav>
-        <div className="ml-auto flex items-center gap-2">
-          <span className="hidden items-center gap-1 text-[11px] text-muted md:flex" title="Records are kept in memory for this tab only. Nothing is uploaded, stored in the browser, put in URLs, or logged.">
-            <ShieldCheck className="h-3.5 w-3.5 text-ok" /> Session-only · processed locally
+        <span className="h-5 w-px shrink-0 bg-line" aria-hidden />
+        <div className="min-w-0 flex-1"><ContextBar /></div>
+        <div className="flex shrink-0 items-center gap-3">
+          <span className="hidden text-[10px] uppercase tracking-wider text-faint 2xl:inline">Visualization demo · not a medical device</span>
+          <span className="flex items-center gap-1 text-[11px] text-muted" title="Records are kept in memory for this tab only. Nothing is uploaded, stored in the browser, put in URLs, or logged.">
+            <ShieldCheck className="h-3.5 w-3.5 text-ok" /> <span className="hidden lg:inline">Session-only</span>
           </span>
           <IconButton label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"} onClick={() => set({ theme: theme === "dark" ? "light" : "dark" })}>
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </IconButton>
         </div>
       </header>
-      {organ === "brain" ? <div className="min-h-0 flex-1"><BrainWorkspace /></div> : (
+      {organ === "brain" ? <main className="min-h-0 flex-1" aria-label="Brain workspace"><BrainWorkspace /></main> : (
       <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(420px,68dvh)_auto_auto] overflow-y-auto lg:grid-cols-[260px_minmax(0,1fr)_360px] lg:grid-rows-1 lg:overflow-hidden">
         <div className="order-2 min-h-0 border-line bg-panel lg:order-1 lg:border-r"><PatientLibrary /></div>
         <main className="order-1 min-h-0 lg:order-2" aria-label="3D heart workspace">

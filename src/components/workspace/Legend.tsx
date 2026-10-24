@@ -11,10 +11,11 @@ const REGION_COLORS: [string, string][] = [
 export function Legend() {
   const mode = useApp((s) => s.mode);
   // open by default only where there is room; on smaller screens it starts collapsed
-  const [open, setOpen] = useState(() => typeof window !== "undefined" && window.innerWidth >= 1400 && window.innerHeight >= 860);
+  // collapsed by default: the image comes first (open it from the corner)
+  const [open, setOpen] = useState(false);
   return (
-    <div className="pointer-events-auto max-w-[260px] rounded-xl border border-line bg-panel/90 text-[11px] shadow-[var(--shadow)] backdrop-blur">
-      <button className="flex w-full items-center gap-1.5 px-2.5 py-1.5 font-medium text-muted hover:text-ink" aria-expanded={open} onClick={() => setOpen(!open)}>
+    <div className="pointer-events-auto max-w-[280px] rounded-md bg-black/55 text-[11px] text-white/85">
+      <button className="flex w-full items-center gap-1.5 px-2 py-1 font-medium text-white/70 hover:text-white" aria-expanded={open} onClick={() => setOpen(!open)}>
         <Info className="h-3.5 w-3.5" /> Legend
       </button>
       {open && (
@@ -26,10 +27,10 @@ export function Legend() {
           {mode === "clinical" && (
             <div className="mt-1 grid grid-cols-2 gap-x-2 gap-y-1 border-t border-line pt-1.5">
               {REGION_COLORS.map(([l, c]) => <span key={l} className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm" style={{ background: c }} />{l}</span>)}
-              <span className="col-span-2 text-faint">Overlay hues are diagrammatic, not tissue colour; blue does not mean deoxygenated blood.</span>
+              <span className="col-span-2 text-white/60">Overlay hues are diagrammatic, not tissue colour; blue does not mean deoxygenated blood.</span>
             </div>
           )}
-          <p className="text-faint">Orientation: anterior view shows patient left on screen right (gizmo L/S/A).</p>
+          <p className="text-white/60">Orientation: anterior view shows patient left on screen right (gizmo L/S/A).</p>
         </div>
       )}
     </div>

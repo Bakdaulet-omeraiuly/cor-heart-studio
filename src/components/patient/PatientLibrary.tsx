@@ -4,7 +4,7 @@ import { Columns2, FlaskConical, Pencil, Plus, Search, Trash2, Upload } from "lu
 import { useApp } from "@/state/store";
 import { patientTitle } from "@/lib/patients";
 import { loadSamples } from "@/lib/session";
-import { Button, IconButton, Pill, cx } from "../ui/primitives";
+import { Button, IconButton, PanelHeader, Pill, cx } from "../ui/primitives";
 
 export function PatientLibrary() {
   const s = useApp();
@@ -21,7 +21,11 @@ export function PatientLibrary() {
 
   return (
     <aside aria-label="Patient library" className="flex h-full min-h-0 flex-col">
-      <div className="flex items-center gap-1.5 border-b border-line p-3">
+      <PanelHeader title="Patients" count={s.order.length} aside={<>
+        <IconButton label="Import JSON / CSV" onClick={() => s.set({ dialog: { kind: "import" } })}><Upload className="h-4 w-4" /></IconButton>
+        <IconButton label="New patient record" onClick={() => s.set({ dialog: { kind: "editor", key: null } })}><Plus className="h-4 w-4" /></IconButton>
+      </>} className="pr-1.5 [&>div]:gap-0.5" />
+      <div className="flex items-center gap-1.5 border-b border-line px-3 py-2">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-faint" />
           <input
@@ -32,8 +36,6 @@ export function PatientLibrary() {
             className="h-8 w-full rounded-lg border border-line bg-panel-2 pl-7 pr-2 text-[13px] placeholder:text-faint"
           />
         </div>
-        <IconButton label="Import JSON / CSV" onClick={() => s.set({ dialog: { kind: "import" } })}><Upload className="h-4 w-4" /></IconButton>
-        <IconButton label="New patient record" onClick={() => s.set({ dialog: { kind: "editor", key: null } })}><Plus className="h-4 w-4" /></IconButton>
       </div>
       {compareMode && (
         <p className="border-b border-line px-3 py-2 text-[12px] text-muted">Select 2–4 records to compare <span className="num">({s.compareKeys.length}/4)</span></p>

@@ -111,8 +111,9 @@ export function SceneToolbar({ onFallback, tierName, lod }: { onFallback: () => 
   const setHidden = (id: StructureId, v: boolean) => s.set({ hidden: { ...s.hidden, [id]: v } });
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex flex-wrap items-start justify-between gap-2 p-3">
-      <div className="pointer-events-auto flex flex-wrap items-center gap-2 rounded-xl border border-line bg-panel/90 p-1.5 shadow-[var(--shadow)] backdrop-blur">
+    <div className="no-scrollbar relative z-20 flex h-10 shrink-0 items-center justify-between gap-x-2 overflow-x-auto border-b border-line bg-panel px-2">
+      <div className="flex shrink-0 items-center gap-1.5">
+        <h2 className="mr-1 pl-1 text-[11px] font-medium uppercase tracking-wider text-muted">3D model</h2>
         <label className="sr-only" htmlFor="view-preset">Camera preset</label>
         <select
           id="view-preset"
@@ -172,7 +173,7 @@ export function SceneToolbar({ onFallback, tierName, lod }: { onFallback: () => 
           </div>
         </Popover>
       </div>
-      <div className="pointer-events-auto flex items-center gap-1 rounded-xl border border-line bg-panel/90 p-1.5 shadow-[var(--shadow)] backdrop-blur">
+      <div className="flex shrink-0 items-center gap-1">
         <IconButton label="Save snapshot (PNG)" onClick={() => { const url = snapshotPng(); if (url) fetch(url).then((r) => r.blob()).then((b) => download(`cor-snapshot-${s.selectedKey?.replace(/[^a-z0-9-]/gi, "_")}.png`, b)); }}><Camera className="h-4 w-4" /></IconButton>
         <Popover align="right" label="Quality and fallback" button={(open) => <IconButton label="Quality" pressed={open}><MonitorSmartphone className="h-4 w-4" /></IconButton>}>
           <p className="mb-2 text-[12px] text-muted">Tier <b className="text-ink">{tierName}</b> · mesh LOD <b className="text-ink">{lod}</b></p>

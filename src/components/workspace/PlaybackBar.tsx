@@ -46,7 +46,7 @@ export function PlaybackBar() {
   const togglePlay = () => s.set(s.playing ? { playing: false, scrubPhase: live } : { playing: true });
   const seek = (p: number) => { getClock("main").phase = p; s.set({ playing: false, scrubPhase: p }); };
   return (
-    <div className="pointer-events-auto flex w-full flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-line bg-panel/92 px-3 py-2 shadow-[var(--shadow)] backdrop-blur">
+    <div className="flex w-full shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-t border-line bg-panel px-3 py-2">
       <IconButton label={s.playing ? "Pause (Space)" : "Play (Space)"} onClick={togglePlay} className="h-9 w-9 bg-panel-3 text-ink">
         {s.playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
       </IconButton>

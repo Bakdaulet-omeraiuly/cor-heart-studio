@@ -116,6 +116,17 @@ export function Switch({ checked, onChange, label, hint }: { checked: boolean; o
   );
 }
 
+/** Docked panel header: micro label on the left, controls on the right (see docs/design-system.md). */
+export function PanelHeader({ title, aside, count, className }: { title: string; aside?: ReactNode; count?: number; className?: string }) {
+  return (
+    <div className={cx("flex h-9 shrink-0 items-center gap-2 border-b border-line bg-panel px-3", className)}>
+      <h2 className="whitespace-nowrap text-[11px] font-medium uppercase tracking-wider text-muted">{title}</h2>
+      {count !== undefined && <span className="num text-[11px] text-faint">{count}</span>}
+      {aside && <div className="ml-auto flex min-w-0 items-center gap-3">{aside}</div>}
+    </div>
+  );
+}
+
 export function SectionTitle({ children, aside }: { children: ReactNode; aside?: ReactNode }) {
   return (
     <div className="mb-2 mt-4 flex items-center justify-between first:mt-0">

@@ -2,7 +2,7 @@
 // Brain module: structure list | 3D model + measurements | MRI evidence (axial, coronal, sagittal).
 import dynamic from "next/dynamic";
 import { Database, Loader2 } from "lucide-react";
-import { Segmented, Switch } from "@/components/ui/primitives";
+import { PanelHeader, Segmented, Switch } from "@/components/ui/primitives";
 import { useWebgl } from "@/components/workspace/HeartViewport";
 import { useBrain } from "./brainStore";
 import { SliceView } from "@/imaging/SliceView";
@@ -46,14 +46,6 @@ export function BrainWorkspace() {
   );
 }
 
-function PanelHeader({ title, aside }: { title: string; aside?: React.ReactNode }) {
-  return (
-    <div className="flex h-9 shrink-0 items-center gap-2 border-b border-line bg-panel px-3">
-      <h2 className="text-[11px] font-medium uppercase tracking-wider text-muted">{title}</h2>
-      <div className="ml-auto flex items-center gap-3">{aside}</div>
-    </div>
-  );
-}
 
 function ModelControls() {
   const s = useBrain();
