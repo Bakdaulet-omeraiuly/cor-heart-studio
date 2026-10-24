@@ -16,7 +16,7 @@ export const DISCLAIMER =
 
 function hasHeartData(c: Ctx): boolean {
   const r = c.p.record;
-  return Object.keys(c.p.observations).some((k) => !k.startsWith("demographics.")) || !!r.valveFindings?.length || !!r.coronaryFindings?.length ||
+  return Object.values(c.p.observations).some((o) => o.category !== "demographics" && o.category !== "brain_imaging") || !!r.valveFindings?.length || !!r.coronaryFindings?.length ||
     !!r.ecg || !!r.echo || !!r.doppler?.length;
 }
 

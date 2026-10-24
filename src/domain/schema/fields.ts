@@ -8,7 +8,8 @@ export type FieldCategory =
   | "ecg"
   | "echo_dimensions"
   | "echo_function"
-  | "hemodynamics";
+  | "hemodynamics"
+  | "brain_imaging";
 
 export type RenderingEligibility = "drives_timing" | "drives_geometry" | "display_only";
 export type ContextKey = "phase" | "method" | "axis" | "location";
@@ -40,6 +41,7 @@ const mmUnits = { mm: same, cm: { factor: 10 } };
 const mlUnits = { ml: same, "cm3": same, "cm^3": same, l: { factor: 1000 } };
 const pctUnits = { "%": same, percent: same };
 const msUnits = { ms: same, s: { factor: 1000 } };
+const ratePerYearUnits = { "%/year": same, "%/y": same, "%/yr": same, "%/a": same, "%peryear": same, "percent/year": same };
 
 export const FIELDS: FieldDef[] = [
   // ---- vital signs
@@ -135,6 +137,14 @@ export const FIELDS: FieldDef[] = [
   { path: "observations.pasp", label: "Pulmonary artery systolic pressure (estimated)", short: "PASP", category: "hemodynamics",
     canonicalUnit: "mmHg", units: { mmhg: same }, impossible: { min: 0, max: 250 }, csvColumn: "pasp_mmhg", rendering: "display_only",
     description: "Displayed with method and location." },
+
+  // ---- brain MRI (serial volumetry; signed annual change, negative = loss)
+  { path: "observations.hippocampalVolumeChangePerYear", label: "Hippocampal volume change per year", short: "Hippo Δ/y", category: "brain_imaging",
+    canonicalUnit: "%/year", units: ratePerYearUnits, impossible: { min: -100, max: 200 }, rendering: "display_only",
+    description: "Annualised change between two MRI scans (negative = atrophy). Compared with cohort ranges by the diagnosis engine; never an individual forecast." },
+  { path: "observations.ventricularVolumeChangePerYear", label: "Ventricular volume change per year", short: "Vent Δ/y", category: "brain_imaging",
+    canonicalUnit: "%/year", units: ratePerYearUnits, impossible: { min: -100, max: 200 }, rendering: "display_only",
+    description: "Annualised lateral-ventricle volume change between two scans (positive = expansion). Compared with cohort means by the diagnosis engine." },
 ];
 
 export const FIELD_BY_PATH = new Map(FIELDS.map((f) => [f.path, f]));
