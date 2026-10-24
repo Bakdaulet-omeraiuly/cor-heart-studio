@@ -40,14 +40,14 @@
   "files": {
     "high": {
       "url": "/models/template/rodero-01/heart-high.glb",
-      "bytes": 8388248,
+      "bytes": 8597100,
       "triangles": [
         300000
       ]
     },
     "low": {
       "url": "/models/template/rodero-01/heart-low.glb",
-      "bytes": 3348128,
+      "bytes": 3556980,
       "triangles": [
         119996
       ]
@@ -117,10 +117,9 @@
       "note": "not in the segmentation labels"
     },
     "coronary_vessels": {
-      "mesh": null,
-      "region": null,
-      "absent": true,
-      "note": "not in the segmentation labels"
+      "mesh": "coronary_arteries",
+      "region": 8,
+      "note": "routed along the grooves (right-dominant pattern), not from imaging"
     },
     "mitral_valve": {
       "runtime": "valve generator"
@@ -296,14 +295,14 @@
   },
   "coronaryOstia": {
     "left": [
-      -0.3222,
-      0.8535,
-      -0.3025
+      -0.5398,
+      3.0114,
+      -0.9998
     ],
     "right": [
-      -0.6134,
-      1.5126,
-      0.0815
+      -1.2413,
+      1.9397,
+      -0.1352
     ]
   },
   "anchors": {
@@ -383,6 +382,49 @@
       0.9268
     ]
   },
+  "coronary": {
+    "pattern": "right-dominant; LM, LAD, LCx, RCA, PDA routed along the AV and interventricular grooves (not from imaging)",
+    "vessels": {
+      "1": {
+        "name": "LM",
+        "proximalDiameterMm": 4.5,
+        "distalDiameterMm": 4.5,
+        "distalAssumed": false,
+        "lengthMm": 10.0
+      },
+      "2": {
+        "name": "LAD",
+        "proximalDiameterMm": 3.7,
+        "distalDiameterMm": 1.9,
+        "distalAssumed": false,
+        "lengthMm": 168.9
+      },
+      "3": {
+        "name": "LCx",
+        "proximalDiameterMm": 3.4,
+        "distalDiameterMm": 1.8,
+        "distalAssumed": true,
+        "lengthMm": 65.7
+      },
+      "4": {
+        "name": "RCA",
+        "proximalDiameterMm": 3.9,
+        "distalDiameterMm": 2.0,
+        "distalAssumed": true,
+        "lengthMm": 60.6
+      },
+      "5": {
+        "name": "PDA",
+        "proximalDiameterMm": 2.0,
+        "distalDiameterMm": 1.4,
+        "distalAssumed": true,
+        "lengthMm": 73.0
+      }
+    },
+    "diameterSource": "Dodge JT et al. Circulation 1992;86:232-46, doi:10.1161/01.cir.86.1.232",
+    "attribute": "_CORO uint8 vec4: vessel id, position along the vessel (0..255), lumen radius in 0.05 mm, 0",
+    "fat": "epicardial fat attribute set within 3-9 mm of the artery centrelines (illustrative)"
+  },
   "baseline": {
     "note": "Measured from this segmentation (cardiac phase unknown). Not a clinical report.",
     "lvEndDiastolicVolumeMl": 122.0,
@@ -415,10 +457,11 @@
     "Shape from a CT segmentation, not reviewed by a clinician",
     "Single phase, cardiac phase unknown: motion is the template's illustrative motion",
     "All chamber and great-artery walls come from the source mesh",
-    "No coronary arteries, veins, venae cavae or pulmonary veins in the labels; their label anchors are placed on the atria",
+    "No venae cavae or pulmonary veins in the labels; their label anchors are placed on the atria",
     "Valves are generated at runtime at the label-derived annulus; leaflets are illustrative",
     "Papillary muscles and coronary ostia positions are illustrative (placed from the LV frame)",
-    "No epicardial fat in the labels",
+    "Coronary arteries routed along the grooves from a typical right-dominant pattern with published calibres; not this heart's imaging",
+    "Epicardial fat is illustrative (around the artery courses)",
     "Healthy adult template (Rodero 2021 case 01), not this patient's anatomy",
     "Great arteries and vein inlets end as short stumps where the source mesh is cut"
   ],

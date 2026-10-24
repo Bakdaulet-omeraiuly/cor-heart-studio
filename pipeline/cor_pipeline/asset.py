@@ -449,7 +449,7 @@ def heart_fidelity(mesh: trimesh.Trimesh, fields, grid: "FineGrid", masks, affin
     return {"toleranceMm": round(tol, 2), "structures": rows, "overall": summarise(rows, round(tol, 2))}
 
 
-def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None, lods=(("high", 300_000), ("low", 120_000)), ct=None):
+def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None, lods=(("high", 300_000), ("low", 120_000)), ct=None, with_coronaries: bool = False):
     """Returns ({lod: glb bytes}, manifest dict, lv cavity proxy dict, qa list, volumes or None).
 
     With `ct` (the CT on the labels' grid), volumes = (meta, image u8, label-index u8) for the slice views.
@@ -487,6 +487,49 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
     rv_c, la_c, ra_c = centroid("rv"), centroid("la"), centroid("ra")
     rv_sep = _unit((lv["base"] - rv_c) - ((lv["base"] - rv_c) @ lv["axis"]) * lv["axis"])
 
+    ao = valves["aortic_valve"]
+    ostia_app = {
+        "left": ao["center"] + ao["normal"] * 0.8 + _unit(np.cross(ao["normal"], np.cross([1.0, 0, 0], ao["normal"]))) * ao["radius"],
+        "right": ao["center"] + ao["normal"] * 0.8 + _unit(np.cross(ao["normal"], np.cross([0, 0, 1.0], ao["normal"]))) * ao["radius"],
+    }
+    coronary = None
+    if with_coronaries:
+        from scipy.spatial import cKDTree
+        from .coronary import VESSELS, build_vessels, route
+        hi = meshes[lods[0][0]]
+        to_ras_dir = lambda d: _unit(np.asarray(d, dtype=float) @ RAS_TO_APP)
+        to_ras_pt = lambda p: np.asarray(p, dtype=float) @ RAS_TO_APP * 100 + frame.centre_mm
+        samples = {k: grid.sample(fields[k], hi.vertices) for k in ("lv_outer", "rv_outer", "la_outer", "ra_outer", "outer")}
+        apex_app = lv["base"] + lv["axis"] * lv["epiApexAlong"]
+        # ostia from the aortic root itself: flow direction = valve centre -> aortic lumen centroid; the left
+        # ostium sits in the left (posterior) sinus, the right ostium in the right (anterior) sinus, ~1 cm above the annulus
+        ao_c = to_ras_pt(ao["center"])
+        flow = _unit(voxel_points(masks["aorta"], affine).mean(axis=0) - ao_c)
+        lat = lambda d: _unit(np.asarray(d, float) - (np.asarray(d, float) @ flow) * flow)
+        r_mm = ao["radius"] * 10
+        ostia_ras = {"left": ao_c + flow * 10 + lat([-1.0, -0.5, 0]) * r_mm,   # RAS: -x = left, -y = posterior
+                     "right": ao_c + flow * 10 + lat([1.0, 1.0, 0]) * r_mm}      # right and anterior
+        ostia_app = {k: frame.point(p) for k, p in ostia_ras.items()}
+        centrelines, _ = route(hi, samples, {"anterior": to_ras_dir(lv["anteriorDir"]), "axis": to_ras_dir(lv["axis"])},
+                               ostia_ras, to_ras_pt(apex_app))
+        def normals_at(pts):
+            # outward direction = gradient of the epicardial distance field (robust where the mesh normals are not)
+            e = 0.75
+            g = np.stack([grid.sample(fields["outer"], pts + e * np.eye(3)[k]) - grid.sample(fields["outer"], pts - e * np.eye(3)[k]) for k in range(3)], axis=1)
+            return g / np.maximum(np.linalg.norm(g, axis=1, keepdims=True), 1e-6)
+
+        def surface_at(pts):
+            # project onto the epicardium (outer field = 0) so a groove path sits on the surface, not below it
+            for _ in range(3):
+                pts = pts - normals_at(pts) * grid.sample(fields["outer"], pts)[:, None]
+            return pts
+        centrelines = {k: surface_at(c) for k, c in centrelines.items()}
+        pos, nrm, faces, t, r, vid = build_vessels(centrelines, normals_at)
+        line_tree = cKDTree(np.concatenate(list(centrelines.values())))
+        coronary = {"pos": pos, "nrm": nrm, "faces": faces, "t": t, "r": r, "vid": vid, "line_tree": line_tree,
+                    "lengthsMm": {k: round(float(np.linalg.norm(np.diff(c, axis=0), axis=1).sum()), 1) for k, c in centrelines.items()},
+                    "vessels": VESSELS}
+
     glbs, tissue_by_lod, points_by_lod = {}, {}, {}
     from .glb import write_glb
 
@@ -494,12 +537,33 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
         weights, tissue = vertex_attributes(mesh.vertices, fields, grid)
         points = frame.point(mesh.vertices).astype(np.float32)
         normals = (np.asarray(mesh.vertex_normals) @ RAS_TO_APP.T * 10).astype(np.float32)
-        glbs[lod] = write_glb([{
+        parts = [{
             "name": "heart_tissue",
             "attributes": {"POSITION": points, "NORMAL": normals, "_WEIGHTS": weights, "_TISSUE": tissue},
             "indices": mesh.faces,
             "extras": {"structure": "myocardium", "layers": ["outer", "chambers", "vessels"]},
-        }], {"assetId": f"cor-ct-{case_id}", "version": "1.0.0"})
+        }]
+        if coronary is not None:
+            # epicardial fat follows the arteries in their grooves: full within 3 mm of a centreline, gone by 9 mm
+            d = coronary["line_tree"].query(mesh.vertices)[0]
+            epi = tissue[:, 0] < 40
+            fat = np.clip(1 - (d - 3) / 6, 0, 1) * epi
+            tissue[:, 1] = np.round(fat * 255).astype(np.uint8)
+            near = cKDTree(mesh.vertices).query(coronary["pos"])[1]
+            n = len(coronary["pos"])
+            parts.append({
+                "name": "coronary_arteries",
+                "attributes": {
+                    "POSITION": frame.point(coronary["pos"]).astype(np.float32),
+                    "NORMAL": (coronary["nrm"] @ RAS_TO_APP.T * 10).astype(np.float32),
+                    "_WEIGHTS": weights[near],
+                    "_TISSUE": np.tile(np.array([0, 0, 3, 8], np.uint8), (n, 1)),
+                    "_CORO": np.stack([coronary["vid"], np.round(coronary["t"] * 255), np.clip(np.round(coronary["r"] / 0.05), 0, 255), np.zeros(n)], axis=1).astype(np.uint8),
+                },
+                "indices": coronary["faces"],
+                "extras": {"structure": "coronary_vessels", "layers": ["coronary"]},
+            })
+        glbs[lod] = write_glb(parts, {"assetId": f"cor-ct-{case_id}", "version": "1.0.0"})
         tissue_by_lod[lod], points_by_lod[lod] = tissue, points
 
     pts, tis = points_by_lod[lods[0][0]], tissue_by_lod[lods[0][0]]
@@ -567,10 +631,11 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
         "Single phase, cardiac phase unknown: motion is the template's illustrative motion",
         "All chamber and great-artery walls come from the source mesh" if measured_walls else
         f"Only the LV wall is from imaging; RV ({WALL_MM['rv']} mm), atrial ({WALL_MM['la']} mm) and vessel walls are a fixed thickness",
+        "No venae cavae or pulmonary veins in the labels; their label anchors are placed on the atria" if coronary is not None else
         "No coronary arteries, veins, venae cavae or pulmonary veins in the labels; their label anchors are placed on the atria",
         "Valves are generated at runtime at the label-derived annulus; leaflets are illustrative",
         "Papillary muscles and coronary ostia positions are illustrative (placed from the LV frame)",
-        "No epicardial fat in the labels",
+        *(["Coronary arteries routed along the grooves from a typical right-dominant pattern with published calibres; not this heart's imaging", "Epicardial fat is illustrative (around the artery courses)"] if coronary is not None else ["No epicardial fat in the labels"]),
     ] + list((dataset or {}).get("knownLimitations", []))
 
     manifest = {
@@ -604,7 +669,8 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
             "myocardium": {"mesh": "heart_tissue", "note": "all walls from the source mesh" if measured_walls else "LV wall from imaging; other walls fixed thickness"},
             **{k: {"mesh": "heart_tissue", "region": v} for k, v in REGION.items()},
             **{k: {"mesh": None, "region": None, "absent": True, "note": "not in the segmentation labels"}
-               for k in ("vena_cava", "pulmonary_veins", "coronary_vessels")},
+               for k in ("vena_cava", "pulmonary_veins") + (() if coronary is not None else ("coronary_vessels",))},
+            **({"coronary_vessels": {"mesh": "coronary_arteries", "region": 8, "note": "routed along the grooves (right-dominant pattern), not from imaging"}} if coronary is not None else {}),
             "mitral_valve": {"runtime": "valve generator"}, "aortic_valve": {"runtime": "valve generator"},
             "tricuspid_valve": {"runtime": "valve generator"}, "pulmonary_valve": {"runtime": "valve generator"},
         },
@@ -624,11 +690,16 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
             "rvAnterior": {"base": _r(inside(rv_c + lv["axis"] * 1.2 - rv_sep * 1.0, "rv", 3.0)),
                            "tip": _r(inside(rv_c + lv["axis"] * 0.3 - rv_sep * 0.3, "rv", 5.0))},
         },
-        "coronaryOstia": {
-            "left": _r(ao["center"] + ao["normal"] * 0.8 + _unit(np.cross(ao["normal"], np.cross([1.0, 0, 0], ao["normal"]))) * ao["radius"]),
-            "right": _r(ao["center"] + ao["normal"] * 0.8 + _unit(np.cross(ao["normal"], np.cross([0, 0, 1.0], ao["normal"]))) * ao["radius"]),
-        },
+        "coronaryOstia": {k: _r(p) for k, p in ostia_app.items()},
         "anchors": {k: _r(v) for k, v in anchors.items()},
+        **({"coronary": {
+            "pattern": "right-dominant; LM, LAD, LCx, RCA, PDA routed along the AV and interventricular grooves (not from imaging)",
+            "vessels": {str(i): {"name": n, "proximalDiameterMm": d0, "distalDiameterMm": d1, "distalAssumed": a, "lengthMm": coronary["lengthsMm"].get(n)}
+                        for i, (n, d0, d1, a) in coronary["vessels"].items()},
+            "diameterSource": "Dodge JT et al. Circulation 1992;86:232-46, doi:10.1161/01.cir.86.1.232",
+            "attribute": "_CORO uint8 vec4: vessel id, position along the vessel (0..255), lumen radius in 0.05 mm, 0",
+            "fat": "epicardial fat attribute set within 3-9 mm of the artery centrelines (illustrative)",
+        }} if coronary is not None else {}),
         "baseline": {
             "note": "Measured from this segmentation (cardiac phase unknown). Not a clinical report.",
             "lvEndDiastolicVolumeMl": round(ml("lv_cavity"), 1),

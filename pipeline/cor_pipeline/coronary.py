@@ -1,0 +1,177 @@
+"""Coronary arteries and epicardial fat seated on a heart template surface (right-dominant pattern).
+
+The source meshes have no coronaries, so they are routed the way they run in a typical right-dominant heart:
+along the grooves where the chamber surfaces meet (atrioventricular and interventricular sulci). A groove is
+where two chamber "outer" distance fields are equal on the epicardium; arteries follow the cheapest path
+over the surface graph with the edge cost lowered along the groove they belong to.
+
+Lumen diameters (mm, mean ± SD) at the origin, Dodge et al. 1992 (Circulation 86:232, doi:10.1161/01.cir.86.1.232):
+left main 4.5 ± 0.5, proximal LAD 3.7 ± 0.4, distal LAD 1.9 ± 0.4, proximal RCA 3.9 ± 0.6 and proximal LCx
+3.4 ± 0.5 (right-dominant). Distal RCA / LCx / PDA calibres are not in the abstract: tapered to 2.0 / 1.8 mm
+(assumption, marked in the manifest).
+
+Every tube vertex carries `_CORO` = (vessel id, position along the vessel 0..1, lumen radius in 0.05 mm units,
+0) so the renderer can narrow a segment for a reported stenosis.
+"""
+
+from __future__ import annotations
+
+import heapq
+
+import numpy as np
+import trimesh
+
+VESSELS = {  # id: (name, proximal diameter mm, distal diameter mm, distal-is-assumed)
+    1: ("LM", 4.5, 4.5, False),
+    2: ("LAD", 3.7, 1.9, False),
+    3: ("LCx", 3.4, 1.8, True),
+    4: ("RCA", 3.9, 2.0, True),
+    5: ("PDA", 2.0, 1.4, True),
+}
+SEGMENTS = 14  # ring resolution
+
+
+def _graph(mesh: trimesh.Trimesh, cost: np.ndarray):
+    edges = mesh.edges_unique
+    length = mesh.edges_unique_length
+    w = length * 0.5 * (cost[edges[:, 0]] + cost[edges[:, 1]])
+    adj: list[list[tuple[int, float]]] = [[] for _ in range(len(mesh.vertices))]
+    for (a, b), c in zip(edges, w):
+        adj[a].append((b, c))
+        adj[b].append((a, c))
+    return adj
+
+
+def _path(adj, start: int, goal: int) -> list[int]:
+    dist = {start: 0.0}
+    prev: dict[int, int] = {}
+    pq = [(0.0, start)]
+    while pq:
+        d, u = heapq.heappop(pq)
+        if u == goal:
+            break
+        if d > dist.get(u, np.inf):
+            continue
+        for v, c in adj[u]:
+            nd = d + c
+            if nd < dist.get(v, np.inf):
+                dist[v] = nd
+                prev[v] = u
+                heapq.heappush(pq, (nd, v))
+    out = [goal]
+    while out[-1] != start:
+        out.append(prev[out[-1]])
+    return out[::-1]
+
+
+def _smooth(points: np.ndarray, spacing_mm: float = 1.5, passes: int = 6) -> np.ndarray:
+    seg = np.linalg.norm(np.diff(points, axis=0), axis=1)
+    s = np.concatenate([[0], np.cumsum(seg)])
+    n = max(4, int(s[-1] / spacing_mm))
+    t = np.linspace(0, s[-1], n)
+    p = np.stack([np.interp(t, s, points[:, k]) for k in range(3)], axis=1)
+    for _ in range(passes):
+        p[1:-1] = 0.25 * p[:-2] + 0.5 * p[1:-1] + 0.25 * p[2:]
+    return p
+
+
+def _tube(center: np.ndarray, radius: np.ndarray, vessel: int, t0: float, t1: float):
+    """Ring vertices around a centreline: positions, outward normals, along-vessel t, radius."""
+    tang = np.gradient(center, axis=0)
+    tang /= np.linalg.norm(tang, axis=1, keepdims=True)
+    ref = np.array([0.0, 0.0, 1.0])
+    n0 = np.cross(tang[0], ref if abs(tang[0] @ ref) < 0.9 else np.array([1.0, 0, 0]))
+    n0 /= np.linalg.norm(n0)
+    normals = [n0]
+    for i in range(1, len(center)):  # parallel transport, no twisting
+        n = normals[-1] - (normals[-1] @ tang[i]) * tang[i]
+        normals.append(n / np.linalg.norm(n))
+    normals = np.array(normals)
+    binorm = np.cross(tang, normals)
+    ang = np.linspace(0, 2 * np.pi, SEGMENTS, endpoint=False)
+    ring = np.cos(ang)[None, :, None] * normals[:, None, :] + np.sin(ang)[None, :, None] * binorm[:, None, :]
+    pos = center[:, None, :] + ring * radius[:, None, None]
+    m = len(center)
+    faces = []
+    for i in range(m - 1):
+        for j in range(SEGMENTS):
+            a, b = i * SEGMENTS + j, i * SEGMENTS + (j + 1) % SEGMENTS
+            c, d = a + SEGMENTS, b + SEGMENTS
+            faces += [[a, b, c], [b, d, c]]  # counter-clockwise seen from outside
+    t = np.repeat(np.linspace(t0, t1, m), SEGMENTS)
+    r = np.repeat(radius, SEGMENTS)
+    vid = np.full(m * SEGMENTS, vessel)
+    return pos.reshape(-1, 3), ring.reshape(-1, 3), np.array(faces), t, r, vid
+
+
+def route(mesh: trimesh.Trimesh, s: dict[str, np.ndarray], frame_dirs: dict[str, np.ndarray], ostia: dict[str, np.ndarray], apex: np.ndarray):
+    """Vessel centrelines (RAS mm) on the epicardium.
+
+    s: per-vertex samples of the outer fields (lv_outer, rv_outer, la_outer, ra_outer, outer).
+    frame_dirs: 'anterior' and 'axis' (base -> apex) unit vectors in RAS.
+    A groove's cost is continuous: |field A - field B| (mm), so the cheapest path runs along the bottom of the crease.
+    """
+    from scipy.spatial import cKDTree
+
+    v = np.asarray(mesh.vertices)
+    epi = np.abs(s["outer"]) < 0.8
+    vent = np.minimum(s["lv_outer"], s["rv_outer"])
+    atria = np.minimum(s["la_outer"], s["ra_outer"])
+    g_av = np.abs(vent - atria)
+    g_iv = np.abs(s["lv_outer"] - s["rv_outer"]) + np.clip(6 - atria, 0, None)  # away from the atria
+    ant = (v - v.mean(axis=0)) @ frame_dirs["anterior"]
+    along = (v - v.mean(axis=0)) @ frame_dirs["axis"]
+
+    def cost(groove, extra=None):
+        c = np.where(epi, 1.0 + 0.6 * np.minimum(groove, 15.0), 200.0)
+        if extra is not None:
+            c = c + extra
+        return c
+
+    def nearest(p, mask):
+        idx = np.flatnonzero(mask)
+        return int(idx[np.argmin(np.linalg.norm(v[idx] - p, axis=1))])
+
+    paths = {}
+    lm0 = nearest(ostia["left"], epi)
+    rca0 = nearest(ostia["right"], epi)
+    apex_v = nearest(apex, epi)
+    # LM ends where the anterior interventricular groove meets the AV groove, near the left ostium
+    junction = epi & (g_iv < 3) & (g_av < 6) & (ant > 0)
+    lad0 = nearest(v[lm0], junction) if junction.any() else nearest(v[lm0], epi & (g_iv < 3))
+    paths["LM"] = _path(_graph(mesh, cost(np.minimum(g_av, g_iv))), lm0, lad0)
+    paths["LAD"] = _path(_graph(mesh, cost(g_iv, np.where(ant < 0, 8.0, 0.0))), lad0, apex_v)
+    # crux: posterior meeting point of the interventricular and AV grooves, low on the base
+    crux_mask = epi & (g_iv < 3) & (g_av < 6) & (ant < 0)
+    crux = nearest(v[apex_v] * 0 + v[epi].mean(axis=0) - frame_dirs["anterior"] * 40, crux_mask) if crux_mask.any() else nearest(v[apex_v], epi)
+    left_side = s["la_outer"] < s["ra_outer"]
+    # LCx: left AV groove from the LM end round to the obtuse margin (stops short of the crux: right dominance)
+    lcx_mask = epi & (g_av < 3) & left_side & (ant < 0.0 + 1e9)
+    lcx_cand = np.flatnonzero(lcx_mask)
+    lcx_end = int(lcx_cand[np.argmax(-v[lcx_cand, 0] - 0.3 * ant[lcx_cand])]) if len(lcx_cand) else crux
+    paths["LCx"] = _path(_graph(mesh, cost(g_av, np.where(left_side, 0.0, 8.0))), lad0, lcx_end)
+    # RCA: right AV groove from the right ostium round the acute margin to the crux
+    paths["RCA"] = _path(_graph(mesh, cost(g_av, np.where(left_side, 8.0, 0.0))), rca0, crux)
+    # PDA: posterior interventricular groove from the crux toward the apex, about two thirds of the way
+    pda_target = nearest(v[crux] + (v[apex_v] - v[crux]) * 0.7, epi & (g_iv < 3)) if (epi & (g_iv < 3)).any() else apex_v
+    paths["PDA"] = _path(_graph(mesh, cost(g_iv, np.where(ant > 0, 8.0, 0.0))), crux, pda_target)
+    return {k: v[p] for k, p in paths.items()}, {"g_av": g_av, "g_iv": g_iv}
+
+
+def build_vessels(centrelines: dict[str, np.ndarray], normals_at, lift_mm: float = 1.9):
+    """Tube mesh arrays for every vessel. Centrelines are lifted by radius*lift: in a groove the artery rides on the
+    epicardial fat that fills the crease, so its centre sits about a diameter above the muscle surface."""
+    pos, nrm, faces, t, r, vid = [], [], [], [], [], []
+    base = 0
+    name_to_id = {n: i for i, (n, *_ ) in VESSELS.items()}
+    for name, pts in centrelines.items():
+        vessel = name_to_id[name]
+        _, d0, d1, _ = VESSELS[vessel]
+        c = _smooth(pts)
+        u = np.linspace(0, 1, len(c))
+        radius = 0.5 * (d0 + (d1 - d0) * u)
+        c = c + normals_at(c) * (radius * lift_mm)[:, None]
+        p, n, f, tt, rr, ii = _tube(c, radius, vessel, 0.0, 1.0)
+        pos.append(p); nrm.append(n); faces.append(f + base); t.append(tt); r.append(rr); vid.append(ii)
+        base += len(p)
+    return (np.concatenate(pos), np.concatenate(nrm), np.concatenate(faces), np.concatenate(t), np.concatenate(r), np.concatenate(vid))

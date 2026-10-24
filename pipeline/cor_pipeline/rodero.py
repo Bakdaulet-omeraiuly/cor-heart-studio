@@ -220,13 +220,18 @@ def main():
     args = ap.parse_args()
     out = Path(args.out)
     (out / "asset").mkdir(parents=True, exist_ok=True)
-    labels, affine, _ = case_labels(args.vtk)
-    np.savez_compressed(out / "labels.npz", labels=labels, affine=affine)
+    cached = out / "labels.npz"
+    if cached.exists() and cached.stat().st_mtime > Path(args.vtk).stat().st_mtime:
+        z = np.load(cached)
+        labels, affine = z["labels"], z["affine"]
+    else:
+        labels, affine, _ = case_labels(args.vtk)
+        np.savez_compressed(cached, labels=labels, affine=affine)
     dataset = {**DATASET, "knownLimitations": [
         "Healthy adult template (Rodero 2021 case %s), not this patient's anatomy" % args.case,
         "Great arteries and vein inlets end as short stumps where the source mesh is cut",
     ]}
-    glbs, manifest, proxy, qa, _ = build_asset(labels, affine, "rodero2021", f"rodero-{args.case}", dataset)
+    glbs, manifest, proxy, qa, _ = build_asset(labels, affine, "rodero2021", f"rodero-{args.case}", dataset, with_coronaries=True)
     manifest["assetId"] = f"cor-template-rodero-{args.case}"
     manifest["provenance"]["geometry"] = f"CT-derived healthy template (Rodero 2021 case {args.case}, CC BY 4.0)"
     for lod, data in glbs.items():
