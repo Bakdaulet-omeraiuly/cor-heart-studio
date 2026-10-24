@@ -28,8 +28,10 @@ describe("asset registry", () => {
 
   it("CT assets declare what the segmentation lacks", () => {
     for (const s of ctSpecs) {
-      expect(s.capabilities.structures).not.toContain("coronary_vessels");
-      expect(s.capabilities.structures).not.toContain("vena_cava");
+      // coronaries and great veins are not in the segmentation: an atlas-grade asset may draw them, labelled as such
+      for (const id of ["coronary_vessels", "vena_cava", "pulmonary_veins"] as const) {
+        if (s.capabilities.structures.includes(id)) expect(String(s.manifest.structureToMesh[id]?.note)).toMatch(/atlas.*not imaged/);
+      }
       expect(s.capabilities.structures).toContain("lv");
       expect(s.manifest.provenance?.reviewedByClinician).toBe(false);
       expect(s.manifest.license).toBe("CC BY 4.0");

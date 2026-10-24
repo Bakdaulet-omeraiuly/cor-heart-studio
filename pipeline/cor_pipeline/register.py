@@ -70,8 +70,21 @@ class Warp:
         return p if self.rbf is None else p + self.rbf(p)
 
 
+def outer_shell(mesh: trimesh.Trimesh, pitch_mm: float = 1.5) -> trimesh.Trimesh:
+    """Outer surface of the union of the atlas chambers: septa and chamber-contact faces have no epicardium to pair
+    with, so closest-point pairs from them pull the fit the wrong way."""
+    vox = mesh.voxelized(pitch_mm).fill()
+    shell = vox.marching_cubes
+    shell.apply_transform(vox.transform)
+    return shell
+
+
 def fit(atlas_epi: trimesh.Trimesh, target_epi: trimesh.Trimesh, a: Landmarks, b: Landmarks,
-        n_surface: int = 300, rounds: int = 3, smoothing: float = 5.0, seed: int = 0) -> Warp:
+        n_surface: int = 300, rounds: int = 3, smoothing: float = 5.0, seed: int = 0,
+        surface: Literal["all", "shell"] = "all") -> Warp:
+    """surface="shell": surface pairs from the atlas's outer shell only (Tier B hearts, docs/atlas-heart.md)."""
+    if surface == "shell":
+        atlas_epi = outer_shell(atlas_epi)
     la = np.array([a[k] for k in KEYS])
     lb = np.array([b[k] for k in KEYS])
     s, R, t = _similarity(la, lb)

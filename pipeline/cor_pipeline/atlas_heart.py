@@ -20,9 +20,10 @@ from .vessels import PROV, ROLE_OF_PART, extend_vessels
 
 def build_atlas_heart(labels: np.ndarray, affine: np.ndarray, source: str, case_id: str, dataset: dict | None,
                       lods=(("high", 300_000), ("low", 120_000)), ct: np.ndarray | None = None,
-                      dataset_prov: np.ndarray | None = None):
+                      dataset_prov: np.ndarray | None = None, atlas_fit: str = "all"):
     """(glbs, manifest, proxy, qa, volumes, prov). `dataset_prov`: voxels labelled by the dataset itself (e.g. the
-    TotalSegmentator v1 IVC) that are not part of the scored heart labels: provenance "dataset"."""
+    TotalSegmentator v1 IVC) that are not part of the scored heart labels: provenance "dataset". `atlas_fit`: see
+    asset._atlas_coronaries ("shell" for the open-CT patients)."""
     g1, m1, *_ = build_asset(labels, affine, source, case_id, None, lods=(("low", 60_000),))
     centre = np.asarray(m1["frameCentreRasMm"], float)
     to_ras = lambda p: np.asarray(p, float) @ RAS_TO_APP * 100 + centre          # app cm -> RAS mm
@@ -47,7 +48,8 @@ def build_atlas_heart(labels: np.ndarray, affine: np.ndarray, source: str, case_
         ct2 = np.full(labels2.shape, -1024, dtype=ct.dtype)
         ct2[pad[0]:pad[0] + ct.shape[0], pad[1]:pad[1] + ct.shape[1], pad[2]:pad[2] + ct.shape[2]] = ct
     glbs, manifest, proxy, qa, volumes = build_asset(labels2, affine2, source, case_id, dataset, lods=lods, ct=ct2,
-                                                     with_coronaries=True, coronaries="atlas", prov=prov)
+                                                     with_coronaries=True, coronaries="atlas", prov=prov,
+                                                     atlas_fit=atlas_fit)
     manifest["fidelity"]["atlas"] = {**report, "coronary": manifest.get("coronary", {}).get("fit"),
                                      "note": "atlas layers are fitted, not measured: reported here, never in the COR-Fit gate"}
     return glbs, manifest, proxy, qa, volumes, prov

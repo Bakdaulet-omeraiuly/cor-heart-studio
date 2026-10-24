@@ -40,8 +40,8 @@ that model follows the scan's segmentation. Code: `pipeline/cor_pipeline/corfit.
 
 | Model | Tolerance (1 voxel) | Surface within tolerance | Mean distance | Worst HD95 | Volume / notes |
 |---|---|---|---|---|---|
-| Heart CT s0270 (high / low LOD) | 1.5 mm | 99.7% / 99.8% | 0.38 mm | 0.86 mm | LV cavity -1.21% · LV epicardium 99.7% |
-| Heart CT s0338 (high / low LOD) | 1.5 mm | 99.8% / 99.8% | 0.38 mm | 1.07 mm | LV cavity -1.2% · LV epicardium 99.5% |
+| Heart CT s0270, atlas-grade (high / low LOD) | 1.5 mm | 99.6% / 99.7% | 0.38 mm | 1.27 mm | LV cavity -1.22% · LV epicardium 99.5% · measured layers only |
+| Heart CT s0338, atlas-grade (high / low LOD) | 1.5 mm | 99.7% / 99.7% | 0.38 mm | 1.03 mm | LV cavity -1.2% · LV epicardium 99.6% · worst pulmonary artery 98.5% |
 | Brain MRI MMRR-21-5, all 84 structures | 1.2 mm | 100.0% | 0.25 mm | 0.72 mm | deep structures ≤ 1.6% |
 | — cortex (62 manual regions) | 1.2 mm | 100.0% | 0.26 mm | 0.72 mm | worst region Parahippocampal (left) 99.4% |
 | — deep structures (22) | 1.2 mm | 100.0% | 0.24 mm | 0.63 mm | |
@@ -57,6 +57,17 @@ How the numbers got here (each step measured by this report):
 | Cortex published undecimated (normals computed in browser) | 99.6 % | 99.5 % | — | geometry |
 | Surface vertices take the region of the voxel half a voxel *inward* (not across a sulcus) | 100.0 % | 100.0 % | — | geometry (region labels) |
 | Synthetic walls Voronoi-clipped against the LV; 1.2 mm minimal LV wall where the label has no myocardium | — | — | 99.5–99.7 % | geometry |
+
+Atlas layers of the two open-CT hearts (2026-10-24, `fidelity.atlas`; fitted, never scored above):
+
+| Heart | Atlas coronaries / veins drawn | Worst shift to the epicardium | Worst inside the tissue | Join gap | Atlas voxels left out (not attached) |
+|---|---|---|---|---|---|
+| s0270 | 18 / 18 | PLB 7.6 mm | coronary sinus 4.5 mm | 0 mm | aorta 4270, vena cava 4581, pulmonary veins 914 |
+| s0338 | 17 / 18 (coronary sinus not drawn: 9.1 mm inside) | RCA 11.7 mm | posterior LV vein 4.1 mm | 0 mm | aorta 3135, vena cava 1177, pulmonary veins 3306 |
+
+Limits 12 mm off / 6 mm inside (unchanged). The fit is close to them on these hearts (RCA 11.7 mm on s0338), and
+small changes of the epicardium move individual branches across them: which side branch fails can change between
+builds. LM, LAD, LCx, RCA and PDA (the stenosis vessels) failing still fails the build.
 
 ## Known weak spots (visible in the report)
 

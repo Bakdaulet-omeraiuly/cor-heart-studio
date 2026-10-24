@@ -94,3 +94,17 @@ def test_vessel_through_tissue_fails():
     bad["LAD"] = tube(np.c_[np.zeros(80), np.zeros(80), np.linspace(R + 2, -R - 2, 80)])  # straight through
     with pytest.raises(coronary.FitError):
         atlas_coronaries(bad, lambda p: p, surface_at, normals_at, outer_at, AORTIC, apex=np.array([0, 0, -R]))
+
+
+def test_failed_side_branch_is_left_out_when_not_required():
+    from cor_pipeline.asset import STENOSIS_VESSELS
+    bad = parts()
+    bad["great_cardiac_vein"] = tube(np.c_[np.zeros(80), np.zeros(80), np.linspace(R + 2, -R - 2, 80)])  # through
+    lines, radii, sources, report = atlas_coronaries(bad, lambda p: p, surface_at, normals_at, outer_at, AORTIC,
+                                                     apex=np.array([0, 0, -R]), required=STENOSIS_VESSELS)
+    assert "great_cardiac_vein" not in lines and report["great_cardiac_vein"]["drawn"] is False
+    assert "not drawn" in report["great_cardiac_vein"]["reason"]
+    bad["LAD"] = bad.pop("great_cardiac_vein")       # a stenosis vessel still fails the build
+    with pytest.raises(coronary.FitError):
+        atlas_coronaries(bad, lambda p: p, surface_at, normals_at, outer_at, AORTIC, apex=np.array([0, 0, -R]),
+                         required=STENOSIS_VESSELS)

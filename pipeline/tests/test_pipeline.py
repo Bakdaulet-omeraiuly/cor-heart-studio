@@ -85,3 +85,10 @@ def test_main_components_keeps_large_pieces_only():
     assert (found, kept) == (3, 2)
     largest, _, kept = main_components(mask)
     assert kept == 1 and largest.sum() == 1000
+
+
+def test_atlas_flag_needs_asset_and_a_totalseg_case(monkeypatch, tmp_path):
+    from cor_pipeline import build
+    monkeypatch.setattr("sys.argv", ["build", "--synthetic", str(tmp_path), "--atlas"])
+    with pytest.raises(SystemExit):
+        build.main()

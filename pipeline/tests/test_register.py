@@ -72,3 +72,20 @@ def test_target_landmarks_from_manifest():
     lm = target_landmarks(man)
     assert np.allclose(lm["apex"], [10, -80, 0])          # cm -> mm
     assert np.allclose(lm["aortic"], [0, 10, 0])
+
+
+def test_outer_shell_drops_internal_faces():
+    from cor_pipeline.register import outer_shell
+    a = trimesh.creation.box((40, 40, 40))
+    b = a.copy(); b.apply_translation((40, 0, 0))     # two chambers sharing a wall at x = 20
+    shell = outer_shell(trimesh.util.concatenate([a, b]), pitch_mm=2.0)
+    inner = (np.abs(shell.vertices[:, 0] - 20) < 2) & (np.abs(shell.vertices[:, 1]) < 15) & (np.abs(shell.vertices[:, 2]) < 15)
+    assert not inner.any()
+
+
+def test_shell_fit_recovers_known_transform():
+    src = egg()
+    dst = src.copy()
+    dst.vertices = bend((src.vertices @ rot(20).T) * 1.1 + [5.0, -3.0, 8.0])
+    warp = fit(src, dst, landmarks(src), landmarks(dst), surface="shell")
+    assert dst.nearest.on_surface(warp(src.vertices))[1].mean() < 1.0

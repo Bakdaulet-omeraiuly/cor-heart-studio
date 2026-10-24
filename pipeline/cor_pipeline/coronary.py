@@ -18,6 +18,8 @@ from __future__ import annotations
 
 import heapq
 
+from collections.abc import Iterable
+
 import numpy as np
 import trimesh
 
@@ -210,7 +212,8 @@ def build_vessels(centrelines: dict[str, np.ndarray], normals_at, lift_mm: float
 
 
 def atlas_coronaries(parts: dict[str, trimesh.Trimesh], warp, surface_at, normals_at, outer_at, aortic: np.ndarray,
-                     apex: np.ndarray, scale: float = 1.0, max_shift_mm: float = 12.0, max_inside_mm: float = 6.0):
+                     apex: np.ndarray, scale: float = 1.0, max_shift_mm: float = 12.0, max_inside_mm: float = 6.0,
+                     required: Iterable[str] | None = None):
     """Coronary arteries and cardiac veins from atlas meshes, seated on this heart's epicardium.
 
     parts: atlas vessel meshes keyed like cor_pipeline.atlas.ATLAS_PARTS; warp maps their coordinates into this heart.
@@ -218,7 +221,8 @@ def atlas_coronaries(parts: dict[str, trimesh.Trimesh], warp, surface_at, normal
     the epicardium. Returns centrelines on the surface (build_vessels lifts them), lumen radii (mm), the source of
     every vessel ("atlas" or "illustrative") and a fit report. Raises FitError when a registered vessel runs more
     than max_inside_mm inside the tissue or more than max_shift_mm off the surface: it would not be this heart's
-    vessel any more, so it must not be drawn.
+    vessel any more, so it must not be drawn. With `required` (e.g. STENOSIS_VESSELS), only those raise; any other
+    branch that fails is left out and reported as {"source": "atlas", "drawn": False, "reason": ...}.
     """
     from .centreline import branches
     from .register import FitError  # noqa: F401  (re-exported for callers)
@@ -230,8 +234,12 @@ def atlas_coronaries(parts: dict[str, trimesh.Trimesh], warp, surface_at, normal
         c = warp(np.asarray(pts, float))
         d = outer_at(c)
         if d.min() < -max_inside_mm or np.abs(d).max() > max_shift_mm:
-            raise FitError(f"{name}: registered course is {-d.min():.1f} mm inside / {np.abs(d).max():.1f} mm off the "
-                           f"epicardium (limits {max_inside_mm} / {max_shift_mm} mm)")
+            reason = (f"registered course is {-d.min():.1f} mm inside / {np.abs(d).max():.1f} mm off the "
+                      f"epicardium (limits {max_inside_mm} / {max_shift_mm} mm)")
+            if required is None or name in required:
+                raise FitError(f"{name}: {reason}")
+            report[name] = {"source": "atlas", "drawn": False, "reason": f"atlas fit failed: {reason}; not drawn"}
+            return
         on = surface_at(c)
         if np.linalg.norm(on[-1] - aortic) < np.linalg.norm(on[0] - aortic):
             on, r = on[::-1], r[::-1]

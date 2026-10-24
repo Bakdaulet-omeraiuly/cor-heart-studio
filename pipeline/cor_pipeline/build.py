@@ -2,6 +2,7 @@
 
     python -m cor_pipeline.build <labels.nii.gz> <out_dir> [--source mmwhs] [--case-id ID]
     python -m cor_pipeline.build <case_dir> <out_dir> --source totalseg_v1
+    python -m cor_pipeline.build <case_dir> <out_dir> --source totalseg_v1 --asset --atlas
     python -m cor_pipeline.build --synthetic <out_dir>
 
 Outputs (all under out_dir, which must stay inside the git-ignored data/ folder):
@@ -38,6 +39,30 @@ from .mesh import extract_surface, main_components, ras_to_app
 
 # Vessel pieces smaller than this fraction of the largest piece are dropped as fragments.
 VESSEL_MIN_FRACTION = 0.1
+
+
+def load_ct_case(case_dir: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """(labels, affine, ct, ivc) for a TotalSegmentator v1 case folder (docs/atlas-heart.md).
+
+    The dataset's own IVC label is cropped like the other vessels and written as vena_cava (a great vein: never
+    scored by COR-Fit); `ivc` marks those voxels so the asset gives them provenance "dataset".
+    """
+    import nibabel as nib
+
+    from .labels import GREAT_VEINS
+    from .sources import load, outside_heart_box
+
+    case_dir = Path(case_dir)
+    labels, affine = load(case_dir, "totalseg_v1")
+    ct_img = nib.load(case_dir / "ct.nii.gz")
+    if ct_img.shape != labels.shape or not np.allclose(ct_img.affine, affine):
+        raise ValueError(f"{case_dir}: ct.nii.gz is not on the label grid")
+    ivc_img = nib.load(case_dir / "segmentations/inferior_vena_cava.nii.gz")
+    vena_cava = next(v for v, s in GREAT_VEINS.items() if s.key == "vena_cava")
+    # the dataset IVC runs the length of the scan: keep the part inside the same box as the other vessels
+    ivc = (np.asarray(ivc_img.dataobj) > 0) & (labels == 0) & ~outside_heart_box(labels, affine, "totalseg_v1")
+    labels[ivc] = vena_cava
+    return labels, affine, np.asarray(ct_img.dataobj), ivc
 
 
 def build_case(labels: np.ndarray, affine: np.ndarray, source: str, case_id: str, input_name: str) -> tuple[trimesh.Scene, dict]:
@@ -98,13 +123,21 @@ def main() -> None:
     parser.add_argument("--case-id")
     parser.add_argument("--synthetic", action="store_true", help="use the built-in synthetic volume")
     parser.add_argument("--asset", action="store_true", help="also write the app asset (asset/: GLBs, manifest)")
+    parser.add_argument("--atlas", action="store_true",
+                        help="with --asset on a totalseg_v1 case folder: atlas-grade heart (docs/atlas-heart.md)")
     args = parser.parse_args()
+    if args.atlas and not (args.asset and args.source == "totalseg_v1" and args.labels):
+        parser.error("--atlas needs --asset and a totalseg_v1 case folder")
 
     if args.synthetic:
         from .synthetic import make_volume
 
         labels, affine = make_volume()
         input_name, case_id = "synthetic", args.case_id or "synthetic"
+    elif args.atlas:
+        labels, affine, ct, ivc = load_ct_case(Path(args.labels))
+        input_name = Path(args.labels).name
+        case_id = args.case_id or input_name
     elif args.labels:
         from .sources import load
 
@@ -129,9 +162,9 @@ def main() -> None:
     if args.asset:
         from .asset import build_asset
 
-        ct = None
+        ct = ct if args.atlas else None
         ct_path = Path(args.labels or "") / "ct.nii.gz"
-        if args.labels and ct_path.exists():
+        if not args.atlas and args.labels and ct_path.exists():
             import nibabel as nib
 
             ct_img = nib.load(ct_path)
@@ -139,7 +172,14 @@ def main() -> None:
                 ct = np.asarray(ct_img.dataobj)
             else:
                 print("  [warning] ct.nii.gz is not on the label grid; no slice volumes written")
-        glbs, manifest, proxy, qa, volumes = build_asset(labels, affine, args.source, case_id, DATASETS.get(args.source), ct=ct)
+        if args.atlas:
+            from .atlas_heart import build_atlas_heart
+
+            glbs, manifest, proxy, qa, volumes, _ = build_atlas_heart(labels, affine, args.source, case_id,
+                                                                      DATASETS.get(args.source), ct=ct, dataset_prov=ivc,
+                                                                      atlas_fit="shell")
+        else:
+            glbs, manifest, proxy, qa, volumes = build_asset(labels, affine, args.source, case_id, DATASETS.get(args.source), ct=ct)
         asset_dir = out / "asset"
         asset_dir.mkdir(exist_ok=True)
         for lod, data in glbs.items():

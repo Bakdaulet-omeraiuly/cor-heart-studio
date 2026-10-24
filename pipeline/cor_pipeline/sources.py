@@ -28,18 +28,27 @@ def load_totalseg_v1(case_dir: Path) -> tuple[np.ndarray, np.ndarray]:
     return labels, affine
 
 
-def crop_vessels_to_heart(labels: np.ndarray, affine: np.ndarray, source: str) -> np.ndarray:
+def outside_heart_box(labels: np.ndarray, affine: np.ndarray, source: str) -> np.ndarray | None:
+    """Voxels farther than VESSEL_MARGIN_MM outside the heart's bounding box (None when there is no heart)."""
     label_map = LABEL_MAPS[source]
     vessel_values = [v for v, s in label_map.items() if s.kind == "vessel"]
     heart = np.isin(labels, [v for v in label_map if v not in vessel_values])
     if not heart.any():
-        return labels
+        return None
     margin = np.ceil(VESSEL_MARGIN_MM / np.linalg.norm(affine[:3, :3], axis=0)).astype(int)
     idx = np.argwhere(heart)
     low = np.maximum(idx.min(axis=0) - margin, 0)
     high = np.minimum(idx.max(axis=0) + margin + 1, labels.shape)
     outside = np.ones(labels.shape, dtype=bool)
     outside[low[0]:high[0], low[1]:high[1], low[2]:high[2]] = False
+    return outside
+
+
+def crop_vessels_to_heart(labels: np.ndarray, affine: np.ndarray, source: str) -> np.ndarray:
+    outside = outside_heart_box(labels, affine, source)
+    if outside is None:
+        return labels
+    vessel_values = [v for v, s in LABEL_MAPS[source].items() if s.kind == "vessel"]
     cropped = labels.copy()
     cropped[outside & np.isin(labels, vessel_values)] = 0
     return cropped

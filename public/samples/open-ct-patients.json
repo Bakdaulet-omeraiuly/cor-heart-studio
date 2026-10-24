@@ -123,7 +123,7 @@
             "modality": "CT",
             "category": "myocardial_thickness",
             "finding": "LV wall thickness, lateral, mid-basal level",
-            "value": 13.7,
+            "value": 13.6,
             "unit": "mm",
             "source": "CT segmentation, TotalSegmentator dataset v1.0 (Wasserthal et al., Radiology: AI 2023) \u2014 https://zenodo.org/records/6802614 (CC BY 4.0); not reviewed by a clinician"
           },

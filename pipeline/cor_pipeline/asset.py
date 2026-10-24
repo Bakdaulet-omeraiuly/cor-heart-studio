@@ -483,8 +483,17 @@ def heart_fidelity(mesh: trimesh.Trimesh, fields, grid: "FineGrid", masks, affin
     return {"toleranceMm": round(tol, 2), "structures": rows, "overall": summarise(rows, round(tol, 2)), "scoredSourceVoxels": scored}
 
 
-def _atlas_coronaries(hi, samples, grid, fields, valves, lv, to_ras_pt, aortic_ras, apex_app, surface_at, normals_at):
-    """BodyParts3D coronaries and veins registered onto this heart (docs/atlas-heart.md)."""
+# vessels the stenosis input addresses (VESSEL_ID LM 1, LAD 2, LCx 3, RCA 4, PDA 5): a heart without them cannot ship
+STENOSIS_VESSELS = ("LM", "LAD", "LCx", "RCA", "PDA")
+
+
+def _atlas_coronaries(hi, samples, grid, fields, valves, lv, to_ras_pt, aortic_ras, apex_app, surface_at, normals_at,
+                      atlas_fit: str = "all"):
+    """BodyParts3D coronaries and veins registered onto this heart (docs/atlas-heart.md).
+
+    atlas_fit="shell" (Tier B): the warp pairs only the atlas's outer shell with the epicardium, and a branch outside
+    STENOSIS_VESSELS that still fails the fit limits is left out (reported) instead of failing the build.
+    """
     import trimesh
     from .atlas import ATLAS_PARTS, DEFAULT_ROOT, load_parts
     from .coronary import atlas_coronaries
@@ -500,12 +509,15 @@ def _atlas_coronaries(hi, samples, grid, fields, valves, lv, to_ras_pt, aortic_r
     b["apex"] = to_ras_pt(np.asarray(apex_app, float)[None])[0]
     chambers = trimesh.util.concatenate([parts[k] for k in ("left_ventricle", "right_ventricle", "left_atrium", "right_atrium")])
     aepi = trimesh.Trimesh(to_target(chambers.vertices), chambers.faces, process=False)
-    w = fit(aepi, epi, a, b, n_surface=1500, rounds=6, smoothing=2.0)
+    shell = atlas_fit == "shell"
+    w = fit(aepi, epi, a, b, n_surface=1500, rounds=6, smoothing=2.0, surface="shell" if shell else "all")
     vessels = {k: m for k, m in parts.items() if ATLAS_PARTS[k].kind in ("coronary_artery", "coronary_vein")}
     outer_at = lambda p: grid.sample(fields["outer"], p)
     lines, radii, sources, report = atlas_coronaries(vessels, lambda p: w(to_target(p)), surface_at, normals_at, outer_at,
-                                                     aortic_ras, to_ras_pt(np.asarray(apex_app, float)[None])[0], scale=w.s)
-    report["_registration"] = {"scale": round(float(w.s), 3), "method": "landmark similarity + thin-plate spline (6 ICP rounds)"}
+                                                     aortic_ras, to_ras_pt(np.asarray(apex_app, float)[None])[0], scale=w.s,
+                                                     required=STENOSIS_VESSELS if shell else None)
+    report["_registration"] = {"scale": round(float(w.s), 3), "method": "landmark similarity + thin-plate spline (6 ICP rounds)"
+                               + (", surface pairs from the atlas outer shell" if shell else "")}
     return lines, radii, sources, report
 
 
@@ -530,7 +542,7 @@ def _prov4(codes: np.ndarray) -> np.ndarray:
 
 
 def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None, lods=(("high", 300_000), ("low", 120_000)), ct=None, with_coronaries: bool = False,
-                coronaries: str = "routed", prov: np.ndarray | None = None):
+                coronaries: str = "routed", prov: np.ndarray | None = None, atlas_fit: str = "all"):
     """Returns ({lod: glb bytes}, manifest dict, lv cavity proxy dict, qa list, volumes or None).
 
     With `ct` (the CT on the labels' grid), volumes = (meta, image u8, label-index u8) for the slice views.
@@ -608,7 +620,7 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
             return pts
         if coronaries == "atlas":
             centrelines, radii, vessel_sources, vessel_fit = _atlas_coronaries(
-                hi, samples, grid, fields, valves, lv, to_ras_pt, ao_c, apex_app, surface_at, normals_at)
+                hi, samples, grid, fields, valves, lv, to_ras_pt, ao_c, apex_app, surface_at, normals_at, atlas_fit)
             debug = {}
         import os
         if os.environ.get("COR_CORONARY_DEBUG"):
@@ -739,16 +751,26 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
                      "belowGate": bool(problems), "reason": "; ".join(problems)})
 
     measured_walls = all(f"{r}_wall" in masks for r in WALL_MM if r not in ("vena_cava", "pulmonary_veins"))
+    from .vessels import PROV as PROV_CODES
+    atlas = coronary is not None and coronary["method"] == "atlas"
+    dataset_ivc = prov is not None and bool((prov == PROV_CODES["dataset"]).any())
     limitations = [
         "Shape from a CT segmentation, not reviewed by a clinician",
         "Single phase, cardiac phase unknown: motion is the template's illustrative motion",
         "All chamber and great-artery walls come from the source mesh" if measured_walls else
         f"Only the LV wall is from imaging; RV ({WALL_MM['rv']} mm), atrial ({WALL_MM['la']} mm) and vessel walls are a fixed thickness",
+        ("Great vessels past the labels, venae cavae and pulmonary veins: BodyParts3D atlas fitted to this heart (CC BY-SA), "
+         "not imaged" + ("; the IVC near the heart is the dataset's own label" if dataset_ivc else "")) if atlas else
         "No venae cavae or pulmonary veins in the labels; their label anchors are placed on the atria" if coronary is not None else
         "No coronary arteries, veins, venae cavae or pulmonary veins in the labels; their label anchors are placed on the atria",
         "Valves are generated at runtime at the label-derived annulus; leaflets are illustrative",
         "Papillary muscles and coronary ostia positions are illustrative (placed from the LV frame)",
-        *(["Coronary arteries routed along the grooves from a typical right-dominant pattern with published calibres; not this heart's imaging", "Epicardial fat is illustrative (around the artery courses)"] if coronary is not None else ["No epicardial fat in the labels"]),
+        *(["Coronary arteries and cardiac veins: BodyParts3D atlas specimen fitted to this heart's epicardium (not imaged)",
+           "Epicardial fat is illustrative (around the artery courses)"] if atlas else
+          ["Coronary arteries routed along the grooves from a typical right-dominant pattern with published calibres; not this heart's imaging",
+           "Epicardial fat is illustrative (around the artery courses)"] if coronary is not None else ["No epicardial fat in the labels"]),
+        *[f"{name.replace('_', ' ')}: {r['reason']}" for name, r in (coronary["fit"] if atlas else {}).items()
+          if isinstance(r, dict) and r.get("drawn") is False],
     ] + list((dataset or {}).get("knownLimitations", []))
 
     manifest = {
@@ -783,9 +805,15 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
         "structureToMesh": {
             "myocardium": {"mesh": "heart_tissue", "note": "all walls from the source mesh" if measured_walls else "LV wall from imaging; other walls fixed thickness"},
             **{k: {"mesh": "heart_tissue", "region": v} for k, v in REGION.items()},
-            **{k: {"mesh": None, "region": None, "absent": True, "note": "not in the segmentation labels"}
-               for k in ("vena_cava", "pulmonary_veins") + (() if coronary is not None else ("coronary_vessels",))},
-            **({"coronary_vessels": {"mesh": "coronary_arteries", "region": 8, "note": "routed along the grooves (right-dominant pattern), not from imaging"}} if coronary is not None else {}),
+            **({"vena_cava": {"mesh": "heart_tissue", "region": REGION["vena_cava"], "note": "BodyParts3D atlas fitted to this heart, not imaged"
+                              + ("; the IVC near the heart is the dataset's own label" if dataset_ivc else "")},
+                "pulmonary_veins": {"mesh": "heart_tissue", "region": REGION["pulmonary_veins"], "note": "BodyParts3D atlas fitted to this heart, not imaged"}}
+               if atlas else
+               {k: {"mesh": None, "region": None, "absent": True, "note": "not in the segmentation labels"} for k in ("vena_cava", "pulmonary_veins")}),
+            **({} if coronary is not None else {"coronary_vessels": {"mesh": None, "region": None, "absent": True, "note": "not in the segmentation labels"}}),
+            **({"coronary_vessels": {"mesh": "coronary_arteries", "region": 8, "note":
+                "BodyParts3D atlas fitted to this heart's epicardium, not imaged" if atlas else
+                "routed along the grooves (right-dominant pattern), not from imaging"}} if coronary is not None else {}),
             "mitral_valve": {"runtime": "valve generator"}, "aortic_valve": {"runtime": "valve generator"},
             "tricuspid_valve": {"runtime": "valve generator"}, "pulmonary_valve": {"runtime": "valve generator"},
         },

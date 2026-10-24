@@ -106,7 +106,44 @@ def extend_vessels(labels: np.ndarray, affine: np.ndarray, parts: dict, warp, so
         out[atlas] = value
         prov[atlas] = PROV["atlas"]
         report["joinGapMm"][role] = round(gap, 2)
+    report["droppedAtlasVoxels"] = drop_unattached(out, prov, source)
     return out, out_aff, prov, report
+
+
+# a vein continuation may attach to its CT vessel or to the atrium it drains into
+DRAINS_INTO = {"vena_cava": "ra", "pulmonary_veins": "la"}
+MIN_ATLAS_PIECE = 27  # voxels: smaller atlas pieces are seam crumbs, not vessels
+
+
+def drop_unattached(labels: np.ndarray, prov: np.ndarray, source: str) -> dict[str, int]:
+    """Remove atlas pieces that do not continue this heart (in place); voxels dropped per role.
+
+    A continuation is drawn only where it joins its measured vessel (or, for a vein, its atrium): a piece the warp put
+    elsewhere, e.g. an arch branch that misses this patient's arch, would be a vessel this heart does not have.
+    """
+    regions = {**LABEL_MAPS[source], **GREAT_VEINS}
+    dropped = {}
+    for role in ROLE_OF_PART.values():
+        if role in dropped:
+            continue
+        value = role_value(source, role)
+        anchors = {role, DRAINS_INTO.get(role)}
+        anchor = np.isin(labels, [v for v, st in regions.items() if st.region in anchors]) & (prov != PROV["atlas"])
+        pieces, n = ndimage.label((labels == value) & (prov == PROV["atlas"]), structure=np.ones((3, 3, 3)))
+        if not n:
+            dropped[role] = 0
+            continue
+        touching = np.unique(pieces[ndimage.binary_dilation(anchor, structure=np.ones((3, 3, 3)))])
+        sizes = np.bincount(pieces.ravel(), minlength=n + 1)
+        keep = np.zeros(n + 1, bool)
+        keep[touching] = True
+        keep &= sizes >= MIN_ATLAS_PIECE
+        keep[0] = False
+        gone = (pieces > 0) & ~keep[pieces]
+        labels[gone] = 0
+        prov[gone] = PROV_NONE
+        dropped[role] = int(gone.sum())
+    return dropped
 
 
 def segment_great_vessels(ct: Path, work: Path) -> dict[str, np.ndarray]:

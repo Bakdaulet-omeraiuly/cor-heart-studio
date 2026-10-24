@@ -92,3 +92,18 @@ def test_continuations_stop_near_the_heart():
     z_top_mm = (np.argwhere(out == AORTA)[:, 2].max() - 70)     # back to the original grid (1 mm voxels)
     heart_top = np.argwhere(lab > 0)[:, 2].max()
     assert z_top_mm - heart_top <= 26
+
+
+def test_atlas_piece_away_from_its_vessel_is_dropped():
+    from cor_pipeline.vessels import PROV_NONE, drop_unattached
+    lab, _ = ct_volume()
+    prov = np.where(lab > 0, PROV["ct"], PROV_NONE).astype(np.uint8)
+    joined = np.zeros(lab.shape, bool); joined[39:42, 28:32, 20:30] = True      # against the aorta wall (x = 38)
+    floating = np.zeros(lab.shape, bool); floating[2:8, 2:8, 40:46] = True       # touches nothing
+    crumb = np.zeros(lab.shape, bool); crumb[21, 30, 40] = True                  # 1 voxel at the aorta
+    assert not (lab[joined | floating | crumb]).any()
+    for m in (joined, floating, crumb):
+        lab[m], prov[m] = AORTA, PROV["atlas"]
+    dropped = drop_unattached(lab, prov, "totalseg_v1")
+    assert dropped["aorta"] == floating.sum() + crumb.sum()
+    assert (lab[floating] == 0).all() and (prov[floating] == PROV_NONE).all() and (lab[joined] == AORTA).all()

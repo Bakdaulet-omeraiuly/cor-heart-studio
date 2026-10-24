@@ -19,16 +19,21 @@
     0,
     0
   ],
+  "frameCentreRasMm": [
+    -28.6391,
+    179.0747,
+    452.4996
+  ],
   "bounds": {
     "min": [
-      -6.8397,
-      -7.5237,
-      -7.5236
+      -7.59,
+      -9.9987,
+      -8.0237
     ],
     "max": [
-      6.8397,
-      7.5237,
-      7.5236
+      7.59,
+      9.9987,
+      8.0237
     ]
   },
   "provenanceTier": "B",
@@ -40,22 +45,23 @@
   "files": {
     "high": {
       "url": "/models/ct/s0338/heart-high.glb",
-      "bytes": 8390724,
+      "bytes": 10175036,
       "triangles": [
-        299988
+        299882
       ]
     },
     "low": {
       "url": "/models/ct/s0338/heart-low.glb",
-      "bytes": 3346540,
+      "bytes": 4761548,
       "triangles": [
-        119832
+        119410
       ]
     }
   },
   "attributes": {
     "_weights": "uint8 normalized vec4: deformation membership (lv, rv, la, ra); remainder = anchored vessels",
     "_tissue": "uint8 normalized vec4: x wall depth (0 epicardium .. 1 endocardium), y epicardial fat (always 0), z tissue kind byte, w region byte",
+    "_prov": "uint8 vec4: x provenance code (0 measured from CT, 1 AI segmentation, 2 dataset label, 3 atlas fitted to this heart, 4 illustrative)",
     "tissueKinds": {
       "myocardium": 0,
       "greatArtery": 1,
@@ -105,22 +111,19 @@
       "region": 5
     },
     "vena_cava": {
-      "mesh": null,
-      "region": null,
-      "absent": true,
-      "note": "not in the segmentation labels"
+      "mesh": "heart_tissue",
+      "region": 6,
+      "note": "BodyParts3D atlas fitted to this heart, not imaged; the IVC near the heart is the dataset's own label"
     },
     "pulmonary_veins": {
-      "mesh": null,
-      "region": null,
-      "absent": true,
-      "note": "not in the segmentation labels"
+      "mesh": "heart_tissue",
+      "region": 7,
+      "note": "BodyParts3D atlas fitted to this heart, not imaged"
     },
     "coronary_vessels": {
-      "mesh": null,
-      "region": null,
-      "absent": true,
-      "note": "not in the segmentation labels"
+      "mesh": "coronary_arteries",
+      "region": 8,
+      "note": "BodyParts3D atlas fitted to this heart's epicardium, not imaged"
     },
     "mitral_valve": {
       "runtime": "valve generator"
@@ -139,9 +142,9 @@
     "method": "Same vertex-shader handles as the procedural asset, on chamber frames measured from the segmentation",
     "lv": {
       "base": [
-        0.8971,
-        2.7615,
-        -0.7837
+        1.621,
+        2.8103,
+        -0.3095
       ],
       "axis": [
         0.5972,
@@ -159,16 +162,16 @@
         0.2951
       ],
       "cavityBaseAlong": 0.0,
-      "cavityApexAlong": 7.588,
-      "epiApexAlong": 8.1812,
-      "meanCavityRadius": 2.5166,
-      "meanWallThickness": 1.1692
+      "cavityApexAlong": 7.6318,
+      "epiApexAlong": 8.2251,
+      "meanCavityRadius": 2.5189,
+      "meanWallThickness": 1.1697
     },
     "rv": {
       "center": [
-        -0.0137,
-        1.3831,
-        4.5506
+        0.7363,
+        1.4082,
+        5.0507
       ],
       "axis": [
         0.5972,
@@ -184,16 +187,16 @@
     },
     "la": {
       "center": [
-        -1.1071,
-        3.6905,
-        -2.0314
+        -0.3571,
+        3.7156,
+        -1.5314
       ]
     },
     "ra": {
       "center": [
-        -4.1413,
-        2.3281,
-        1.7402
+        -3.3912,
+        2.3531,
+        2.2402
       ]
     },
     "segmentConvention": "AHA 17-segment; angle measured around the LV long axis from the septal direction toward anterior"
@@ -201,37 +204,37 @@
   "valves": {
     "mitral_valve": {
       "center": [
-        0.6991,
-        2.4758,
-        -0.8458
+        1.4162,
+        2.563,
+        -0.3294
       ],
       "normal": [
-        0.6486,
-        -0.2265,
-        0.7267
+        0.6355,
+        -0.1876,
+        0.749
       ],
-      "radius": 1.766,
+      "radius": 1.8055,
       "fromImaging": true
     },
     "aortic_valve": {
       "center": [
-        -0.662,
-        4.9117,
-        0.6418
+        0.1702,
+        4.7844,
+        0.952
       ],
       "normal": [
-        0.2759,
-        -0.6459,
-        -0.7118
+        -0.2279,
+        0.6772,
+        0.6996
       ],
-      "radius": 1.0846,
+      "radius": 1.1417,
       "fromImaging": true
     },
     "tricuspid_valve": {
       "center": [
-        -2.6947,
-        1.3495,
-        2.4834
+        -1.9446,
+        1.3746,
+        2.9835
       ],
       "normal": [
         0.7921,
@@ -243,157 +246,422 @@
     },
     "pulmonary_valve": {
       "center": [
-        0.5192,
-        6.8413,
-        2.4119
+        1.255,
+        7.1031,
+        3.3718
       ],
       "normal": [
-        -0.8861,
-        0.0551,
-        -0.4601
+        -0.4857,
+        0.1402,
+        -0.8628
       ],
-      "radius": 0.9059,
+      "radius": 1.2612,
       "fromImaging": true
     }
   },
   "papillary": {
     "anterolateral": {
       "base": [
-        5.1536,
-        0.775,
-        0.9249
+        5.9037,
+        0.8,
+        1.4249
       ],
       "tip": [
-        3.3536,
-        1.675,
-        0.1749
+        4.1037,
+        1.7,
+        0.6749
       ]
     },
     "posteromedial": {
       "base": [
-        2.7536,
-        -1.625,
-        1.3749
+        3.5037,
+        -1.6,
+        1.8749
       ],
       "tip": [
-        2.0036,
-        0.325,
-        0.4749
+        2.7537,
+        0.35,
+        0.9749
       ]
     },
     "rvAnterior": {
       "base": [
-        0.0536,
-        0.775,
-        6.0249
+        0.8037,
+        0.8,
+        6.5249
       ],
       "tip": [
-        -0.0964,
-        1.225,
-        4.9749
+        0.6537,
+        1.25,
+        5.4749
       ]
     }
   },
   "coronaryOstia": {
     "left": [
-      0.6013,
-      4.5961,
-      0.294
+      1.1908,
+      4.4292,
+      -0.1138
     ],
     "right": [
-      -0.1379,
-      3.685,
-      0.8342
+      -0.9162,
+      3.8334,
+      0.4842
     ]
   },
   "anchors": {
     "lv": [
-      5.3443,
-      0.5463,
-      -1.5316
+      6.0818,
+      0.5841,
+      -1.0479
     ],
     "rv": [
-      1.969,
-      -0.3396,
-      7.4969
+      3.4893,
+      -0.4331,
+      7.8469
     ],
     "la": [
-      -2.1381,
-      5.6623,
-      -3.7703
+      -0.4244,
+      6.1833,
+      -3.0497
     ],
     "ra": [
-      -6.3983,
-      2.347,
-      3.4364
+      -5.2524,
+      2.6005,
+      4.6301
     ],
     "apex": [
-      5.6637,
-      -1.5647,
-      3.9348
+      6.4137,
+      -1.5396,
+      4.4348
     ],
     "aorta": [
-      -0.4373,
-      -7.4418,
-      -4.7131
+      -1.9461,
+      7.8372,
+      2.7232
     ],
     "pulmonary_artery": [
-      -6.6831,
-      6.9795,
-      -3.14
+      -7.4112,
+      7.1339,
+      -4.3932
     ],
     "vena_cava": [
-      -3.9961,
-      6.8187,
-      2.3811
+      -3.2461,
+      6.8438,
+      2.8812
     ],
     "pulmonary_veins": [
-      -1.1721,
-      5.3568,
-      -4.1234
+      -0.3947,
+      5.4842,
+      -3.5724
     ],
     "coronary_vessels": [
-      2.7644,
-      4.1679,
-      3.1116
+      3.4977,
+      4.2105,
+      3.5966
     ],
     "myocardium": [
-      5.1177,
-      0.752,
-      -1.7559
+      5.8539,
+      0.791,
+      -1.2734
     ],
     "mitral_valve": [
-      0.6991,
-      2.4758,
-      -0.8458
+      1.4162,
+      2.563,
+      -0.3294
     ],
     "aortic_valve": [
-      -0.662,
-      4.9117,
-      0.6418
+      0.1702,
+      4.7844,
+      0.952
     ],
     "tricuspid_valve": [
-      -2.6947,
-      1.3495,
-      2.4834
+      -1.9446,
+      1.3746,
+      2.9835
     ],
     "pulmonary_valve": [
-      0.5192,
-      6.8413,
-      2.4119
+      1.255,
+      7.1031,
+      3.3718
     ]
+  },
+  "coronary": {
+    "pattern": "BodyParts3D atlas coronary arteries and cardiac veins (right-dominant specimen), registered onto this heart's epicardium; not imaged in this scan. Obtuse marginal and SA-nodal artery are illustrative (not in the atlas)",
+    "dominance": "right",
+    "method": "atlas",
+    "fit": {
+      "LM": {
+        "source": "atlas",
+        "maxShiftMm": 3.1,
+        "maxInsideMm": 3.1
+      },
+      "LAD": {
+        "source": "atlas",
+        "maxShiftMm": 6.5,
+        "maxInsideMm": 1.6
+      },
+      "D1": {
+        "source": "atlas",
+        "maxShiftMm": 3.0,
+        "maxInsideMm": 0.0
+      },
+      "D2": {
+        "source": "atlas",
+        "maxShiftMm": 2.2,
+        "maxInsideMm": 0.9
+      },
+      "D3": {
+        "source": "atlas",
+        "maxShiftMm": 3.4,
+        "maxInsideMm": 0.0
+      },
+      "D4": {
+        "source": "atlas",
+        "maxShiftMm": 6.2,
+        "maxInsideMm": 0.4
+      },
+      "conal": {
+        "source": "atlas",
+        "maxShiftMm": 1.6,
+        "maxInsideMm": 0.8
+      },
+      "LCx": {
+        "source": "atlas",
+        "maxShiftMm": 8.6,
+        "maxInsideMm": 0.1
+      },
+      "RCA": {
+        "source": "atlas",
+        "maxShiftMm": 11.7,
+        "maxInsideMm": 1.2
+      },
+      "acute_marginal": {
+        "source": "atlas",
+        "maxShiftMm": 3.2,
+        "maxInsideMm": 0.2
+      },
+      "PDA": {
+        "source": "atlas",
+        "maxShiftMm": 7.0,
+        "maxInsideMm": 1.6
+      },
+      "PLB": {
+        "source": "atlas",
+        "maxShiftMm": 8.0,
+        "maxInsideMm": 0.0
+      },
+      "great_cardiac_vein": {
+        "source": "atlas",
+        "maxShiftMm": 7.7,
+        "maxInsideMm": 0.9
+      },
+      "middle_cardiac_vein": {
+        "source": "atlas",
+        "maxShiftMm": 10.3,
+        "maxInsideMm": 1.7
+      },
+      "small_cardiac_vein": {
+        "source": "atlas",
+        "maxShiftMm": 5.1,
+        "maxInsideMm": 1.4
+      },
+      "posterior_lv_vein": {
+        "source": "atlas",
+        "maxShiftMm": 8.0,
+        "maxInsideMm": 4.1
+      },
+      "left_marginal_vein": {
+        "source": "atlas",
+        "maxShiftMm": 10.1,
+        "maxInsideMm": 0.0
+      },
+      "coronary_sinus": {
+        "source": "atlas",
+        "drawn": false,
+        "reason": "atlas fit failed: registered course is 9.1 mm inside / 11.0 mm off the epicardium (limits 6.0 / 12.0 mm); not drawn"
+      },
+      "OM": {
+        "source": "illustrative"
+      },
+      "SA_nodal": {
+        "source": "illustrative"
+      },
+      "_registration": {
+        "scale": 1.292,
+        "method": "landmark similarity + thin-plate spline (6 ICP rounds), surface pairs from the atlas outer shell"
+      }
+    },
+    "license": "CC BY-SA 2.1 JP (BodyParts3D, DBCLS) \u2014 derived vessel meshes are CC BY-SA",
+    "vessels": {
+      "1": {
+        "name": "LM",
+        "proximalDiameterMm": 4.5,
+        "distalDiameterMm": 4.5,
+        "distalAssumed": false,
+        "lengthMm": 8.1,
+        "source": "atlas"
+      },
+      "2": {
+        "name": "LAD",
+        "proximalDiameterMm": 3.7,
+        "distalDiameterMm": 1.9,
+        "distalAssumed": false,
+        "lengthMm": 162.2,
+        "source": "atlas"
+      },
+      "3": {
+        "name": "LCx",
+        "proximalDiameterMm": 3.4,
+        "distalDiameterMm": 1.8,
+        "distalAssumed": true,
+        "lengthMm": 86.0,
+        "source": "atlas"
+      },
+      "4": {
+        "name": "RCA",
+        "proximalDiameterMm": 3.9,
+        "distalDiameterMm": 2.0,
+        "distalAssumed": true,
+        "lengthMm": 224.9,
+        "source": "atlas"
+      },
+      "5": {
+        "name": "PDA",
+        "proximalDiameterMm": 2.0,
+        "distalDiameterMm": 1.4,
+        "distalAssumed": true,
+        "lengthMm": 168.8,
+        "source": "atlas"
+      },
+      "6": {
+        "name": "D1",
+        "proximalDiameterMm": 2.4,
+        "distalDiameterMm": 1.2,
+        "distalAssumed": true,
+        "lengthMm": 86.7,
+        "source": "atlas"
+      },
+      "7": {
+        "name": "D2",
+        "proximalDiameterMm": 2.0,
+        "distalDiameterMm": 1.0,
+        "distalAssumed": true,
+        "lengthMm": 23.8,
+        "source": "atlas"
+      },
+      "14": {
+        "name": "D3",
+        "proximalDiameterMm": 1.8,
+        "distalDiameterMm": 1.0,
+        "distalAssumed": true,
+        "lengthMm": 18.3,
+        "source": "atlas"
+      },
+      "15": {
+        "name": "D4",
+        "proximalDiameterMm": 1.6,
+        "distalDiameterMm": 0.9,
+        "distalAssumed": true,
+        "lengthMm": 67.4,
+        "source": "atlas"
+      },
+      "9": {
+        "name": "OM",
+        "proximalDiameterMm": 2.4,
+        "distalDiameterMm": 1.4,
+        "distalAssumed": true,
+        "lengthMm": 65.7,
+        "source": "illustrative"
+      },
+      "10": {
+        "name": "conal",
+        "proximalDiameterMm": 1.4,
+        "distalDiameterMm": 0.9,
+        "distalAssumed": true,
+        "lengthMm": 41.4,
+        "source": "atlas"
+      },
+      "11": {
+        "name": "SA_nodal",
+        "proximalDiameterMm": 1.0,
+        "distalDiameterMm": 0.8,
+        "distalAssumed": true,
+        "lengthMm": 25.0,
+        "source": "illustrative"
+      },
+      "12": {
+        "name": "acute_marginal",
+        "proximalDiameterMm": 1.8,
+        "distalDiameterMm": 1.0,
+        "distalAssumed": true,
+        "lengthMm": 75.5,
+        "source": "atlas"
+      },
+      "13": {
+        "name": "PLB",
+        "proximalDiameterMm": 2.0,
+        "distalDiameterMm": 1.2,
+        "distalAssumed": true,
+        "lengthMm": 130.0,
+        "source": "atlas"
+      },
+      "20": {
+        "name": "great_cardiac_vein",
+        "proximalDiameterMm": 4.0,
+        "distalDiameterMm": 3.0,
+        "distalAssumed": true,
+        "lengthMm": 86.1,
+        "source": "atlas"
+      },
+      "21": {
+        "name": "middle_cardiac_vein",
+        "proximalDiameterMm": 3.0,
+        "distalDiameterMm": 2.0,
+        "distalAssumed": true,
+        "lengthMm": 166.3,
+        "source": "atlas"
+      },
+      "22": {
+        "name": "small_cardiac_vein",
+        "proximalDiameterMm": 2.0,
+        "distalDiameterMm": 1.5,
+        "distalAssumed": true,
+        "lengthMm": 127.7,
+        "source": "atlas"
+      },
+      "25": {
+        "name": "posterior_lv_vein",
+        "proximalDiameterMm": 2.5,
+        "distalDiameterMm": 1.8,
+        "distalAssumed": true,
+        "lengthMm": 117.1,
+        "source": "atlas"
+      },
+      "26": {
+        "name": "left_marginal_vein",
+        "proximalDiameterMm": 2.5,
+        "distalDiameterMm": 1.8,
+        "distalAssumed": true,
+        "lengthMm": 99.5,
+        "source": "atlas"
+      }
+    },
+    "diameterSource": "Dodge JT et al. Circulation 1992;86:232-46, doi:10.1161/01.cir.86.1.232",
+    "attribute": "_CORO uint8 vec4: vessel id, position along the vessel (0..255), lumen radius in 0.05 mm, 0",
+    "fat": "epicardial fat attribute set within 3-9 mm of the artery centrelines (illustrative)"
   },
   "baseline": {
     "note": "Measured from this segmentation (cardiac phase unknown). Not a clinical report.",
     "lvEndDiastolicVolumeMl": 132.2,
     "lvEpicardialVolumeMl": 302.4,
-    "lvEndDiastolicDiameterMm": 43.7,
+    "lvEndDiastolicDiameterMm": 43.8,
     "ivsThicknessMm": 13.9,
-    "lvPosteriorWallThicknessMm": 13.7,
+    "lvPosteriorWallThicknessMm": 13.6,
     "laVolumeMl": 68.3,
-    "rvBasalDiameterMm": 52.3,
+    "rvBasalDiameterMm": 52.2,
     "raMinorDimensionMm": 32.2,
-    "measurementLevelAlong": 2.2764
+    "measurementLevelAlong": 2.2895
   },
   "morphTargets": [],
   "layers": [
@@ -415,10 +683,12 @@
     "Shape from a CT segmentation, not reviewed by a clinician",
     "Single phase, cardiac phase unknown: motion is the template's illustrative motion",
     "Only the LV wall is from imaging; RV (3.0 mm), atrial (2.0 mm) and vessel walls are a fixed thickness",
-    "No coronary arteries, veins, venae cavae or pulmonary veins in the labels; their label anchors are placed on the atria",
+    "Great vessels past the labels, venae cavae and pulmonary veins: BodyParts3D atlas fitted to this heart (CC BY-SA), not imaged; the IVC near the heart is the dataset's own label",
     "Valves are generated at runtime at the label-derived annulus; leaflets are illustrative",
     "Papillary muscles and coronary ostia positions are illustrative (placed from the LV frame)",
-    "No epicardial fat in the labels",
+    "Coronary arteries and cardiac veins: BodyParts3D atlas specimen fitted to this heart's epicardium (not imaged)",
+    "Epicardial fat is illustrative (around the artery courses)",
+    "coronary sinus: atlas fit failed: registered course is 9.1 mm inside / 11.0 mm off the epicardium (limits 6.0 / 12.0 mm); not drawn",
     "Labels are 1.5 mm resampled; scans are mostly not ECG-gated, so the cardiac phase is unknown.",
     "RV volume is consistently ~1.5x LV in sampled cases: the RV/atrial labels may include their walls (only LV myocardium is a separate label). Unverified - do not report RV volume as RVEDV."
   ],
@@ -432,13 +702,13 @@
             "key": "lv_cavity",
             "name": "LV cavity (endocardium)",
             "source": "CT label boundary",
-            "nsdPercent": 100.0,
+            "nsdPercent": 99.9,
             "meanMm": 0.36,
             "hd95Mm": 0.8,
-            "maxMm": 3.31,
-            "meshToLabelPercent": 99.8,
+            "maxMm": 5.43,
+            "meshToLabelPercent": 99.5,
             "labelToMeshPercent": 100.0,
-            "points": 53180
+            "points": 47492
           },
           {
             "key": "rv",
@@ -447,136 +717,34 @@
             "nsdPercent": 99.8,
             "meanMm": 0.36,
             "hd95Mm": 0.79,
-            "maxMm": 5.1,
-            "meshToLabelPercent": 99.5,
+            "maxMm": 5.13,
+            "meshToLabelPercent": 99.3,
             "labelToMeshPercent": 100.0,
-            "points": 59439
+            "points": 51618
           },
           {
             "key": "la",
             "name": "Left atrium",
             "source": "CT label boundary",
-            "nsdPercent": 99.7,
+            "nsdPercent": 99.6,
             "meanMm": 0.38,
             "hd95Mm": 0.85,
-            "maxMm": 2.44,
-            "meshToLabelPercent": 99.9,
+            "maxMm": 8.08,
+            "meshToLabelPercent": 99.1,
             "labelToMeshPercent": 99.7,
-            "points": 48037
+            "points": 44868
           },
           {
             "key": "ra",
             "name": "Right atrium",
             "source": "CT label boundary",
-            "nsdPercent": 99.9,
+            "nsdPercent": 99.8,
             "meanMm": 0.37,
             "hd95Mm": 0.81,
-            "maxMm": 5.32,
-            "meshToLabelPercent": 99.5,
+            "maxMm": 5.29,
+            "meshToLabelPercent": 98.8,
             "labelToMeshPercent": 100.0,
-            "points": 50410
-          },
-          {
-            "key": "aorta",
-            "name": "Aorta lumen",
-            "source": "CT label boundary",
-            "nsdPercent": 99.9,
-            "meanMm": 0.39,
-            "hd95Mm": 0.83,
-            "maxMm": 3.34,
-            "meshToLabelPercent": 100.0,
-            "labelToMeshPercent": 99.8,
-            "points": 57572
-          },
-          {
-            "key": "pulmonary_artery",
-            "name": "Pulmonary artery lumen",
-            "source": "CT label boundary",
-            "nsdPercent": 99.4,
-            "meanMm": 0.48,
-            "hd95Mm": 1.07,
-            "maxMm": 6.8,
-            "meshToLabelPercent": 99.4,
-            "labelToMeshPercent": 99.4,
-            "points": 22440
-          },
-          {
-            "key": "lv_epicardium",
-            "name": "LV epicardium (myocardium outer)",
-            "source": "CT label boundary",
-            "nsdPercent": 99.5,
-            "meanMm": 0.39,
-            "hd95Mm": 0.83,
-            "maxMm": 30.93,
-            "meshToLabelPercent": 98.7,
-            "labelToMeshPercent": 99.9,
-            "points": 56851
-          },
-          {
-            "key": "other_walls",
-            "name": "RV, atrial and vessel outer walls",
-            "source": "fixed thickness, not from imaging",
-            "nsdPercent": null
-          }
-        ],
-        "overall": {
-          "nsdPercent": 99.8,
-          "meanMm": 0.38,
-          "hd95MmWorst": 1.07,
-          "toleranceMm": 1.5,
-          "structures": 7
-        }
-      },
-      "low": {
-        "toleranceMm": 1.5,
-        "structures": [
-          {
-            "key": "lv_cavity",
-            "name": "LV cavity (endocardium)",
-            "source": "CT label boundary",
-            "nsdPercent": 100.0,
-            "meanMm": 0.36,
-            "hd95Mm": 0.8,
-            "maxMm": 3.31,
-            "meshToLabelPercent": 99.7,
-            "labelToMeshPercent": 100.0,
-            "points": 45173
-          },
-          {
-            "key": "rv",
-            "name": "RV blood pool",
-            "source": "CT label boundary",
-            "nsdPercent": 99.9,
-            "meanMm": 0.36,
-            "hd95Mm": 0.79,
-            "maxMm": 5.1,
-            "meshToLabelPercent": 99.5,
-            "labelToMeshPercent": 100.0,
-            "points": 47495
-          },
-          {
-            "key": "la",
-            "name": "Left atrium",
-            "source": "CT label boundary",
-            "nsdPercent": 99.7,
-            "meanMm": 0.38,
-            "hd95Mm": 0.85,
-            "maxMm": 2.42,
-            "meshToLabelPercent": 99.9,
-            "labelToMeshPercent": 99.6,
-            "points": 42927
-          },
-          {
-            "key": "ra",
-            "name": "Right atrium",
-            "source": "CT label boundary",
-            "nsdPercent": 100.0,
-            "meanMm": 0.37,
-            "hd95Mm": 0.82,
-            "maxMm": 5.32,
-            "meshToLabelPercent": 99.6,
-            "labelToMeshPercent": 100.0,
-            "points": 43703
+            "points": 45933
           },
           {
             "key": "aorta",
@@ -585,22 +753,22 @@
             "nsdPercent": 99.8,
             "meanMm": 0.4,
             "hd95Mm": 0.83,
-            "maxMm": 3.37,
-            "meshToLabelPercent": 100.0,
-            "labelToMeshPercent": 99.8,
-            "points": 47180
+            "maxMm": 4.17,
+            "meshToLabelPercent": 99.2,
+            "labelToMeshPercent": 99.9,
+            "points": 47901
           },
           {
             "key": "pulmonary_artery",
             "name": "Pulmonary artery lumen",
             "source": "CT label boundary",
-            "nsdPercent": 99.4,
-            "meanMm": 0.49,
-            "hd95Mm": 1.07,
-            "maxMm": 6.82,
-            "meshToLabelPercent": 99.5,
-            "labelToMeshPercent": 99.4,
-            "points": 20091
+            "nsdPercent": 98.7,
+            "meanMm": 0.47,
+            "hd95Mm": 1.02,
+            "maxMm": 6.84,
+            "meshToLabelPercent": 97.7,
+            "labelToMeshPercent": 98.8,
+            "points": 12327
           },
           {
             "key": "lv_epicardium",
@@ -608,11 +776,11 @@
             "source": "CT label boundary",
             "nsdPercent": 99.6,
             "meanMm": 0.38,
-            "hd95Mm": 0.83,
-            "maxMm": 26.5,
-            "meshToLabelPercent": 98.1,
-            "labelToMeshPercent": 99.9,
-            "points": 46930
+            "hd95Mm": 0.81,
+            "maxMm": 26.1,
+            "meshToLabelPercent": 97.8,
+            "labelToMeshPercent": 100.0,
+            "points": 49936
           },
           {
             "key": "other_walls",
@@ -622,18 +790,245 @@
           }
         ],
         "overall": {
-          "nsdPercent": 99.8,
+          "nsdPercent": 99.7,
           "meanMm": 0.38,
-          "hd95MmWorst": 1.07,
+          "hd95MmWorst": 1.02,
           "toleranceMm": 1.5,
           "structures": 7
-        }
+        },
+        "scoredSourceVoxels": 228551
+      },
+      "low": {
+        "toleranceMm": 1.5,
+        "structures": [
+          {
+            "key": "lv_cavity",
+            "name": "LV cavity (endocardium)",
+            "source": "CT label boundary",
+            "nsdPercent": 99.9,
+            "meanMm": 0.36,
+            "hd95Mm": 0.81,
+            "maxMm": 5.43,
+            "meshToLabelPercent": 99.3,
+            "labelToMeshPercent": 100.0,
+            "points": 42856
+          },
+          {
+            "key": "rv",
+            "name": "RV blood pool",
+            "source": "CT label boundary",
+            "nsdPercent": 99.7,
+            "meanMm": 0.37,
+            "hd95Mm": 0.8,
+            "maxMm": 4.16,
+            "meshToLabelPercent": 99.7,
+            "labelToMeshPercent": 99.6,
+            "points": 44537
+          },
+          {
+            "key": "la",
+            "name": "Left atrium",
+            "source": "CT label boundary",
+            "nsdPercent": 99.6,
+            "meanMm": 0.38,
+            "hd95Mm": 0.85,
+            "maxMm": 6.04,
+            "meshToLabelPercent": 99.8,
+            "labelToMeshPercent": 99.6,
+            "points": 41858
+          },
+          {
+            "key": "ra",
+            "name": "Right atrium",
+            "source": "CT label boundary",
+            "nsdPercent": 99.9,
+            "meanMm": 0.37,
+            "hd95Mm": 0.82,
+            "maxMm": 2.89,
+            "meshToLabelPercent": 99.0,
+            "labelToMeshPercent": 100.0,
+            "points": 42346
+          },
+          {
+            "key": "aorta",
+            "name": "Aorta lumen",
+            "source": "CT label boundary",
+            "nsdPercent": 99.8,
+            "meanMm": 0.4,
+            "hd95Mm": 0.84,
+            "maxMm": 10.65,
+            "meshToLabelPercent": 99.1,
+            "labelToMeshPercent": 99.9,
+            "points": 43013
+          },
+          {
+            "key": "pulmonary_artery",
+            "name": "Pulmonary artery lumen",
+            "source": "CT label boundary",
+            "nsdPercent": 98.5,
+            "meanMm": 0.49,
+            "hd95Mm": 1.03,
+            "maxMm": 6.83,
+            "meshToLabelPercent": 97.0,
+            "labelToMeshPercent": 98.6,
+            "points": 11039
+          },
+          {
+            "key": "lv_epicardium",
+            "name": "LV epicardium (myocardium outer)",
+            "source": "CT label boundary",
+            "nsdPercent": 99.8,
+            "meanMm": 0.37,
+            "hd95Mm": 0.81,
+            "maxMm": 13.5,
+            "meshToLabelPercent": 97.7,
+            "labelToMeshPercent": 100.0,
+            "points": 43940
+          },
+          {
+            "key": "other_walls",
+            "name": "RV, atrial and vessel outer walls",
+            "source": "fixed thickness, not from imaging",
+            "nsdPercent": null
+          }
+        ],
+        "overall": {
+          "nsdPercent": 99.7,
+          "meanMm": 0.38,
+          "hd95MmWorst": 1.03,
+          "toleranceMm": 1.5,
+          "structures": 7
+        },
+        "scoredSourceVoxels": 228551
       }
     },
     "volume": {
       "lvCavityMeshMl": 130.6,
       "lvCavityLabelMl": 132.2,
       "errorPercent": -1.2
+    },
+    "measuredOnly": true,
+    "scoredSourceVoxels": 228551,
+    "belowGate": false,
+    "reason": "",
+    "atlas": {
+      "joinGapMm": {
+        "aorta": 0.0,
+        "pulmonary_artery": 0.0,
+        "vena_cava": 0.0,
+        "pulmonary_veins": 0.0
+      },
+      "shiftMm": {},
+      "beyondHeartMm": 25.0,
+      "droppedAtlasVoxels": {
+        "aorta": 3135,
+        "pulmonary_artery": 2,
+        "vena_cava": 1177,
+        "pulmonary_veins": 3306
+      },
+      "coronary": {
+        "LM": {
+          "source": "atlas",
+          "maxShiftMm": 3.1,
+          "maxInsideMm": 3.1
+        },
+        "LAD": {
+          "source": "atlas",
+          "maxShiftMm": 6.5,
+          "maxInsideMm": 1.6
+        },
+        "D1": {
+          "source": "atlas",
+          "maxShiftMm": 3.0,
+          "maxInsideMm": 0.0
+        },
+        "D2": {
+          "source": "atlas",
+          "maxShiftMm": 2.2,
+          "maxInsideMm": 0.9
+        },
+        "D3": {
+          "source": "atlas",
+          "maxShiftMm": 3.4,
+          "maxInsideMm": 0.0
+        },
+        "D4": {
+          "source": "atlas",
+          "maxShiftMm": 6.2,
+          "maxInsideMm": 0.4
+        },
+        "conal": {
+          "source": "atlas",
+          "maxShiftMm": 1.6,
+          "maxInsideMm": 0.8
+        },
+        "LCx": {
+          "source": "atlas",
+          "maxShiftMm": 8.6,
+          "maxInsideMm": 0.1
+        },
+        "RCA": {
+          "source": "atlas",
+          "maxShiftMm": 11.7,
+          "maxInsideMm": 1.2
+        },
+        "acute_marginal": {
+          "source": "atlas",
+          "maxShiftMm": 3.2,
+          "maxInsideMm": 0.2
+        },
+        "PDA": {
+          "source": "atlas",
+          "maxShiftMm": 7.0,
+          "maxInsideMm": 1.6
+        },
+        "PLB": {
+          "source": "atlas",
+          "maxShiftMm": 8.0,
+          "maxInsideMm": 0.0
+        },
+        "great_cardiac_vein": {
+          "source": "atlas",
+          "maxShiftMm": 7.7,
+          "maxInsideMm": 0.9
+        },
+        "middle_cardiac_vein": {
+          "source": "atlas",
+          "maxShiftMm": 10.3,
+          "maxInsideMm": 1.7
+        },
+        "small_cardiac_vein": {
+          "source": "atlas",
+          "maxShiftMm": 5.1,
+          "maxInsideMm": 1.4
+        },
+        "posterior_lv_vein": {
+          "source": "atlas",
+          "maxShiftMm": 8.0,
+          "maxInsideMm": 4.1
+        },
+        "left_marginal_vein": {
+          "source": "atlas",
+          "maxShiftMm": 10.1,
+          "maxInsideMm": 0.0
+        },
+        "coronary_sinus": {
+          "source": "atlas",
+          "drawn": false,
+          "reason": "atlas fit failed: registered course is 9.1 mm inside / 11.0 mm off the epicardium (limits 6.0 / 12.0 mm); not drawn"
+        },
+        "OM": {
+          "source": "illustrative"
+        },
+        "SA_nodal": {
+          "source": "illustrative"
+        },
+        "_registration": {
+          "scale": 1.292,
+          "method": "landmark similarity + thin-plate spline (6 ICP rounds), surface pairs from the atlas outer shell"
+        }
+      },
+      "note": "atlas layers are fitted, not measured: reported here, never in the COR-Fit gate"
     }
   },
   "imaging": {
@@ -641,9 +1036,9 @@
     "image": "/models/ct/s0338/ct.u8.gz",
     "labels": "/models/ct/s0338/ctlabels.u8.gz",
     "dims": [
-      119,
-      126,
-      102
+      129,
+      133,
+      156
     ],
     "order": "C (i slowest, k fastest)",
     "spacingMm": [
@@ -656,19 +1051,19 @@
         -0.15,
         0.0,
         0.0,
-        8.903605
+        9.653671
       ],
       [
         0.0,
         0.0,
         0.15,
-        -7.925
+        -11.949961
       ],
       [
         0.0,
         0.15,
         0.0,
-        -9.425117
+        -9.975053
       ],
       [
         0.0,
@@ -747,7 +1142,7 @@
           0.36,
           0.55
         ],
-        "volumeMl": 86.3
+        "volumeMl": 149.5
       },
       {
         "index": 7,
@@ -758,7 +1153,7 @@
           0.58,
           0.44
         ],
-        "volumeMl": 8.6
+        "volumeMl": 36.2
       }
     ]
   }
