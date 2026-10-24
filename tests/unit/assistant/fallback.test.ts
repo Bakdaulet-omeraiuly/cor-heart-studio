@@ -126,16 +126,30 @@ describe("fallbackText — content", () => {
     );
   });
 
+  it("cites several red flags in order, each by its R# id, and stays guard-safe without findings", () => {
+    const a: Assessment = {
+      ...EMPTY_WITH_MISSING,
+      redFlags: ["Severe aortic stenosis with reported symptoms: urgent specialist review.", "QTc prolonged: urgent review."],
+    };
+    const ided = withIds(a);
+    const text = fallbackText(ided);
+    expect(text).toContain("R1 Severe aortic stenosis with reported symptoms: urgent specialist review.");
+    expect(text).toContain("R2 QTc prolonged: urgent review.");
+    expect(text.match(/\bR\d+\b/g)).toEqual(["R1", "R2"]);
+    expect(guard(text, ided, patientFor("SYN-999"))).toEqual({ ok: true });
+  });
+
   it("cites only M# ids the guard knows", () => {
     const ided = withIds(EMPTY_WITH_MISSING);
     const cited = fallbackText(ided).match(/\bM\d+\b/g);
     expect(cited).toEqual(ided.missing.map((m) => m.id));
   });
 
-  it("cites a finding id on a clinical red-flag line and never echoes quoted record text", () => {
+  it("cites each red flag by its own R# id and never echoes quoted record text", () => {
     const redFlag = fallbackText(withIds(RED_FLAG));
-    // The red flag is a clinical claim (number + grade word), so it carries F1.
-    expect(redFlag).toContain("F1 Ejection fraction 22% with severe systolic dysfunction");
+    // The red flag is a clinical claim (number + grade word), so it carries its R1 id, not the finding's.
+    expect(redFlag).toContain("R1 Ejection fraction 22% with severe systolic dysfunction");
+    expect(redFlag).not.toContain("F1 Ejection fraction");
 
     const injection = fallbackText(withIds(INJECTION_IN_RECORD_TEXT));
     // String evidence renders its field label only, never the injected free text.

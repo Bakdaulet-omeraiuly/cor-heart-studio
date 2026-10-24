@@ -8,16 +8,17 @@
 //     `Evidence.unit`. `allowedNumbers()` derives the allowed set from exactly
 //     those evidence values, and we never add precision the stored value does not
 //     have, so the guard's number check always matches.
-//   - Every clinical sentence carries a real `F#`/`E#` id. Each finding line
+//   - Every clinical sentence carries a real `F#`/`E#`/`R#` id. Each finding line
 //     starts with its finding id and cites each evidence item's id inline, so the
 //     guard's citation check always finds a known id next to the grade word,
 //     finding label and numbers on that line.
 //   - The `Missing:` line cites each item by its `M#` id (`Missing: M1 <field>,
 //     M2 <field>.`). The guard strips id tokens before extracting numbers and
 //     counts known `M#` ids as citations, so the line passes either way.
-//   - Other non-clinical lines (plainly-rendered red flags, the disclaimer) carry
-//     no number, grade word or finding label, so the guard does not require a
-//     citation for them.
+//   - Each red-flag line starts with the flag's own `R#` id (`R1 <text>`); the
+//     guard counts known `R#` ids as citations.
+//   - The disclaimer carries no number, grade word or finding label, so the guard
+//     does not require a citation for it.
 //
 // Design choices that keep the text guard-safe:
 //
@@ -30,10 +31,8 @@
 //     field name only — its free text is never echoed. That avoids repeating
 //     record prose (which may itself be adversarial) and keeps the line to known
 //     ids plus the field label.
-//   - A red-flag line is clinical (it names a grade and a number), so it is
-//     prefixed with the first finding's id when the Assessment has a finding; with
-//     no findings the red flag is rendered plainly (in practice a red flag always
-//     accompanies a finding, so the clinical-without-citation case does not arise).
+//   - A red-flag line is clinical (it may name a grade and a number), so it is
+//     prefixed with the flag's own `R#` id, whether or not there are findings.
 import type { IdedAssessment } from "./ids";
 
 type IdedEvidence = IdedAssessment["findings"][number]["evidence"][number];
@@ -119,13 +118,9 @@ export function fallbackText(a: IdedAssessment): string {
     lines.push(`Missing: ${fields}.`);
   }
 
-  if (a.redFlags.length > 0) {
-    // A red flag is a clinical claim, so cite the first finding's id when there
-    // is one; otherwise render it plainly.
-    const findingId = a.findings[0]?.id ?? a.differential[0]?.id;
-    for (const flag of a.redFlags) {
-      lines.push(findingId ? `${findingId} ${flag}` : flag);
-    }
+  // A red flag is a clinical claim, so each line cites the flag's own `R#` id.
+  for (const flag of a.redFlags) {
+    lines.push(`${flag.id} ${flag.text}`);
   }
 
   if (a.disclaimer) {

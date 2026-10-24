@@ -1,12 +1,17 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   allowedNumbers,
   extractNumbers,
   guard,
+  hasClinicalTerm,
   matchNumber,
   type NumberToken,
 } from "@/app/api/assistant/guard";
 import { withIds } from "@/app/api/assistant/ids";
+import { assess } from "@/app/api/assistant/engine";
+import { normalizeRecord } from "@/domain/normalization/normalize";
 import { AORTIC_STENOSIS } from "@/app/api/assistant/__fixtures__/assess";
 import type { Assessment } from "@/app/api/assistant/engine";
 import type {
@@ -65,7 +70,8 @@ const ASSESSMENT: Assessment = {
       why: "Indexed valve area confirms severe grading in small-body patients.",
     },
   ],
-  redFlags: [],
+  // One red flag → R1, so the `[R#]` citation cases have a known id.
+  redFlags: ["Severe aortic stenosis with reported symptoms: urgent specialist review."],
   disclaimer: "Not a diagnosis.",
 };
 
@@ -234,6 +240,10 @@ describe("extractNumbers — parsing", () => {
 
   it("ignores digits inside missing-item ids ([M2], bare M1)", () => {
     expect(extractNumbers("Not recorded [M2]; see also M1.")).toEqual([]);
+  });
+
+  it("ignores digits inside red-flag ids ([R1], bare R2)", () => {
+    expect(extractNumbers("Referral advised [R1]; see also R2.")).toEqual([]);
   });
 
   it("keeps a real number alongside stripped ids", () => {
@@ -455,6 +465,21 @@ describe("guard — end to end", () => {
       expected: { ok: true },
     },
     {
+      name: "a known [R#] counts as the citation of a red-flag sentence",
+      text: "Severe aortic stenosis is flagged, so urgent specialist referral is advised [R1].",
+      expected: { ok: true },
+    },
+    {
+      name: "an unknown R# is an unknown id (and does not cite the sentence)",
+      text: "Severe aortic stenosis is flagged, so urgent specialist referral is advised [R2].",
+      expected: { ok: false, reasons: ["unknown_id", "uncited"] },
+    },
+    {
+      name: "an R# citation after the full stop cites the sentence before it",
+      text: "Severe aortic stenosis is flagged. [R1]\nPeak velocity is 1.3 m/s [E1].",
+      expected: { ok: true },
+    },
+    {
       // Live check (task 7.4): the model writes the citation after the full stop.
       name: "a citation after the full stop cites the sentence before it",
       text: "The findings are severe. [E1]\nPeak velocity is 1.3 m/s. [E1]",
@@ -507,6 +532,134 @@ describe("guard — SYN-004 aortic stenosis fixture", () => {
     expect(values).toContain(2020); // "ACC/AHA 2020 …" source
     expect(values).toContain(1); // "R-VALVE-STEN-01" rule id
     expect(values).not.toContain(4);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Clinical terms (task 14.3, Requirement 6.4)
+// ---------------------------------------------------------------------------
+
+describe("hasClinicalTerm — whole words, sensible forms", () => {
+  it.each([
+    "QT", "QTc", "QT/QTc", "PR interval", "QRS", "EF", "LVEF", "ejection fraction",
+    "ventricle", "ventricles", "ventricular", "atrium", "atria", "atrial", "valve", "valves",
+    "stenosis", "stenoses", "regurgitation", "hypertrophy", "coronary", "oxygen saturation",
+    "Blood Pressure", "heart rate", "hippocampus", "hippocampal", "atrophy",
+  ])("matches %s", (text) => {
+    expect(hasClinicalTerm(text)).toBe(true);
+  });
+
+  it.each([
+    "prior", "effect", "previous", "pr", "ef", "qt", "Prior results", "the effect of time",
+    "QTxyz", "valveFindings", "ventriclesque",
+  ])("does not match %s", (text) => {
+    expect(hasClinicalTerm(text)).toBe(false);
+  });
+});
+
+describe("guard — clinical terms need a citation", () => {
+  const cases: {
+    name: string;
+    text: string;
+    expected: { ok: true } | { ok: false; reasons: ("number" | "unknown_id" | "uncited")[] };
+  }[] = [
+    {
+      name: "an uncited QT / oxygen-saturation claim is rejected",
+      text: "Low oxygen saturation can strain the heart and lengthen the QT interval.",
+      expected: { ok: false, reasons: ["uncited"] },
+    },
+    {
+      name: "a refusal that only names the topic is accepted",
+      text: "Oxygen saturation is not something I assess.",
+      expected: { ok: true },
+    },
+    {
+      name: "an I-first refusal naming the topic is accepted",
+      text: "I don't assess blood pressure here.",
+      expected: { ok: true },
+    },
+    {
+      name: "a 'what I can help with' list of clinical terms is accepted",
+      text: "I can help with aortic stenosis, LV function, coronary stenosis and QTc.",
+      expected: { ok: true },
+    },
+    {
+      name: "refusal plus help list in one reply is accepted",
+      text: "Oxygen saturation is not something I assess. I can help with aortic stenosis, LV function, coronary stenosis and QTc.",
+      expected: { ok: true },
+    },
+    {
+      name: "a claim dressed as a refusal is still rejected",
+      text: "Low oxygen saturation lengthens the QT interval, which is not something I assess.",
+      expected: { ok: false, reasons: ["uncited"] },
+    },
+    {
+      name: "a claim tacked onto a help list is still rejected",
+      text: "I can help with coronary stenosis because it causes heart failure.",
+      expected: { ok: false, reasons: ["uncited"] },
+    },
+    {
+      name: "an uncited EF sentence is rejected",
+      text: "The EF looks preserved.",
+      expected: { ok: false, reasons: ["uncited"] },
+    },
+    {
+      name: "an uncited ventricle sentence is rejected",
+      text: "The left ventricle appears enlarged.",
+      expected: { ok: false, reasons: ["uncited"] },
+    },
+    {
+      name: "an uncited hippocampus atrophy sentence is rejected",
+      text: "There is hippocampus atrophy on this scan.",
+      expected: { ok: false, reasons: ["uncited"] },
+    },
+    {
+      name: "a cited clinical-term sentence is accepted",
+      text: "The aortic valve is the main finding [F1].",
+      expected: { ok: true },
+    },
+    {
+      name: "ordinary words like prior / effect / previous do not trigger",
+      text: "The prior answer had no effect on the previous summary.",
+      expected: { ok: true },
+    },
+  ];
+
+  it.each(cases)("$name", ({ text, expected }) => {
+    expect(guard(text, IDED, PATIENT)).toEqual(expected);
+  });
+});
+
+describe("guard — real engine on the SYN-004 sample", () => {
+  const samples = (
+    JSON.parse(readFileSync(resolve(process.cwd(), "public/samples/synthetic-patients.json"), "utf8")) as {
+      patients: { patientId?: string }[];
+    }
+  ).patients;
+  const n = normalizeRecord(samples.find((p) => p.patientId === "SYN-004"));
+  if (!n.ok) throw new Error("SYN-004 sample does not normalize");
+  const ided = withIds(assess(n.patient.record));
+
+  it("the engine raises a red flag for SYN-004, stamped R1", () => {
+    expect(ided.redFlags.map((f) => f.id)).toEqual(["R1"]);
+  });
+
+  it("accepts a referral sentence cited by its R1 red flag", () => {
+    expect(guard("Urgent specialist referral is advised [R1].", ided, n.patient)).toEqual({ ok: true });
+  });
+
+  it("rejects the same sentence citing a red flag that does not exist", () => {
+    expect(guard("Urgent specialist referral is advised [R2].", ided, n.patient)).toEqual({
+      ok: false,
+      reasons: ["unknown_id"],
+    });
+  });
+
+  it("rejects an uncited valve claim for SYN-004", () => {
+    expect(guard("The aortic valve needs replacing soon.", ided, n.patient)).toEqual({
+      ok: false,
+      reasons: ["uncited"],
+    });
   });
 });
 

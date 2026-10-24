@@ -22,6 +22,12 @@ const missing: Ref = {
   field: "observations.aorticValveAreaIndexed",
   why: "Indexed valve area confirms severe grading.",
 };
+const redFlag: Ref = {
+  id: "R1",
+  kind: "redFlag",
+  label: "Red flag",
+  text: "Severe aortic stenosis with reported symptoms: urgent specialist review.",
+};
 
 describe("splitReply", () => {
   it("splits bracketed ids into ref parts and keeps the text around them", () => {
@@ -50,6 +56,17 @@ describe("splitReply", () => {
       { kind: "text", text: ". Grade " },
       { kind: "ref", id: "F1" },
       { kind: "ref", id: "M2" },
+      { kind: "text", text: "." },
+    ]);
+  });
+
+  it("splits [R#] citations, alone and grouped, into ref parts", () => {
+    expect(splitReply("Urgent specialist referral is advised [R1]. Severe AS [F1, R2].")).toEqual([
+      { kind: "text", text: "Urgent specialist referral is advised " },
+      { kind: "ref", id: "R1" },
+      { kind: "text", text: ". Severe AS " },
+      { kind: "ref", id: "F1" },
+      { kind: "ref", id: "R2" },
       { kind: "text", text: "." },
     ]);
   });
@@ -123,7 +140,13 @@ describe("ref formatting", () => {
     ]);
   });
 
+  it("formats a red-flag ref as label · text", () => {
+    expect(refValue(redFlag)).toBeNull();
+    expect(refDetails(redFlag)).toEqual(["Red flag", "Severe aortic stenosis with reported symptoms: urgent specialist review."]);
+  });
+
   it("names id buttons by kind", () => {
+    expect(refAccessibleName("R1", redFlag)).toBe("Red flag R1");
     expect(refAccessibleName("M1", missing)).toBe("Missing data M1");
     expect(refAccessibleName("E1", evidence)).toBe("Evidence E1");
     expect(refAccessibleName("F1", finding)).toBe("Finding F1");

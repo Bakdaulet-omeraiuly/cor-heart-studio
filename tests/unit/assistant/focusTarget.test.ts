@@ -93,6 +93,8 @@ describe("focusTarget — safe no-op (Req 11.3)", () => {
     ["no organ", ref({ organ: undefined, target: "lv" })],
     ["missing-data ref (M#)", ref({ id: "M1", kind: "missing", label: "Missing data", field: "observations.lvMassIndex", why: "Indexed LV mass.", organ: undefined })],
     ["missing-data ref even with a heart target", ref({ id: "M1", kind: "missing", label: "Missing data", target: "lv" })],
+    ["red-flag ref (R#)", ref({ id: "R1", kind: "redFlag", label: "Red flag", text: "Urgent specialist review.", organ: undefined })],
+    ["red-flag ref even with a heart target", ref({ id: "R1", kind: "redFlag", label: "Red flag", target: "aortic_valve" })],
   ])("%s → none, no store calls", (_name, r) => {
     const { calls, deps } = recorder();
     expect(focusTarget(r, deps)).toEqual({ kind: "none" });
