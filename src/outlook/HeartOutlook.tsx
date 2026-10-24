@@ -241,7 +241,7 @@ function LvhOutlook({ entry }: { entry: PatientEntry }) {
         <dt className="text-faint">{active.length ? "On treatment" : "Natural course"}</dt><dd className="num">{fmtSigned(later.lvmiChange, 1)} g/m²</dd>
         <dt className="text-faint">Share of the study&apos;s follow-up reached</dt><dd className="num">{Math.round(later.fractionOfFollowUp * 100)} %</dd>
       </dl>
-      <p className="mt-1 text-[10px] leading-snug text-faint">Between today and the end of a study the change is interpolated linearly (assumption); after it the change is held{later.heldBeyondEvidence ? " (now), because there are no trial data beyond" : ", because there are no trial data beyond"}.</p>
+      <p className="mt-1 text-[10px] leading-snug text-faint">Between today and the end of a study the change is interpolated linearly (assumption). {later.heldBeyondEvidence ? "Now past the study's follow-up, so the change is held at its last measured value: there are no trial data beyond." : "After the study's follow-up the change is held: there are no trial data beyond."}</p>
 
       <H3>LV mass index change by drug class</H3>
       <table className="w-full text-[11px]">
