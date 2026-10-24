@@ -70,8 +70,11 @@ export function HeartViewport() {
         </div>
       )}
       <SceneToolbar onFallback={() => setForceFallback(true)} tierName={tier.name} lod={assets.high ? "high" : "low"} />
-      <Legend />
-      <PlaybackBar />
+      {/* legend and player share one bottom column so they can never overlap each other */}
+      <div className="pointer-events-none absolute inset-x-3 bottom-3 z-20 flex flex-col items-start gap-2">
+        <Legend />
+        <PlaybackBar />
+      </div>
     </div>
   );
 }

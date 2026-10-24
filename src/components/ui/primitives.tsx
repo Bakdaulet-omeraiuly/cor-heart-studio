@@ -110,7 +110,7 @@ export function Switch({ checked, onChange, label, hint }: { checked: boolean; o
         onClick={() => onChange(!checked)}
         className={cx("relative h-5 w-9 shrink-0 rounded-full transition-colors", checked ? "bg-accent" : "bg-panel-3 ring-1 ring-line-strong")}
       >
-        <span className={cx("absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform", checked ? "translate-x-4.5" : "translate-x-0.5")} />
+        <span className={cx("absolute left-0 top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform", checked ? "translate-x-4.5" : "translate-x-0.5")} />
       </button>
     </label>
   );

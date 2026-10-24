@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { Camera, Eye, EyeOff, Focus, Layers, MonitorSmartphone, RotateCcw, Scissors, ScanEye } from "lucide-react";
 import { STRUCTURE_IDS, STRUCTURE_LABEL, type StructureId } from "@/domain/mapping/types";
 import { useApp, type CameraPreset, type CutAxis, type Layers as L, type Quality } from "@/state/store";
@@ -19,25 +20,60 @@ const PRESETS: { id: CameraPreset; label: string; key: string }[] = [
   { id: "aortic_closeup", label: "Aortic close-up", key: "9" },
 ];
 
+/**
+ * Popover rendered in a portal with fixed positioning, clamped to the window, so it is never clipped by
+ * the viewport (overflow hidden) or hidden under the inspector / playback bar on narrow screens.
+ */
 export function Popover({ button, children, align = "left", label }: { button: (open: boolean) => ReactNode; children: ReactNode; align?: "left" | "right"; label: string }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ left: number; top: number; maxH: number; width: number } | null>(null);
+  const anchor = useRef<HTMLDivElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    const place = () => {
+      const r = anchor.current?.getBoundingClientRect();
+      if (!r) return;
+      const margin = 8;
+      const width = Math.min(300, window.innerWidth - margin * 2);
+      let left = align === "right" ? r.right - width : r.left;
+      left = Math.max(margin, Math.min(left, window.innerWidth - width - margin));
+      const top = r.bottom + 6;
+      setPos({ left, top, width, maxH: Math.max(160, window.innerHeight - top - margin) });
+    };
+    place();
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    return () => { window.removeEventListener("resize", place); window.removeEventListener("scroll", place, true); };
+  }, [open, align]);
+
   useEffect(() => {
     if (!open) return;
     const close = (e: MouseEvent | KeyboardEvent) => {
-      if (e instanceof KeyboardEvent ? e.key === "Escape" : !ref.current?.contains(e.target as Node)) setOpen(false);
+      if (e instanceof KeyboardEvent) { if (e.key === "Escape") setOpen(false); return; }
+      const t = e.target as Node;
+      if (!anchor.current?.contains(t) && !panel.current?.contains(t)) setOpen(false);
     };
     document.addEventListener("mousedown", close);
     document.addEventListener("keydown", close);
     return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", close); };
   }, [open]);
+
   return (
-    <div ref={ref} className="relative">
+    <div ref={anchor} className="relative">
       <div onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-haspopup="dialog">{button(open)}</div>
-      {open && (
-        <div role="dialog" aria-label={label} className={cx("absolute top-10 z-30 w-72 rounded-xl border border-line bg-panel p-3 shadow-[var(--shadow)]", align === "right" ? "right-0" : "left-0")}>
+      {open && pos && createPortal(
+        <div
+          ref={panel}
+          role="dialog"
+          aria-label={label}
+          style={{ position: "fixed", left: pos.left, top: pos.top, width: pos.width, maxHeight: pos.maxH }}
+          className="z-[60] overflow-y-auto rounded-xl border border-line bg-panel p-3 shadow-[var(--shadow)] scroll-thin"
+        >
           {children}
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );
@@ -116,7 +152,7 @@ export function SceneToolbar({ onFallback, tierName, lod }: { onFallback: () => 
         </Popover>
         <IconButton label="X-ray outer shell" pressed={s.xray} onClick={() => s.set({ xray: !s.xray })}><ScanEye className="h-4 w-4" /></IconButton>
         <Popover label="Layers and structures" button={(open) => <IconButton label="Layers and structures" pressed={open}><Layers className="h-4 w-4" /></IconButton>}>
-          <div className="max-h-[60vh] overflow-auto pr-1 scroll-thin">
+          <div>
             {LAYER_ROWS.map((r) => <Switch key={r.k} label={r.label} hint={r.hint} checked={s.layers[r.k]} onChange={(v) => s.setLayer(r.k, v)} />)}
             <div className="mt-3 border-t border-line pt-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-faint">Structures</div>
             <ul className="mt-1">

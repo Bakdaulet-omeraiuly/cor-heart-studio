@@ -46,11 +46,11 @@ export function PlaybackBar() {
   const togglePlay = () => s.set(s.playing ? { playing: false, scrubPhase: live } : { playing: true });
   const seek = (p: number) => { getClock("main").phase = p; s.set({ playing: false, scrubPhase: p }); };
   return (
-    <div className="pointer-events-auto absolute inset-x-3 bottom-3 z-20 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-line bg-panel/92 px-3 py-2 shadow-[var(--shadow)] backdrop-blur">
+    <div className="pointer-events-auto flex w-full flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-line bg-panel/92 px-3 py-2 shadow-[var(--shadow)] backdrop-blur">
       <IconButton label={s.playing ? "Pause (Space)" : "Play (Space)"} onClick={togglePlay} className="h-9 w-9 bg-panel-3 text-ink">
         {s.playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
       </IconButton>
-      <div className="flex min-w-[220px] flex-1 flex-col gap-1">
+      <div className="flex min-w-[180px] flex-1 flex-col gap-1">
         <div className="flex items-center justify-between text-[12px]">
           <span aria-live="polite" className="font-medium">
             <span className="text-faint">Phase · </span>{PHASE_NAMES[cyc.phase]}
@@ -62,7 +62,7 @@ export function PlaybackBar() {
         </div>
         <input aria-label="Cardiac cycle phase" type="range" min={0} max={0.999} step={0.001} value={phase} onChange={(e) => seek(Number(e.target.value))} />
       </div>
-      <div className="hidden md:block"><CycleDiagram phases={phases} phase={phase} /></div>
+      <div className="hidden xl:block"><CycleDiagram phases={phases} phase={phase} /></div>
       <div className="flex flex-col gap-1 text-[12px]">
         <span className="flex items-center gap-1.5"><span className="num text-[15px] font-semibold">{heartRateBpm}</span> bpm <EvidenceBadge evidence={evidence} compact /></span>
         <label className="flex items-center gap-1.5 text-muted">

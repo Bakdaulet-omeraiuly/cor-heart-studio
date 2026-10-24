@@ -10,9 +10,10 @@ const REGION_COLORS: [string, string][] = [
 
 export function Legend() {
   const mode = useApp((s) => s.mode);
-  const [open, setOpen] = useState(true);
+  // open by default only where there is room; on smaller screens it starts collapsed
+  const [open, setOpen] = useState(() => typeof window !== "undefined" && window.innerWidth >= 1400 && window.innerHeight >= 860);
   return (
-    <div className="pointer-events-auto absolute bottom-[92px] left-3 z-10 max-w-[260px] rounded-xl border border-line bg-panel/90 text-[11px] shadow-[var(--shadow)] backdrop-blur">
+    <div className="pointer-events-auto max-w-[260px] rounded-xl border border-line bg-panel/90 text-[11px] shadow-[var(--shadow)] backdrop-blur">
       <button className="flex w-full items-center gap-1.5 px-2.5 py-1.5 font-medium text-muted hover:text-ink" aria-expanded={open} onClick={() => setOpen(!open)}>
         <Info className="h-3.5 w-3.5" /> Legend
       </button>

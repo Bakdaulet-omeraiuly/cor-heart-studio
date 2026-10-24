@@ -41,7 +41,7 @@ export default function Workspace() {
           </IconButton>
         </div>
       </header>
-      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,42dvh)_auto_auto] overflow-y-auto lg:grid-cols-[260px_minmax(0,1fr)_360px] lg:grid-rows-1 lg:overflow-hidden">
+      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(420px,68dvh)_auto_auto] overflow-y-auto lg:grid-cols-[260px_minmax(0,1fr)_360px] lg:grid-rows-1 lg:overflow-hidden">
         <div className="order-2 min-h-0 border-line bg-panel lg:order-1 lg:border-r"><PatientLibrary /></div>
         <main className="order-1 min-h-0 lg:order-2" aria-label="3D heart workspace">
           {workspace === "compare" ? <CompareWorkspace /> : <HeartViewport />}
