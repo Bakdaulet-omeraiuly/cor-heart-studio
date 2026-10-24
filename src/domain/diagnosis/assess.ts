@@ -2,6 +2,7 @@
 // Spec: .kiro/specs/diagnosis-engine/. Sources and thresholds: docs/research/diagnosis-engine.md.
 import { normalizeRecord } from "../normalization/normalize";
 import { Ctx } from "./context";
+import { assessLv } from "./lv";
 import type { Assess, Assessment } from "./types";
 import { assessValves } from "./valves";
 
@@ -17,5 +18,6 @@ export const assess: Assess = (record): Assessment => {
   const c = new Ctx(n.patient);
   // phase 1 — fixed order
   assessValves(c);
+  assessLv(c, true);
   return { findings: c.findings, differential: c.differential, missing: c.missing, redFlags: c.redFlags, disclaimer: DISCLAIMER };
 };
