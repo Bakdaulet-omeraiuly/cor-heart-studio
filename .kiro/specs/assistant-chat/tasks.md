@@ -61,7 +61,7 @@ Before the first task, read `node_modules/next/dist/docs/01-app/01-getting-start
     pipeline parse → key check → normalize → assess → ids → runChat (45 s) → guard → response; error mapping table;
     `cache-control: no-store`; one content-free log line.
     - _Requirements: 2.1, 2.5, 3.1, 4.2, 4.3, 4.6, 6.6, 7.1, 7.2, 7.3, 8.1, 8.3, 9.1, 9.2, 9.3_
-  - [ ] 7.3 Unit tests `tests/unit/assistant/route.test.ts` (ok, fallback, 503 without key, 400, 413, 429).
+  - [x] 7.3 Unit tests `tests/unit/assistant/route.test.ts` (ok, fallback, 503 without key, 400, 413, 429).
     - _Requirements: 12.1_
   - [ ] 7.4 Manual check with a local key in `.env.local` (never committed): ask about SYN-004 and SYN-003.
     - _Requirements: 4.1_
