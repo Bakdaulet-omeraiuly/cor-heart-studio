@@ -5,6 +5,7 @@ import { assessBrain, hasBrainData } from "./brain";
 import { assessChambers } from "./chambers";
 import { Ctx } from "./context";
 import { assessCoronary } from "./coronary";
+import { assessDifferential } from "./differential";
 import { assessEcg } from "./ecg";
 import { assessLv } from "./lv";
 import type { Assess, Assessment } from "./types";
@@ -34,5 +35,7 @@ export const assess: Assess = (record): Assessment => {
   assessCoronary(c);
   assessEcg(c);
   assessBrain(c);
+  // phase 2
+  assessDifferential(c);
   return { findings: c.findings, differential: c.differential, missing: c.missing, redFlags: c.redFlags, disclaimer: DISCLAIMER };
 };
