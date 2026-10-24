@@ -69,3 +69,21 @@ How the numbers got here (each step measured by this report):
 - Where the LV cavity label has no myocardium around it (≈ 6 % of its boundary, mostly the valve
   plane) a 1.2 mm minimal wall is added, below the 1.5 mm tolerance.
 - The cortex GLB is ~13 MB because it is not decimated.
+
+## Rodero template: why the great-artery stumps scored 66–84 % (diagnosed 2026-10-24)
+
+The Rodero 2021 source meshes end where the authors cut the great arteries. Rasterised, each lumen label then has
+two kinds of boundary faces: faces covered by the vessel's own measured wall, and faces that open straight onto
+background at the cut. Scored separately against the rendered mesh (0.75 mm tolerance, high LOD):
+
+| Lumen | Faces onto own wall | within 0.75 mm | Faces onto background (cut ends) | within 0.75 mm |
+|---|---|---|---|---|
+| Aorta | 75.5 % | 99.8 % | 24.5 % | 21.8 % |
+| Pulmonary artery | 52.0 % | 100.0 % | 48.0 % | 28.8 % |
+
+So the reconstruction of the vessels is accurate; the low score comes from the cut itself, which is not an
+anatomical surface (the rendered stump is an open tube). The atlas-grade heart fixes this by **reconstruction**,
+not by scoring less: the BodyParts3D continuation (cor_pipeline/vessels.py) continues each vessel past its cut, so
+the cut faces become interior faces between measured and atlas voxels of the same vessel. Scoring then counts every
+measured (CT/source) voxel's boundary except faces shared with the atlas continuation; atlas voxels themselves are
+reported separately (`fidelity.atlas`) and never enter the COR-Fit gate.
