@@ -2,6 +2,11 @@
 
 **Challenge track:** Healthcare & Biotech
 
+**Why this track:** it is clinical decision support for cardiology and neurology. The tool grades aortic stenosis,
+LV function, CAD-RADS, QTc and brain atrophy by current guidelines (ACC/AHA, ASE/EACVI, ESC, SCCT). It shows the
+evidence and DOI behind every statement, so a clinician can check it. All data is synthetic or open, and the app is
+labelled "not a medical device, no diagnosis".
+
 **Project.** COR Heart Studio is a 3D heart and brain viewer driven by a patient record. We added a guideline-based
 diagnostic assistant for clinicians, in two parts:
 - **The engine**, `assess(record) → Assessment`. It grades every condition the site shows by its guideline and adds a
