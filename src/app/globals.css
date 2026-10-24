@@ -1,26 +1,129 @@
 @import "tailwindcss";
 
+/* Design tokens. Dark is the default; light is opt-in via [data-theme="light"]. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #0b0d10;
+  --panel: #12151a;
+  --panel-2: #181c22;
+  --panel-3: #20252d;
+  --border: #262c35;
+  --border-strong: #353d48;
+  --text: #e8eaed;
+  --muted: #9aa3ae;
+  --faint: #6b7480;
+  --accent: #e8836b;
+  --accent-ink: #1a0d09;
+  --focus: #7cb4ff;
+  --warn: #f2b84b;
+  --error: #f0736a;
+  --info: #79b0ff;
+  --ok: #6cc59b;
+  --measured: #79b0ff;
+  --assessed: #c49cf2;
+  --derived: #6cc59b;
+  --illustrative: #f2b84b;
+  --unknown: #8b94a0;
+  --shadow: 0 10px 30px rgb(0 0 0 / 0.35);
+  color-scheme: dark;
+}
+[data-theme="light"] {
+  --bg: #eef0f3;
+  --panel: #ffffff;
+  --panel-2: #f6f7f9;
+  --panel-3: #eceef2;
+  --border: #dde1e7;
+  --border-strong: #c7cdd6;
+  --text: #15191f;
+  --muted: #535c68;
+  --faint: #7a838f;
+  --accent: #c4553c;
+  --accent-ink: #ffffff;
+  --focus: #1f6fe0;
+  --warn: #9a6400;
+  --error: #c23b30;
+  --info: #1f63c9;
+  --ok: #1d7f52;
+  --measured: #1f63c9;
+  --assessed: #7a3fc0;
+  --derived: #1d7f52;
+  --illustrative: #9a6400;
+  --unknown: #6b7480;
+  --shadow: 0 10px 30px rgb(20 30 50 / 0.12);
+  color-scheme: light;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-panel-3: var(--panel-3);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-ink: var(--text);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-warn: var(--warn);
+  --color-error: var(--error);
+  --color-info: var(--info);
+  --color-ok: var(--ok);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html, body { height: 100%; }
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
+.num { font-family: var(--font-geist-mono), ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+
+/* scrollbars */
+.scroll-thin { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+
+/* structure-anchored labels projected from 3D anchors */
+.structure-label {
+  display: inline-block;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  color: #f4f5f7;
+  background: rgb(14 16 20 / 0.72);
+  border: 1px solid rgb(255 255 255 / 0.14);
+  backdrop-filter: blur(4px);
+  transform: translateY(-14px);
+  transition: opacity 120ms;
+}
+.structure-label::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -10px;
+  width: 1px;
+  height: 9px;
+  background: rgb(255 255 255 / 0.45);
+}
+.structure-label.is-selected { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+[data-theme="light"] .structure-label { background: rgb(255 255 255 / 0.86); color: #15191f; border-color: rgb(0 0 0 / 0.12); }
+[data-theme="light"] .structure-label::after { background: rgb(0 0 0 / 0.35); }
+
+/* evidence badges: symbol + colour (colour is never the only signal) */
+.ev { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; line-height: 1; padding: 3px 6px; border-radius: 6px; border: 1px solid currentColor; white-space: nowrap; }
+.ev-reported_measurement { color: var(--measured); }
+.ev-reported_assessment { color: var(--assessed); }
+.ev-derived { color: var(--derived); }
+.ev-illustrative_inference { color: var(--illustrative); border-style: dashed; }
+.ev-default_unknown { color: var(--unknown); border-style: dotted; }
+
+input[type="range"] { accent-color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0ms !important; animation-duration: 0ms !important; }
 }

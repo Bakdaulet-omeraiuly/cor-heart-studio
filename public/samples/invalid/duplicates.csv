@@ -1,0 +1,4 @@
+patient_id,study_id,heart_rate_bpm,lv_ef_percent,clinician_notes
+DUP-040,STUDY-040,70,55,first
+DUP-040,STUDY-040,72,50,"second copy, same key"
+DUP-041,STUDY-041,64,60,unique

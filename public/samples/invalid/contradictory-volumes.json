@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "1.0.0",
+  "patients": [
+    {
+      "patientId": "BAD-030", "studyId": "STUDY-030", "synthetic": true,
+      "observations": {
+        "lvEndDiastolicVolume": { "value": 60, "unit": "mL", "source": "synthetic (swapped)" },
+        "lvEndSystolicVolume": { "value": 140, "unit": "mL", "source": "synthetic (swapped)" },
+        "lvEjectionFraction": { "value": 57, "unit": "%", "source": "synthetic" },
+        "heartRate": { "value": -5, "unit": "bpm", "source": "synthetic impossible value" }
+      }
+    }
+  ]
+}

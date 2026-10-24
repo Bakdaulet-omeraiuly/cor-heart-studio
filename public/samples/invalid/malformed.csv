@@ -1,0 +1,3 @@
+patient_id,study_id,heart_rate_bpm,clinician_notes
+BAD-001,STUDY-A,72,"unterminated quote, starts here
+BAD-002,STUDY-B,80,fine

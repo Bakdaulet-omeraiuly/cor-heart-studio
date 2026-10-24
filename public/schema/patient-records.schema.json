@@ -1,0 +1,1591 @@
+{
+  "$id": "https://cor-heart-studio.local/schema/patient-records.schema.json",
+  "title": "COR Heart Studio patient records",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "string"
+    },
+    "patients": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "patientId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "studyId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "synthetic": {
+            "type": "boolean"
+          },
+          "studyDate": {
+            "type": "string"
+          },
+          "diagnoses": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "system": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "primary",
+                        "secondary"
+                      ]
+                    },
+                    "severity": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "text"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "minLength": 1
+                }
+              ]
+            }
+          },
+          "observations": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "unit": {
+                      "type": "string"
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "observedAt": {
+                      "type": "string"
+                    },
+                    "method": {
+                      "type": "string"
+                    },
+                    "phase": {
+                      "type": "string"
+                    },
+                    "location": {
+                      "type": "string"
+                    },
+                    "axis": {
+                      "type": "string"
+                    },
+                    "indexed": {
+                      "type": "boolean"
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value"
+                  ]
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          "valveFindings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "valve": {
+                  "type": "string",
+                  "enum": [
+                    "mitral_valve",
+                    "aortic_valve",
+                    "tricuspid_valve",
+                    "pulmonary_valve"
+                  ]
+                },
+                "condition": {
+                  "type": "string",
+                  "enum": [
+                    "stenosis",
+                    "regurgitation",
+                    "prolapse",
+                    "calcification",
+                    "prosthetic",
+                    "other"
+                  ]
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "none",
+                    "trace",
+                    "mild",
+                    "mild_to_moderate",
+                    "moderate",
+                    "moderate_to_severe",
+                    "severe",
+                    "unspecified"
+                  ]
+                },
+                "valveArea": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "unit": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "observedAt": {
+                          "type": "string"
+                        },
+                        "method": {
+                          "type": "string"
+                        },
+                        "phase": {
+                          "type": "string"
+                        },
+                        "location": {
+                          "type": "string"
+                        },
+                        "axis": {
+                          "type": "string"
+                        },
+                        "indexed": {
+                          "type": "boolean"
+                        },
+                        "note": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value"
+                      ]
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                },
+                "peakGradient": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "unit": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "observedAt": {
+                          "type": "string"
+                        },
+                        "method": {
+                          "type": "string"
+                        },
+                        "phase": {
+                          "type": "string"
+                        },
+                        "location": {
+                          "type": "string"
+                        },
+                        "axis": {
+                          "type": "string"
+                        },
+                        "indexed": {
+                          "type": "boolean"
+                        },
+                        "note": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value"
+                      ]
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                },
+                "meanGradient": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "unit": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "observedAt": {
+                          "type": "string"
+                        },
+                        "method": {
+                          "type": "string"
+                        },
+                        "phase": {
+                          "type": "string"
+                        },
+                        "location": {
+                          "type": "string"
+                        },
+                        "axis": {
+                          "type": "string"
+                        },
+                        "indexed": {
+                          "type": "boolean"
+                        },
+                        "note": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value"
+                      ]
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                },
+                "peakVelocity": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "unit": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "observedAt": {
+                          "type": "string"
+                        },
+                        "method": {
+                          "type": "string"
+                        },
+                        "phase": {
+                          "type": "string"
+                        },
+                        "location": {
+                          "type": "string"
+                        },
+                        "axis": {
+                          "type": "string"
+                        },
+                        "indexed": {
+                          "type": "boolean"
+                        },
+                        "note": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value"
+                      ]
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                },
+                "source": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string"
+                },
+                "observedAt": {
+                  "type": "string"
+                },
+                "note": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "valve",
+                "condition"
+              ]
+            }
+          },
+          "symptoms": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "symptom": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "present": {
+                      "type": "boolean"
+                    },
+                    "onset": {
+                      "type": "string"
+                    },
+                    "duration": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "source": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "symptom"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "minLength": 1
+                }
+              ]
+            }
+          },
+          "clinicianNotes": {
+            "type": "string"
+          },
+          "demographics": {
+            "type": "object",
+            "properties": {
+              "age": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "unit": {
+                    "default": "years",
+                    "type": "string",
+                    "enum": [
+                      "years",
+                      "months",
+                      "days"
+                    ]
+                  },
+                  "referenceDate": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value"
+                ]
+              },
+              "biologicalSex": {
+                "type": "string"
+              },
+              "heightCm": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "unit": {
+                        "type": "string"
+                      },
+                      "source": {
+                        "type": "string"
+                      },
+                      "observedAt": {
+                        "type": "string"
+                      },
+                      "method": {
+                        "type": "string"
+                      },
+                      "phase": {
+                        "type": "string"
+                      },
+                      "location": {
+                        "type": "string"
+                      },
+                      "axis": {
+                        "type": "string"
+                      },
+                      "indexed": {
+                        "type": "boolean"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "weightKg": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "unit": {
+                        "type": "string"
+                      },
+                      "source": {
+                        "type": "string"
+                      },
+                      "observedAt": {
+                        "type": "string"
+                      },
+                      "method": {
+                        "type": "string"
+                      },
+                      "phase": {
+                        "type": "string"
+                      },
+                      "location": {
+                        "type": "string"
+                      },
+                      "axis": {
+                        "type": "string"
+                      },
+                      "indexed": {
+                        "type": "boolean"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              }
+            }
+          },
+          "history": {
+            "type": "object",
+            "properties": {
+              "medical": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "familyCardiac": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "medications": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "dose": {
+                      "type": "string"
+                    },
+                    "frequency": {
+                      "type": "string"
+                    },
+                    "route": {
+                      "type": "string"
+                    },
+                    "since": {
+                      "type": "string"
+                    },
+                    "source": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "minLength": 1
+                }
+              ]
+            }
+          },
+          "symptomDetails": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "symptom": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "present": {
+                      "type": "boolean"
+                    },
+                    "onset": {
+                      "type": "string"
+                    },
+                    "duration": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "source": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "symptom"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "minLength": 1
+                }
+              ]
+            }
+          },
+          "ecg": {
+            "type": "object",
+            "properties": {
+              "rhythm": {
+                "type": "string"
+              },
+              "heartRate": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "unit": {
+                        "type": "string"
+                      },
+                      "source": {
+                        "type": "string"
+                      },
+                      "observedAt": {
+                        "type": "string"
+                      },
+                      "method": {
+                        "type": "string"
+                      },
+                      "phase": {
+                        "type": "string"
+                      },
+                      "location": {
+                        "type": "string"
+                      },
+                      "axis": {
+                        "type": "string"
+                      },
+                      "indexed": {
+                        "type": "boolean"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "prInterval": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "unit": {
+                        "type": "string"
+                      },
+                      "source": {
+                        "type": "string"
+                      },
+                      "observedAt": {
+                        "type": "string"
+                      },
+                      "method": {
+                        "type": "string"
+                      },
+                      "phase": {
+                        "type": "string"
+                      },
+                      "location": {
+                        "type": "string"
+                      },
+                      "axis": {
+                        "type": "string"
+                      },
+                      "indexed": {
+                        "type": "boolean"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "qrsDuration": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "unit": {
+                        "type": "string"
+                      },
+                      "source": {
+                        "type": "string"
+                      },
+                      "observedAt": {
+                        "type": "string"
+                      },
+                      "method": {
+                        "type": "string"
+                      },
+                      "phase": {
+                        "type": "string"
+                      },
+                      "location": {
+                        "type": "string"
+                      },
+                      "axis": {
+                        "type": "string"
+                      },
+                      "indexed": {
+                        "type": "boolean"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "qtInterval": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "unit": {
+                        "type": "string"
+                      },
+                      "source": {
+                        "type": "string"
+                      },
+                      "observedAt": {
+                        "type": "string"
+                      },
+                      "method": {
+                        "type": "string"
+                      },
+                      "phase": {
+                        "type": "string"
+                      },
+                      "location": {
+                        "type": "string"
+                      },
+                      "axis": {
+                        "type": "string"
+                      },
+                      "indexed": {
+                        "type": "boolean"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "qtc": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "unit": {
+                        "type": "string"
+                      },
+                      "source": {
+                        "type": "string"
+                      },
+                      "observedAt": {
+                        "type": "string"
+                      },
+                      "method": {
+                        "type": "string"
+                      },
+                      "phase": {
+                        "type": "string"
+                      },
+                      "location": {
+                        "type": "string"
+                      },
+                      "axis": {
+                        "type": "string"
+                      },
+                      "indexed": {
+                        "type": "boolean"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "qtcCorrectionMethod": {
+                "type": "string"
+              },
+              "stChanges": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "leads": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "description": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "magnitude": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            },
+                            "unit": {
+                              "type": "string"
+                            },
+                            "source": {
+                              "type": "string"
+                            },
+                            "observedAt": {
+                              "type": "string"
+                            },
+                            "method": {
+                              "type": "string"
+                            },
+                            "phase": {
+                              "type": "string"
+                            },
+                            "location": {
+                              "type": "string"
+                            },
+                            "axis": {
+                              "type": "string"
+                            },
+                            "indexed": {
+                              "type": "boolean"
+                            },
+                            "note": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "value"
+                          ]
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "description"
+                  ]
+                }
+              },
+              "tWaveAbnormalities": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "leads": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "description": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "description"
+                  ]
+                }
+              },
+              "arrhythmias": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "string"
+              },
+              "observedAt": {
+                "type": "string"
+              },
+              "waveforms": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "leads": {
+                      "minItems": 1,
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "samplingFrequencyHz": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "amplitudeUnit": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "calibration": {
+                      "type": "string"
+                    },
+                    "startTime": {
+                      "type": "string"
+                    },
+                    "samples": {
+                      "type": "array",
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        }
+                      }
+                    },
+                    "attachmentRef": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "leads",
+                    "samplingFrequencyHz",
+                    "amplitudeUnit"
+                  ]
+                }
+              }
+            }
+          },
+          "echo": {
+            "type": "object",
+            "properties": {
+              "regionalWallMotion": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "segment": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 17
+                    },
+                    "convention": {
+                      "default": "AHA17",
+                      "type": "string",
+                      "const": "AHA17"
+                    },
+                    "motion": {
+                      "type": "string",
+                      "enum": [
+                        "normal",
+                        "hypokinetic",
+                        "akinetic",
+                        "dyskinetic",
+                        "aneurysmal",
+                        "unspecified"
+                      ]
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "method": {
+                      "type": "string"
+                    },
+                    "observedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "segment",
+                    "motion"
+                  ]
+                }
+              },
+              "wallThickness": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "region": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 17
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "septum",
+                            "posterior",
+                            "anterior",
+                            "lateral",
+                            "inferior",
+                            "apex"
+                          ]
+                        }
+                      ]
+                    },
+                    "value": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "unit": {
+                      "type": "string"
+                    },
+                    "phase": {
+                      "type": "string"
+                    },
+                    "method": {
+                      "type": "string"
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "observedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "region",
+                    "value"
+                  ]
+                }
+              },
+              "diastolicFunction": {
+                "type": "object",
+                "properties": {
+                  "grade": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "source": {
+                    "type": "string"
+                  }
+                }
+              },
+              "rvFunction": {
+                "type": "object",
+                "properties": {
+                  "metric": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "unit": {
+                    "type": "string"
+                  },
+                  "assessment": {
+                    "type": "string"
+                  },
+                  "source": {
+                    "type": "string"
+                  }
+                }
+              },
+              "source": {
+                "type": "string"
+              },
+              "observedAt": {
+                "type": "string"
+              }
+            }
+          },
+          "doppler": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "measurement": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "value": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "unit": {
+                  "type": "string"
+                },
+                "valve": {
+                  "type": "string",
+                  "enum": [
+                    "mitral_valve",
+                    "aortic_valve",
+                    "tricuspid_valve",
+                    "pulmonary_valve"
+                  ]
+                },
+                "sampleLocation": {
+                  "type": "string"
+                },
+                "referenceDirection": {
+                  "type": "string"
+                },
+                "phase": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string"
+                },
+                "jet": {
+                  "type": "object",
+                  "properties": {
+                    "direction": {
+                      "type": "string"
+                    },
+                    "width": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            },
+                            "unit": {
+                              "type": "string"
+                            },
+                            "source": {
+                              "type": "string"
+                            },
+                            "observedAt": {
+                              "type": "string"
+                            },
+                            "method": {
+                              "type": "string"
+                            },
+                            "phase": {
+                              "type": "string"
+                            },
+                            "location": {
+                              "type": "string"
+                            },
+                            "axis": {
+                              "type": "string"
+                            },
+                            "indexed": {
+                              "type": "boolean"
+                            },
+                            "note": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "value"
+                          ]
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ]
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "source": {
+                  "type": "string"
+                },
+                "observedAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "measurement",
+                "value"
+              ]
+            }
+          },
+          "labs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "analyte": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "value": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "unit": {
+                  "type": "string"
+                },
+                "assay": {
+                  "type": "string"
+                },
+                "referenceInterval": {
+                  "type": "object",
+                  "properties": {
+                    "low": {
+                      "type": "number"
+                    },
+                    "high": {
+                      "type": "number"
+                    },
+                    "unit": {
+                      "type": "string"
+                    },
+                    "source": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "collectedAt": {
+                  "type": "string"
+                },
+                "source": {
+                  "type": "string"
+                },
+                "note": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "analyte",
+                "value"
+              ]
+            }
+          },
+          "imaging": {
+            "type": "object",
+            "properties": {
+              "findings": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "modality": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "category": {
+                      "default": "other",
+                      "type": "string",
+                      "enum": [
+                        "chamber_geometry",
+                        "myocardial_thickness",
+                        "ventricular_volume",
+                        "coronary_anatomy",
+                        "tissue_characterization",
+                        "fibrosis_scar",
+                        "congenital",
+                        "other"
+                      ]
+                    },
+                    "finding": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "location": {
+                      "type": "string"
+                    },
+                    "segment": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 17
+                    },
+                    "value": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "unit": {
+                      "type": "string"
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "observedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "modality",
+                    "finding"
+                  ]
+                }
+              },
+              "assets": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "dicom_series",
+                        "segmentation_mask",
+                        "mesh"
+                      ]
+                    },
+                    "reference": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "deidentified": {
+                      "type": "boolean"
+                    },
+                    "units": {
+                      "type": "string"
+                    },
+                    "orientation": {
+                      "type": "string"
+                    },
+                    "structureLabels": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "license": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "reference"
+                  ]
+                }
+              }
+            }
+          },
+          "additionalInvestigations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "holter",
+                    "exercise_stress_test",
+                    "coronary_ct_angiography",
+                    "coronary_angiography",
+                    "catheterization",
+                    "other"
+                  ]
+                },
+                "summary": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "date": {
+                  "type": "string"
+                },
+                "findings": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "pressures": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "location": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "value": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "unit": {
+                        "type": "string"
+                      },
+                      "phase": {
+                        "type": "string"
+                      },
+                      "method": {
+                        "type": "string"
+                      },
+                      "observedAt": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "location",
+                      "value"
+                    ]
+                  }
+                },
+                "source": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "summary"
+              ]
+            }
+          },
+          "clinicalConclusion": {
+            "type": "object",
+            "properties": {
+              "primaryDiagnoses": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "secondaryDiagnoses": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "severity": {
+                "type": "string"
+              },
+              "structuralFindings": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "functionalFindings": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "interpretation": {
+                "type": "string"
+              },
+              "recommendedFollowUp": {
+                "type": "string"
+              },
+              "author": {
+                "type": "string"
+              },
+              "date": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "patientId",
+          "studyId"
+        ],
+        "additionalProperties": {}
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "patients"
+  ]
+}

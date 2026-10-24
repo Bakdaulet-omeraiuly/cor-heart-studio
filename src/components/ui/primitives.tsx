@@ -1,0 +1,138 @@
+"use client";
+import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { EVIDENCE_LABEL, type EvidenceClass } from "@/domain/types";
+
+export const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(" ");
+
+type Variant = "primary" | "ghost" | "outline" | "subtle" | "danger";
+export const Button = forwardRef<HTMLButtonElement, ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: "sm" | "md"; pressed?: boolean }>(
+  function Button({ variant = "outline", size = "md", pressed, className, ...p }, ref) {
+    return (
+      <button
+        ref={ref}
+        aria-pressed={pressed}
+        className={cx(
+          "inline-flex items-center justify-center gap-1.5 rounded-lg font-medium transition-colors disabled:opacity-45 disabled:pointer-events-none select-none",
+          size === "sm" ? "h-7 px-2.5 text-[12px]" : "h-8.5 px-3 text-[13px]",
+          variant === "primary" && "bg-accent text-accent-ink hover:brightness-110",
+          variant === "outline" && "border border-line bg-panel-2 text-ink hover:border-line-strong hover:bg-panel-3",
+          variant === "ghost" && "text-muted hover:text-ink hover:bg-panel-3",
+          variant === "subtle" && "bg-panel-3 text-ink hover:brightness-110",
+          variant === "danger" && "text-error hover:bg-panel-3",
+          pressed && "!border-accent !text-ink bg-panel-3",
+          className,
+        )}
+        {...p}
+      />
+    );
+  },
+);
+
+export function IconButton({ label, children, className, pressed, ...p }: ButtonHTMLAttributes<HTMLButtonElement> & { label: string; pressed?: boolean }) {
+  return (
+    <button
+      aria-label={label}
+      title={label}
+      aria-pressed={pressed}
+      className={cx("inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-panel-3 hover:text-ink", pressed && "bg-panel-3 text-ink ring-1 ring-accent/60", className)}
+      {...p}
+    >
+      {children}
+    </button>
+  );
+}
+
+const EV_SYMBOL: Record<EvidenceClass, string> = {
+  reported_measurement: "●",
+  reported_assessment: "◆",
+  derived: "▲",
+  illustrative_inference: "◌",
+  default_unknown: "?",
+};
+export function EvidenceBadge({ evidence, compact }: { evidence: EvidenceClass; compact?: boolean }) {
+  return (
+    <span className={cx("ev", `ev-${evidence}`)} title={EVIDENCE_LABEL[evidence]}>
+      <span aria-hidden>{EV_SYMBOL[evidence]}</span>
+      {compact ? <span className="sr-only">{EVIDENCE_LABEL[evidence]}</span> : EVIDENCE_LABEL[evidence]}
+    </span>
+  );
+}
+
+export function Pill({ children, tone = "neutral", title }: { children: ReactNode; tone?: "neutral" | "warn" | "error" | "info" | "ok" | "accent"; title?: string }) {
+  return (
+    <span
+      title={title}
+      className={cx(
+        "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-medium leading-none whitespace-nowrap",
+        tone === "neutral" && "bg-panel-3 text-muted",
+        tone === "warn" && "bg-warn/15 text-warn",
+        tone === "error" && "bg-error/15 text-error",
+        tone === "info" && "bg-info/15 text-info",
+        tone === "ok" && "bg-ok/15 text-ok",
+        tone === "accent" && "bg-accent/15 text-accent",
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+export function Segmented<T extends string>({ value, options, onChange, label, size = "sm" }: { value: T; options: { value: T; label: ReactNode; title?: string }[]; onChange: (v: T) => void; label: string; size?: "sm" | "md" }) {
+  return (
+    <div role="radiogroup" aria-label={label} className="inline-flex rounded-lg border border-line bg-panel-2 p-0.5">
+      {options.map((o) => (
+        <button
+          key={o.value}
+          role="radio"
+          aria-checked={value === o.value}
+          title={o.title}
+          onClick={() => onChange(o.value)}
+          className={cx("rounded-md px-2.5 font-medium transition-colors", size === "sm" ? "h-6 text-[12px]" : "h-7.5 text-[13px]", value === o.value ? "bg-panel-3 text-ink shadow-sm" : "text-muted hover:text-ink")}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function Switch({ checked, onChange, label, hint }: { checked: boolean; onChange: (v: boolean) => void; label: string; hint?: string }) {
+  return (
+    <label className="flex cursor-pointer items-center justify-between gap-3 py-1 text-[13px]">
+      <span className="flex flex-col">
+        <span>{label}</span>
+        {hint && <span className="text-[11px] text-faint">{hint}</span>}
+      </span>
+      <button
+        role="switch"
+        aria-checked={checked}
+        aria-label={label}
+        onClick={() => onChange(!checked)}
+        className={cx("relative h-5 w-9 shrink-0 rounded-full transition-colors", checked ? "bg-accent" : "bg-panel-3 ring-1 ring-line-strong")}
+      >
+        <span className={cx("absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform", checked ? "translate-x-4.5" : "translate-x-0.5")} />
+      </button>
+    </label>
+  );
+}
+
+export function SectionTitle({ children, aside }: { children: ReactNode; aside?: ReactNode }) {
+  return (
+    <div className="mb-2 mt-4 flex items-center justify-between first:mt-0">
+      <h3 className="text-[11px] font-semibold uppercase tracking-[0.08em] text-faint">{children}</h3>
+      {aside}
+    </div>
+  );
+}
+
+export function download(name: string, content: string | Blob, type = "application/json") {
+  const blob = typeof content === "string" ? new Blob([content], { type }) : content;
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}

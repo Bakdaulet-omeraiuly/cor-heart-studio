@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "1.0.0",
+  "patients": [
+    { "patientId": "BAD-010", "observations": { "heartRate": { "value": 70, "unit": "bpm" } } },
+    { "studyId": "STUDY-011", "observations": { "heartRate": { "value": 75, "unit": "bpm" } } },
+    { "patientId": "OK-012", "studyId": "STUDY-012", "synthetic": true, "observations": { "heartRate": { "value": 66, "unit": "bpm" } } }
+  ]
+}

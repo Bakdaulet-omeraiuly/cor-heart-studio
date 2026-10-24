@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# COR Heart Studio
 
-## Getting Started
+Explainable 3D cardiac visualization of structured observations. Import or enter a patient record,
+see the anatomical heart change, and trace every visual change back to its input, rule and evidence
+class. **Visualization demo with synthetic data — not a medical device, no diagnosis.**
 
-First, run the development server:
+## Quick start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm ci
+npm run dev            # http://localhost:3000 — synthetic samples load automatically
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Production: `npm run build && npm run start`. Any Node host works (Vercel: import the repo, defaults).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tests
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run typecheck
+npm test               # Vitest: domain, import, mapping, rendered-volume tests
+npm run build && npm run test:e2e   # Playwright with local Google Chrome (real WebGL + no-WebGL fallback)
+node tests/perf/measure.mjs          # with `npm run start -- -p 3200` running
+```
 
-## Learn More
+## Importing patients
 
-To learn more about Next.js, take a look at the following resources:
+Import dialog (⇪ in the patient panel): JSON (`{ "schemaVersion": "1.0.0", "patients": [...] }`,
+or a bare array / single record) or CSV (one patient-study per row, units in column names).
+Preview shows valid / warning / rejected / duplicate rows with fixes; duplicates of `(patientId, studyId)`
+need an explicit replace/skip. Templates: `public/samples/`. Schema: `public/schema/`.
+Everything is processed in the browser tab and forgotten when it closes.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Regenerating assets and data
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run build:asset    # procedural heart GLBs + manifest (~2.5 min)
+npm run build:data     # CSV twin, templates, JSON Schema
+npx tsx scripts/generate-data-dictionary.ts
+```
 
-## Deploy on Vercel
+## Docs
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `docs/data-to-visual-mapping.md` — rules, formulas, bounds, limitations
+- `docs/medical-data-dictionary.md` — every category, units, CSV mapping, rendering eligibility
+- `docs/asset-pipeline.md` — how the heart is built, attribute contract, replacement
+- `docs/anatomy-review.md` — checklist, rubric, known defects (self-review only)
+- `docs/architecture.md`, `docs/verification.md`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Honest limits
+
+Tier A only: a procedural anatomical heart adapted to measurements. Shape beyond measured dimensions,
+motion waveform, valve geometry and flow particles are illustrative. No DICOM, segmentation, CFD or
+clinical thresholds. Tools used: code only (no Blender/Figma/Meshy/Tripo). License: not chosen yet.

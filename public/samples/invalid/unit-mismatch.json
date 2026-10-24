@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0.0",
+  "patients": [
+    {
+      "patientId": "BAD-020", "studyId": "STUDY-020", "synthetic": true,
+      "observations": {
+        "heartRate": { "value": 1.2, "unit": "Hz", "source": "synthetic" },
+        "lvEndDiastolicDiameter": { "value": 2.4, "unit": "inch", "source": "synthetic" },
+        "lvEndSystolicDiameter": { "value": 38, "source": "synthetic, unit omitted" },
+        "lvEjectionFraction": { "value": 0.55, "unit": "fraction", "source": "synthetic" },
+        "ivsThickness": { "value": 1.1, "unit": "cm", "source": "synthetic (valid cm, converted to 11 mm)" }
+      }
+    }
+  ]
+}
