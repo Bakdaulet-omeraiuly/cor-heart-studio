@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { hippocampalPattern, ventricularPattern } from "@/domain/diagnosis/brain";
+import { normalizeRecord } from "@/domain/normalization/normalize";
 import { alt, missingFields, o, obsRec } from "./helpers";
 
 const brain = (obs: Record<string, unknown>) => obsRec(obs);
@@ -39,6 +40,16 @@ describe("brain atrophy rates vs cohorts (Barnes 2009, de Leon 1989)", () => {
     const a = brain({ hippocampalVolumeChangePerYear: -4.8 });
     expect(a.differential).toEqual([]);
     expect(missingFields(a)).toContain("observations.hippocampalVolumeChangePerYear");
+  });
+
+  it("the rates are registry fields: recognised by normalize, impossible values excluded", () => {
+    const n = normalizeRecord({ patientId: "T-1", studyId: "S-1", observations: { hippocampalVolumeChangePerYear: o(-4.8, "%/year"), ventricularVolumeChangePerYear: o(250, "%/year") } });
+    expect(n.ok).toBe(true);
+    if (!n.ok) return;
+    expect(n.patient.issues.map((i) => i.code)).not.toContain("observation.unsupported");
+    expect(n.patient.observations["observations.hippocampalVolumeChangePerYear"]).toMatchObject({ value: -4.8, unit: "%/year", status: "ok", category: "brain_imaging" });
+    expect(n.patient.observations["observations.ventricularVolumeChangePerYear"].status).toBe("impossible");
+    expect(missingFields(brain({ ventricularVolumeChangePerYear: o(250, "%/year") }))).toContain("observations.ventricularVolumeChangePerYear");
   });
 
   it("ventricles give the target when there is no hippocampal rate", () => {

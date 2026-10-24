@@ -194,13 +194,13 @@ These are **cohort means**, not individual diagnostic cut-offs. Alzheimer's dise
 clinically (NIA-AA 2018, Jack CR et al. *Alzheimers Dement* 2018;14:535–62,
 doi:[10.1016/j.jalz.2018.02.018](https://doi.org/10.1016/j.jalz.2018.02.018)), not by an atrophy rate.
 
-The record schema has no brain namespace, so the engine reads three optional observations: signed %/year change, with
-negative meaning loss, the same convention as `evidence.ts`.
+The record schema has no brain namespace. Two observations were therefore added to the field registry
+(`src/domain/schema/fields.ts`, category `brain_imaging`, unit %/year, guard −100…200), so `normalizeRecord()` checks
+unit and bounds. Both are signed annual changes with negative meaning loss, the same convention as `evidence.ts`:
 - `observations.hippocampalVolumeChangePerYear`
-- `observations.wholeBrainVolumeChangePerYear`
 - `observations.ventricularVolumeChangePerYear`
 
-Brain output is **only `differential`**, both alternatives always together and always `possible`:
+Brain output is **only `differential`** and always `possible`. Every alternative the rate fits is listed:
 - hippocampal loss ≥ 3.92 %/y (the AD CI lower bound) → "within the AD cohort range";
 - ≤ 2.30 %/y (the control CI upper bound) → "within the ageing range";
 - between → "between cohort ranges".
@@ -283,10 +283,10 @@ The engine meets these by construction: thresholds are code. The real test of th
   - SBP 140 and HCM 15 mm.
 - **Clinician review:** 20 of the cases (suggested: `as-01`, `as-10`, `as-11`, `as-12`, `mr-04`, `ar-01`, `lv-04`, `lv-06`,
   `lv-13`, `lv-15`, `lv-17`, `lv-18`, `ch-03`, `ch-05`, `cad-04`, `cad-05`, `ecg-05`, `ecg-08`, `br-01`, `br-03`) should be
-  checked by a physician. **Not done yet**: every case has `"reviewedByClinician": false`. Results go here.
-- Brain inputs are three `observations.*VolumeChangePerYear` keys that are not in the field registry
-  (`src/domain/schema/fields.ts`, not owned here). Normalization lists them as "unsupported observation" info issues.
-  Adding them to the registry is a shared change.
+  checked by a physician. **Skipped for now** (team decision): every case has `"reviewedByClinician": false`.
+- Done: the brain inputs are registry fields. This touched three shared files: `fields.ts`, the Inspector category
+  label, and the generated table in `docs/medical-data-dictionary.md`. No CSV column was added, so the CSV templates
+  are unchanged.
 - For @kerimku1's number guard:
   - `Evidence.source` strings contain years and page numbers;
   - valve values are given in canonical units (430 cm/s → 4.3 m/s);

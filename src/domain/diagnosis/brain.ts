@@ -22,28 +22,15 @@ export const hippocampalPattern = (lossPctPerYear: number): BrainPattern =>
 export const ventricularPattern = (expansionPctPerYear: number): BrainPattern =>
   expansionPctPerYear >= VENT_AD ? "alzheimer" : expansionPctPerYear <= VENT_AGEING ? "ageing" : "between";
 
-const RATE_UNITS = new Set(["%/y", "%/yr", "%/year", "%peryear", "percent/year", "%/a"]);
-
-/** Brain rate observations are outside the field registry, so they are read from the validated record directly. */
-function rate(c: Ctx, field: string): Num | null {
-  const key = field.slice("observations.".length);
-  const raw = c.p.record.observations?.[key];
-  if (raw === undefined) return null;
-  if (raw.value === null) { c.need(field, "explicitly unknown in the record"); return null; }
-  const unit = "unit" in raw ? raw.unit : undefined;
-  const u = (unit ?? "").trim().toLowerCase().replace(/\s+/g, "");
-  if (!RATE_UNITS.has(u)) { c.need(field, unit ? "unit is not supported (use %/year), so the value is not used" : "value has no unit (use %/year), so it is not used"); return null; }
-  return { field, value: raw.value, unit: "%/year" };
-}
-
+/** The rates are registry fields (src/domain/schema/fields.ts, category brain_imaging), so normalize() checks unit and bounds. */
 export function hasBrainData(c: Ctx) {
-  return Object.values(BRAIN_FIELDS).some((f) => c.p.record.observations?.[f.slice("observations.".length)] !== undefined);
+  return Object.values(BRAIN_FIELDS).some((f) => c.p.observations[f] !== undefined);
 }
 
 export function assessBrain(c: Ctx) {
   if (!hasBrainData(c)) return;
-  const hip = rate(c, BRAIN_FIELDS.hippocampus);
-  const ven = rate(c, BRAIN_FIELDS.ventricles);
+  const hip: Num | null = c.num(BRAIN_FIELDS.hippocampus);
+  const ven: Num | null = c.num(BRAIN_FIELDS.ventricles);
   const support: Record<"alzheimer" | "ageing", Evidence[]> = { alzheimer: [], ageing: [] };
   const add = (p: BrainPattern, e: Evidence) => {
     if (p !== "ageing") support.alzheimer.push(e);
