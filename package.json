@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "build:asset": "node scripts/heart-asset/build.ts",
     "build:data": "tsx scripts/generate-data-files.ts"
   },
