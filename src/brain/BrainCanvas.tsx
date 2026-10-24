@@ -1,8 +1,8 @@
 "use client";
 // 3D brain from the segmentation. Browser-only (next/dynamic, ssr: false).
-import { Canvas, type ThreeEvent } from "@react-three/fiber";
+import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { GizmoHelper, GizmoViewport, OrbitControls } from "@react-three/drei";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useBrain } from "./brainStore";
 import { appToVoxel, voxelToApp, type Vec3 } from "@/imaging/sliceGeometry";
@@ -124,6 +124,53 @@ function SlicePlanes({ data }: { data: BrainData }) {
   );
 }
 
+/** Centroid (app frame, cm) of every vertex carrying a structure's region id. */
+function regionCentroid(data: BrainData, index: number): THREE.Vector3 | null {
+  const c = new THREE.Vector3();
+  let n = 0;
+  for (const m of data.meshes) {
+    const reg = m.geometry.getAttribute("_region") as THREE.BufferAttribute;
+    const pos = m.geometry.getAttribute("position") as THREE.BufferAttribute;
+    for (let i = 0; i < reg.count; i++) {
+      if (Math.round(reg.getX(i) * 255) !== index) continue;
+      c.x += pos.getX(i); c.y += pos.getY(i); c.z += pos.getZ(i); n++;
+    }
+  }
+  return n ? c.divideScalar(n) : null;
+}
+
+/** Animates the orbit camera to look at a structure chosen in the list, from the side it is on. */
+function CameraFocus({ data }: { data: BrainData }) {
+  const request = useBrain((s) => s.focusRequest);
+  const { camera, controls } = useThree() as unknown as { camera: THREE.PerspectiveCamera; controls: { target: THREE.Vector3; update: () => void } | null };
+  const anim = useRef<{ fromPos: THREE.Vector3; toPos: THREE.Vector3; fromTarget: THREE.Vector3; toTarget: THREE.Vector3; t: number } | null>(null);
+  useEffect(() => {
+    if (!request || !controls) return;
+    const target = regionCentroid(data, request.index);
+    if (!target) return;
+    const st = data.manifest.structures[request.index - 1];
+    // look from outside the structure's side: lateral for one hemisphere, else from the structure's direction
+    const dir = target.clone();
+    if (st?.hemisphere === "left") dir.x += 6;
+    if (st?.hemisphere === "right") dir.x -= 6;
+    if (dir.lengthSq() < 1e-6) dir.set(0, 0.3, 1);
+    dir.normalize();
+    const distance = camera.position.distanceTo(controls.target);
+    anim.current = { fromPos: camera.position.clone(), toPos: target.clone().addScaledVector(dir, distance), fromTarget: controls.target.clone(), toTarget: target, t: 0 };
+  }, [request, data, camera, controls]);
+  useFrame((_, dt) => {
+    const a = anim.current;
+    if (!a || !controls) return;
+    a.t = Math.min(1, a.t + dt / 0.7);
+    const k = 1 - Math.pow(1 - a.t, 3);
+    camera.position.lerpVectors(a.fromPos, a.toPos, k);
+    controls.target.lerpVectors(a.fromTarget, a.toTarget, k);
+    controls.update();
+    if (a.t >= 1) anim.current = null;
+  });
+  return null;
+}
+
 export default function BrainCanvas({ data }: { data: BrainData }) {
   return (
     <Canvas
@@ -140,6 +187,7 @@ export default function BrainCanvas({ data }: { data: BrainData }) {
       <BrainMeshes data={data} />
       <SlicePlanes data={data} />
       <OrbitControls makeDefault enableDamping dampingFactor={0.12} minDistance={10} maxDistance={90} />
+      <CameraFocus data={data} />
       <GizmoHelper alignment="bottom-right" margin={[56, 56]}>
         <GizmoViewport axisColors={["#e8836b", "#8fbf7f", "#79b0ff"]} labels={["L", "S", "A"]} labelColor="#0b0d10" axisHeadScale={0.9} />
       </GizmoHelper>

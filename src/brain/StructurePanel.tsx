@@ -47,7 +47,13 @@ export function StructurePanel({ data }: { data: BrainData }) {
   const q = query.trim().toLowerCase();
   const groups = useMemo(() => GROUPS.map((g) => ({ ...g, items: structures.filter((x) => g.match(x) && (!q || x.name.toLowerCase().includes(q))) })), [structures, q]);
 
-  const select = (st: BrainStructure) => s.set({ selected: st.index, crosshair: centroidOf(data, st.index) ?? s.crosshair });
+  const select = (st: BrainStructure) => s.set({
+    selected: st.index,
+    crosshair: centroidOf(data, st.index) ?? s.crosshair,
+    focusRequest: { index: st.index, nonce: (s.focusRequest?.nonce ?? 0) + 1 },
+    // deep structures sit inside the cortex: make it see-through so the selection is visible
+    ...(st.group !== "cortex" && s.cortexOpacity > 0.5 ? { cortexOpacity: 0.2 } : {}),
+  });
 
   return (
     <aside className="flex h-full min-h-0 flex-col" aria-label="Brain structures">

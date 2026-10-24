@@ -42,3 +42,11 @@ body/data, 13 px controls, 15 px titles. Numbers always `.num` (tabular).
 - Viewports: toolbar docked in the panel header, playback docked as the panel footer, corner text for
   provenance; legend collapsed by default.
 - MPR evidence column on the right (brain MRI, heart CT) with colour-coded plane headers and crosshairs.
+
+## Phase 2 (implemented)
+
+- Metric strip under each 3D view: brain totals; heart key numbers with their source on every cell
+  (Tier B: CT segmentation volumes, LV mass derived ×1.05 g/mL; Tier A: reported values, unknown shown as "—").
+- Inspector collapses from the app bar to widen the 3D view.
+- Brain: choosing a structure in the list turns the camera to it (from its hemisphere's side) and makes
+  the cortex see-through for deep structures.

@@ -26,6 +26,8 @@ test("brain module: 3D model, MRI slices with segmentation, linked crosshair", a
   await page.getByRole("button", { name: /^Hippocampus \(left\)/ }).click();
   await expect(page.getByTestId("brain-selection")).toContainText("Hippocampus (left)");
   await expect(page.getByTestId("brain-selection")).toContainText("Automatically (FreeSurfer)");
+  // a deep structure chosen from the list makes the cortex see-through (and the camera turns to it)
+  await expect(page.getByRole("slider", { name: "Cortex opacity" })).toHaveValue("0.2");
   await page.waitForTimeout(1500);
   await page.getByTestId("brain-workspace").screenshot({ path: `${shots}/e2e-brain-hippocampus.png` });
 

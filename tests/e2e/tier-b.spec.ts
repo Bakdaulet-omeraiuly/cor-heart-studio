@@ -33,6 +33,11 @@ test("a CT-derived heart (Tier B) renders with its provenance", async ({ page })
   await page.waitForTimeout(1500);
   await viewport(page).screenshot({ path: `${shots}/e2e-tier-b-s0270-four-chamber.png` });
 
+  // key numbers come from the segmentation, with their source
+  await expect(page.getByTestId("heart-metrics")).toContainText("LV cavity");
+  await expect(page.getByTestId("heart-metrics")).toContainText("126.5");
+  await expect(page.getByTestId("heart-metrics")).toContainText("CT segmentation");
+
   // source CT evidence: three planes, crosshair shared between them
   await expect(page.getByTestId("ct-evidence")).toBeVisible();
   for (const v of ["axial", "coronal", "sagittal"]) await expect(page.getByTestId(`slice-${v}`)).toBeVisible();
@@ -80,4 +85,18 @@ test("comparison mixes a procedural and a CT heart", async ({ page }) => {
   await page.waitForTimeout(1500);
   await page.getByTestId("compare").screenshot({ path: `${shots}/e2e-tier-b-compare.png` });
   expect(errors).toEqual([]);
+});
+
+test("the inspector can be collapsed to widen the 3D view", async ({ page }) => {
+  await openCtCase(page, "s0270");
+  const before = (await viewport(page).boundingBox())!.width;
+  await page.getByRole("button", { name: "Hide inspector" }).click();
+  await expect(page.getByRole("complementary", { name: "Inspector" })).toHaveCount(0);
+  await expect.poll(async () => (await viewport(page).boundingBox())!.width).toBeGreaterThan(before + 200);
+  const start = await frames(page);
+  await expect.poll(async () => (await frames(page)) - start, { timeout: 30_000 }).toBeGreaterThan(30);
+  await page.waitForTimeout(1200);
+  await page.getByRole("main").screenshot({ path: `${shots}/e2e-tier-b-wide.png` });
+  await page.getByRole("button", { name: "Show inspector" }).click();
+  await expect(page.getByRole("complementary", { name: "Inspector" })).toBeVisible();
 });

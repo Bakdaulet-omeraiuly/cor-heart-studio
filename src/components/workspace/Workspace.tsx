@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import dynamic from "next/dynamic";
-import { Brain, HeartPulse, Moon, ShieldCheck, Sun } from "lucide-react";
+import { Brain, HeartPulse, Moon, PanelRightClose, PanelRightOpen, ShieldCheck, Sun } from "lucide-react";
 import { useApp, type Module } from "@/state/store";
 import { loadSamples } from "@/lib/session";
 import { PatientLibrary } from "../patient/PatientLibrary";
@@ -26,6 +26,7 @@ export default function Workspace() {
   const dialog = useApp((s) => s.dialog);
   const set = useApp((s) => s.set);
   const organ = useApp((s) => s.module);
+  const inspectorOpen = useApp((s) => s.inspectorOpen);
 
   useEffect(() => { document.documentElement.dataset.theme = theme; }, [theme]);
   useEffect(() => {
@@ -61,18 +62,23 @@ export default function Workspace() {
           <span className="flex items-center gap-1 text-[11px] text-muted" title="Records are kept in memory for this tab only. Nothing is uploaded, stored in the browser, put in URLs, or logged.">
             <ShieldCheck className="h-3.5 w-3.5 text-ok" /> <span className="hidden lg:inline">Session-only</span>
           </span>
+          {organ === "heart" && (
+            <IconButton label={inspectorOpen ? "Hide inspector" : "Show inspector"} pressed={!inspectorOpen} onClick={() => set({ inspectorOpen: !inspectorOpen })}>
+              {inspectorOpen ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
+            </IconButton>
+          )}
           <IconButton label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"} onClick={() => set({ theme: theme === "dark" ? "light" : "dark" })}>
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </IconButton>
         </div>
       </header>
       {organ === "brain" ? <main className="min-h-0 flex-1" aria-label="Brain workspace"><BrainWorkspace /></main> : (
-      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(420px,68dvh)_auto_auto] overflow-y-auto lg:grid-cols-[260px_minmax(0,1fr)_360px] lg:grid-rows-1 lg:overflow-hidden">
+      <div className={`grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(420px,68dvh)_auto_auto] overflow-y-auto lg:grid-rows-1 lg:overflow-hidden ${inspectorOpen ? "lg:grid-cols-[260px_minmax(0,1fr)_360px]" : "lg:grid-cols-[260px_minmax(0,1fr)]"}`}>
         <div className="order-2 min-h-0 border-line bg-panel lg:order-1 lg:border-r"><PatientLibrary /></div>
         <main className="order-1 min-h-0 lg:order-2" aria-label="3D heart workspace">
           {workspace === "compare" ? <CompareWorkspace /> : <HeartViewport />}
         </main>
-        <div className="order-3 min-h-0 border-line bg-panel lg:border-l"><Inspector /></div>
+        {inspectorOpen && <div className="order-3 min-h-0 border-line bg-panel lg:border-l"><Inspector /></div>}
       </div>
       )}
       {dialog?.kind === "import" && <ImportDialog />}

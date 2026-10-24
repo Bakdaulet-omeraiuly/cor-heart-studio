@@ -26,6 +26,8 @@ export type Module = "heart" | "brain";
 export interface AppState {
   /** Organ module shown in the workspace. */
   module: Module;
+  /** Heart module: right-hand inspector panel shown (collapse to widen the 3D view). */
+  inspectorOpen: boolean;
   entries: Record<string, PatientEntry>;
   order: string[];
   selectedKey: string | null;
@@ -67,6 +69,7 @@ export interface AppState {
 
 export const useApp = create<AppState>((set, get) => ({
   module: "heart",
+  inspectorOpen: true,
   entries: {},
   order: [],
   selectedKey: null,

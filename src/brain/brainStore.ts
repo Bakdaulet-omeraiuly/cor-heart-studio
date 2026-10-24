@@ -11,6 +11,8 @@ export interface BrainState {
   hidden: Set<number>;
   cortexOpacity: number; // 0..1
   showPlanes: boolean;
+  /** Turn the 3D camera toward a structure (set when it is chosen from the list). */
+  focusRequest: { index: number; nonce: number } | null;
   overlay: "fill" | "outline" | "off";
   overlayOpacity: number;
   windowCenter: number;
@@ -26,6 +28,7 @@ export const useBrain = create<BrainState>((set) => ({
   hidden: new Set(),
   cortexOpacity: 1,
   showPlanes: true,
+  focusRequest: null,
   overlay: "fill",
   overlayOpacity: 0.35,
   windowCenter: 128,
