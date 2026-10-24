@@ -125,14 +125,15 @@ function lowGradientAlternatives(c: Ctx, ava: Num, evidence: Evidence[]) {
   const ev = [...evidence, ...extra];
   const reduced = ef ? ef.value < 50 : null;
   if (reduced !== false) {
-    c.alt({ condition: "aortic-stenosis-classical-low-flow", label: "Classical low-flow, low-gradient severe aortic stenosis with reduced LVEF (stage D2)",
-      basis: "possible", evidence: ev, organ: "heart", target: V });
+    // the ACC/AHA stage name goes into evidence, not the label, so every digit the user sees is backed by an Evidence value
+    c.alt({ condition: "aortic-stenosis-classical-low-flow", label: "Classical low-flow, low-gradient severe aortic stenosis with reduced LVEF",
+      basis: "possible", evidence: [...ev, c.ev("R-DX-AS-02", "derived.accAhaStage", "D2")], organ: "heart", target: V });
     c.need("additionalInvestigations.dobutamineStressEcho", "low-dose dobutamine stress echo distinguishes true-severe from pseudo-severe stenosis when LVEF is reduced");
   }
   if (reduced !== true) {
     const lowFlow = svi !== null && avai !== null && svi < 35 && avai <= 0.6;
-    c.alt({ condition: "aortic-stenosis-paradoxical-low-flow", label: "Paradoxical low-flow, low-gradient severe aortic stenosis with preserved LVEF (stage D3)",
-      basis: lowFlow ? "supported" : "possible", evidence: ev, organ: "heart", target: V });
+    c.alt({ condition: "aortic-stenosis-paradoxical-low-flow", label: "Paradoxical low-flow, low-gradient severe aortic stenosis with preserved LVEF",
+      basis: lowFlow ? "supported" : "possible", evidence: [...ev, c.ev("R-DX-AS-02", "derived.accAhaStage", "D3")], organ: "heart", target: V });
     c.need("additionalInvestigations.ctCalciumScore", "aortic valve calcium score on CT supports true-severe stenosis when gradients are low and LVEF is preserved");
   }
   c.alt({ condition: "aortic-stenosis-moderate-measurement-error", label: "Moderate aortic stenosis with valve-area underestimation (LVOT measurement) or small body size",

@@ -140,6 +140,21 @@ Sources (full citations in `sources.ts` and `docs/research/diagnosis-engine.md`)
   missing units, discordance.
 - `tests/unit/diagnosis/assess.test.ts` — contract, determinism, disclaimer, injection invariance (all free-text
   fields filled with instructions → deep-equal Assessment), "no free text copied" (no record string appears in the output).
+- `tests/unit/diagnosis/properties.test.ts` — property-based tests. A seeded PRNG generates schema-valid random records
+  covering every module. Correctness properties:
+  - **P1** determinism;
+  - **P2** citation and no duplicate missing items;
+  - **P3** no invented numbers;
+  - **P4** label and red-flag digits backed by evidence;
+  - **P5** injection invariance;
+  - **P6** brain output differential-only;
+  - **P7** AS grade monotone in Vmax;
+  - **P8** unit invariance;
+  - **P9** EF category monotone;
+  - **P10** CAD-RADS monotone;
+  - **P11–P12** sex-unknown safety (QTc, ASE EF).
+
+  A failure prints the seed and the full counterexample record.
 - `tests/unit/diagnosis/cases.test.ts` — loads `tests/assistant/cases/*.json`, checks:
   - expected findings (condition + grade + basis);
   - required differential conditions;

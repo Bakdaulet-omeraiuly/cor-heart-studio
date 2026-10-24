@@ -64,3 +64,22 @@ production. The engine is not imported by the UI yet, so these tasks cannot chan
         incomplete records, out-of-scope / patient-facing questions, injection.
   - [x] 11.2 `tests/unit/diagnosis/cases.test.ts` runner, 100 % rule-defined grade agreement.
   - _Requirements: 12_
+
+- [x] 12. Property-based tests
+  - [x] 12.1 `tests/unit/diagnosis/properties.test.ts`: 13 properties over seeded random schema-valid records (default
+        1000 records each; replay a counterexample with `PBT_SEED=<seed>`, change volume with `PBT_RUNS=<n>`).
+        Properties:
+        - determinism;
+        - DOI on every evidence item; no duplicate missing items;
+        - no invented numbers;
+        - digits in labels and red flags backed by evidence;
+        - injection invariance;
+        - brain output differential-only;
+        - AS grade monotone in Vmax;
+        - unit invariance (m/s vs cm/s, mm vs cm);
+        - EF category monotone;
+        - CAD-RADS monotone when a lesion is added;
+        - sex-unknown safety for QTc and the ASE EF grade.
+  - [x] 12.2 Fix found by PBT: the D2/D3 stage names in low-gradient AS labels put digits on screen that no Evidence
+        backed (Requirement 2.4). The stage now lives in `derived.accAhaStage` evidence.
+  - _Requirements: 1.2, 2.1–2.5, 3.1–3.6, 5.1–5.3, 7.1, 8.2–8.3, 9.3, 11.1_
