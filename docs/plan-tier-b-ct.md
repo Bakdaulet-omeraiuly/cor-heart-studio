@@ -3,7 +3,9 @@
 Status 2026-10-24: **in progress.** Working data now: **TotalSegmentator v1 dataset** (Zenodo 6802614,
 CC BY 4.0, per-chamber labels, fetched per case without registration). MM-WHS CT stays the planned
 higher-quality source once its access/terms are sorted. Step 2 + 4 (meshes, volumes, QA) work on 5 real
-cardiac CTs (s0270 s0335 s0338 s0356 s0368) → `data/out/<case>/`. Next: step 3 (attribute contract).
+cardiac CTs (s0270 s0335 s0338 s0356 s0368) → `data/out/<case>/`. Step 3 done (`--asset`: GLBs +
+manifest in the app contract, see `pipeline/README.md`). Next: step 5 — make the app's manifest
+per-patient (today 7 files import it statically) and coronary meshes optional, then load a CT asset.
 Read this first in a new session.
 
 ## Decisions (made with the user)

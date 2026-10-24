@@ -7,6 +7,8 @@
 Outputs (all under out_dir, which must stay inside the git-ignored data/ folder):
     structures.glb   one named mesh per structure, app frame, centimetres
     report.json      provenance, measurements, QA issues, mesh stats
+    asset/           with --asset: heart-high.glb, heart-low.glb, manifest.json, lv-cavity-proxy.json
+                     in the app's attribute contract (see asset.py)
 """
 
 import argparse
@@ -94,6 +96,7 @@ def main() -> None:
     parser.add_argument("--source", default="mmwhs", choices=sorted(LABEL_MAPS))
     parser.add_argument("--case-id")
     parser.add_argument("--synthetic", action="store_true", help="use the built-in synthetic volume")
+    parser.add_argument("--asset", action="store_true", help="also write the app asset (asset/: GLBs, manifest)")
     args = parser.parse_args()
 
     if args.synthetic:
@@ -121,6 +124,20 @@ def main() -> None:
         print(f"  {key:18s} {ml:8.1f} mL")
     for issue in report["qa"]:
         print(f"  [{issue['level']}] {issue['structure']}: {issue['message']}")
+
+    if args.asset:
+        from .asset import build_asset
+
+        glbs, manifest, proxy, qa = build_asset(labels, affine, args.source, case_id, DATASETS.get(args.source))
+        asset_dir = out / "asset"
+        asset_dir.mkdir(exist_ok=True)
+        for lod, data in glbs.items():
+            (asset_dir / f"heart-{lod}.glb").write_bytes(data)
+        (asset_dir / "manifest.json").write_text(json.dumps(manifest, indent=2))
+        (asset_dir / "lv-cavity-proxy.json").write_text(json.dumps(proxy))
+        print(f"  asset -> {asset_dir} ({', '.join(f'{k} {len(v) / 1e6:.1f} MB' for k, v in glbs.items())})")
+        for issue in qa:
+            print(f"  [{issue['level']}] {issue['structure']}: {issue['message']}")
 
 
 if __name__ == "__main__":

@@ -33,5 +33,24 @@ Outputs `structures.glb` (one named mesh per structure) and `report.json` (prove
 volumes, LV mass = myocardium × 1.05 g/mL, mesh stats, QA: missing labels, implausible volumes,
 non-watertight meshes, fragments).
 
-Not done yet: attribute contract (`_WEIGHTS`, `_TISSUE`) for the app's deformation (step 3), wall
-thickness, TotalSegmentator for unlabelled scans.
+## App asset (step 3): `--asset`
+
+`cor_pipeline/asset.py` writes `asset/heart-{high,low}.glb` (300k / 120k triangles), `manifest.json`,
+`lv-cavity-proxy.json` and, via `preview`, `preview.png` (regions + wall-depth cut). Same contract as
+the procedural heart (docs/asset-pipeline.md), `provenanceTier: "B"`:
+
+- Signed distance fields on a 0.75 mm grid: `outer` = LV (myocardium + cavity) ∪ every other blood
+  pool grown by a fixed wall (RV 3 mm, atria 2 mm, aorta 2 mm, PA 1.5 mm); `cavity` = blood pools;
+  tissue = outer − cavity → one closed solid (cavity surfaces inside, so cuts show wall thickness).
+- `_WEIGHTS`, `_TISSUE` (depth, kind, region) follow `vertexAttributes()` in
+  `scripts/heart-asset/build.ts`; fat is 0.
+- Manifest geometry is measured: LV frame by PCA of the cavity (base at the mitral plane, septal
+  direction toward the RV), mitral/tricuspid annulus from where the blood pools touch, aortic/pulmonary
+  valves at the vessel root. Papillary muscles and coronary ostia are illustrative (LV frame).
+- Not in the labels, so not in the mesh: coronary vessels, venae cavae, pulmonary veins.
+
+The app cannot load it yet: it imports the procedural manifest statically and requires the
+`coronary_arteries` / `cardiac_veins` meshes. That is step 5 (Tier B loader).
+
+Not done yet: TotalSegmentator inference for unlabelled scans; aortic annulus radius tends to read
+small (0.74–1.08 cm on the five cases) because the root slab tapers.
