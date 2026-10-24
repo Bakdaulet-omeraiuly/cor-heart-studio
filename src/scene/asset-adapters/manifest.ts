@@ -16,6 +16,8 @@ export interface HeartManifest {
   center?: V3;
   files: Record<"high" | "low", { url: string; bytes: number; triangles: number[] }>;
   structureToMesh: Record<string, { absent?: boolean; [key: string]: unknown }>;
+  /** Coronary arteries modelled on a template (pipeline/cor_pipeline/coronary.py). */
+  coronary?: { vessels: Record<string, { name: string; lengthMm: number | null }>; diameterSource?: string };
   deformation: {
     lv: {
       base: V3; axis: V3; septalDir: V3; anteriorDir: V3;

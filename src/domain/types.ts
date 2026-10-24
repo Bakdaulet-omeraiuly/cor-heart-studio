@@ -1,3 +1,4 @@
+import type { CoronaryFinding } from "./coronary";
 import type { FieldCategory, RenderingEligibility } from "./schema/fields";
 import type { PatientRecord, Severity, ValveId, WallMotion } from "./schema/record";
 
@@ -110,6 +111,7 @@ export interface NormalizedPatient {
   observations: Record<string, NormalizedObservation>;
   derived: DerivedValue[];
   valveFindings: NormalizedValveFinding[];
+  coronaryFindings: CoronaryFinding[];
   wallMotion: NormalizedWallMotion[];
   wallThickness: NormalizedWallThickness[];
   issues: Issue[];

@@ -48,6 +48,9 @@ export function capabilitiesFromManifest(manifest: HeartManifest): AssetCapabili
     valveLeaflets: ["mitral_valve", "aortic_valve", "tricuspid_valve", "pulmonary_valve"],
     regurgitationCue: true,
     tissueOverlay: true,
+    coronaryStenosis: manifest.coronary
+      ? Object.fromEntries(Object.values(manifest.coronary.vessels).filter((v) => v.lengthMm).map((v) => [v.name, { lengthMm: v.lengthMm! }]))
+      : null,
   };
 }
 

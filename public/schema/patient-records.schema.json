@@ -374,6 +374,58 @@
               ]
             }
           },
+          "coronaryFindings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "vessel": {
+                  "type": "string",
+                  "enum": [
+                    "LM",
+                    "LAD",
+                    "LCx",
+                    "RCA",
+                    "PDA"
+                  ]
+                },
+                "segment": {
+                  "type": "string",
+                  "enum": [
+                    "proximal",
+                    "mid",
+                    "distal"
+                  ]
+                },
+                "stenosisPercent": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "plaque": {
+                  "type": "string",
+                  "enum": [
+                    "noncalcified",
+                    "partially_calcified",
+                    "calcified"
+                  ]
+                },
+                "source": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string"
+                },
+                "note": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "vessel",
+                "stenosisPercent"
+              ]
+            }
+          },
           "symptoms": {
             "type": "array",
             "items": {

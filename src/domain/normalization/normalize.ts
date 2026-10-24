@@ -226,6 +226,7 @@ export function normalizeRecord(raw: unknown): NormalizeResult {
       observations,
       derived,
       valveFindings,
+      coronaryFindings: (rec.coronaryFindings ?? []).map((c) => ({ vessel: c.vessel, segment: c.segment, stenosisPercent: c.stenosisPercent, plaque: c.plaque, source: c.source })),
       wallMotion,
       wallThickness,
       issues,

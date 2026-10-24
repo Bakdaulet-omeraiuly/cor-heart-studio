@@ -4,6 +4,8 @@ import * as THREE from "three";
 import type { DeformParams } from "../animation/deform";
 import { DEFORM_FN_GLSL, DEFORM_UNIFORMS_GLSL, SEGMENT_GLSL } from "./deformGlsl";
 
+export const MAX_LESIONS = 8;
+
 export interface TissueUniforms {
   [k: string]: THREE.IUniform;
 }
@@ -29,6 +31,9 @@ export function createTissueUniforms(): TissueUniforms {
     uHighlight: { value: 1 },
     uRegionFlag: { value: new Array(9).fill(0) },
     uTime: { value: 0 },
+    // coronary lesions: (vessel id, centre t, half width t, diameter narrowing 0..1) and plaque kind (1 non-, 2 partially, 3 calcified)
+    uLesion: { value: Array.from({ length: MAX_LESIONS }, () => new THREE.Vector4(0, 0, 0, 0)) },
+    uLesionPlaque: { value: new Array(MAX_LESIONS).fill(0) },
   };
 }
 
@@ -65,8 +70,12 @@ const VERTEX_HEAD = /* glsl */ `
 #include <common>
 attribute vec4 _weights;
 attribute vec4 _tissue;
+attribute vec4 _coro;
+uniform vec4 uLesion[${MAX_LESIONS}];
+uniform float uLesionPlaque[${MAX_LESIONS}];
 varying vec4 vTissue;
 varying vec3 vRest;
+varying vec2 vPlaque;
 varying float vStatic;
 varying vec4 vW;
 ${DEFORM_UNIFORMS_GLSL}
@@ -76,6 +85,7 @@ ${DEFORM_FN_GLSL}
 
 const FRAGMENT_HEAD = /* glsl */ `
 #include <common>
+varying vec2 vPlaque;
 varying vec4 vTissue;
 varying vec3 vRest;
 varying float vStatic;
@@ -119,7 +129,7 @@ export function createTissueMaterial(uniforms: TissueUniforms, opts: { clippingP
     opacity: opts.ghost ? 0.22 : 1,
     depthWrite: !opts.ghost,
   });
-  mat.customProgramCacheKey = () => (opts.ghost ? "cor-tissue-ghost-v2" : "cor-tissue-v2");
+  mat.customProgramCacheKey = () => (opts.ghost ? "cor-tissue-ghost-v3" : "cor-tissue-v3");
   mat.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms);
     shader.vertexShader = shader.vertexShader
@@ -129,9 +139,24 @@ export function createTissueMaterial(uniforms: TissueUniforms, opts: { clippingP
         vec3 tA = normalize(cross(restN, abs(restN.y) < 0.95 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0)));
         vec3 tB = cross(restN, tA);
         float rgn = floor(_tissue.w * 255.0 + 0.5);
-        vec3 p0 = deformPoint(position, _weights, _tissue.x, rgn);
-        vec3 p1 = deformPoint(position + tA * 0.04, _weights, _tissue.x, rgn);
-        vec3 p2 = deformPoint(position + tB * 0.04, _weights, _tissue.x, rgn);
+        // coronary lesion: pull the tube wall toward its centreline (normal = ring direction, _coro.z = lumen radius)
+        vec3 restPos = position;
+        vPlaque = vec2(0.0);
+        float coroId = floor(_coro.x * 255.0 + 0.5);
+        if (coroId > 0.5) {
+          float rCm = _coro.z * 255.0 * 0.005;
+          for (int i = 0; i < ${MAX_LESIONS}; i++) {
+            vec4 L = uLesion[i];
+            if (L.w <= 0.0 || abs(L.x - coroId) > 0.5) continue;
+            float u = clamp(abs(_coro.y - L.y) / max(L.z, 1e-4), 0.0, 1.0);
+            float prof = 0.5 + 0.5 * cos(3.14159265 * u); // 1 at the centre, 0 at the lesion ends
+            restPos -= restN * rCm * L.w * prof;
+            if (prof > vPlaque.x) vPlaque = vec2(prof, uLesionPlaque[i]);
+          }
+        }
+        vec3 p0 = deformPoint(restPos, _weights, _tissue.x, rgn);
+        vec3 p1 = deformPoint(restPos + tA * 0.04, _weights, _tissue.x, rgn);
+        vec3 p2 = deformPoint(restPos + tB * 0.04, _weights, _tissue.x, rgn);
         vec3 objectNormal = normalize(cross(p1 - p0, p2 - p0));
         #ifdef USE_TANGENT
           vec3 objectTangent = vec3( tangent.xyz );
@@ -183,6 +208,11 @@ export function createTissueMaterial(uniforms: TissueUniforms, opts: { clippingP
           if (kind > 0.5 && kind < 2.5) col = mix(col, kind < 1.5 ? artery : vein, smoothstep(0.3, 0.75, vStatic));
           if (kind > 2.5 && kind < 3.5) col = vec3(0.74, 0.38, 0.32) * (0.9 + 0.2 * n2); // coronary artery: pale pink-tan wall
           if (kind > 3.5) col = vec3(0.30, 0.10, 0.22) * (0.9 + 0.2 * n2);            // coronary vein: dark blood seen through a thin wall
+          // atherosclerotic plaque at a lesion: yellow lipid-rich (non-calcified) to chalk-white (calcified)
+          if (vPlaque.x > 0.05) {
+            vec3 plaque = vPlaque.y > 2.5 ? vec3(0.92, 0.90, 0.84) : vPlaque.y > 1.5 ? vec3(0.90, 0.80, 0.55) : vec3(0.88, 0.72, 0.30);
+            col = mix(col, plaque * (0.9 + 0.15 * n2), smoothstep(0.05, 0.6, vPlaque.x));
+          }
           // epicardial fat: lobulated yellow, brighter at lobule centres, thin edges let the muscle show through
           float lob = fbm3(vRest * 6.5);
           vec3 fatCol = mix(vec3(0.78, 0.56, 0.20), vec3(0.95, 0.80, 0.42), smoothstep(0.3, 0.8, lob));
@@ -195,6 +225,7 @@ export function createTissueMaterial(uniforms: TissueUniforms, opts: { clippingP
           if (inner) col *= 0.82;
           if (kind > 2.5 && kind < 3.5) col = vec3(0.78, 0.18, 0.18);
           if (kind > 3.5) col = vec3(0.30, 0.25, 0.55);
+          if (vPlaque.x > 0.05) col = mix(col, vec3(1.0, 0.85, 0.1), smoothstep(0.05, 0.5, vPlaque.x)); // lesion marker
           col = mix(col, vec3(0.75), fat * 0.25);
         }
 

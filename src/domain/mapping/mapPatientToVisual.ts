@@ -1,6 +1,7 @@
 // Deterministic, pure mapping: normalized patient + reference profile + asset capabilities -> visual state.
 // No React, no WebGL, no randomness, no clock. Same inputs + versions => identical output.
 import { VALVE_IDS, type Severity, type ValveId } from "../schema/record";
+import { LESION_LENGTH_MM, VESSEL_ID, VESSEL_LABEL, cadRads, segmentCentre, stenosisCategory, type LesionVisual } from "../coronary";
 import type { EvidenceClass, Issue, NormalizedObservation, NormalizedPatient } from "../types";
 import { cyclePhases } from "./cycle";
 import {
@@ -352,6 +353,34 @@ export function mapPatientToVisual(patient: NormalizedPatient, reference: Refere
   }
 
   // ---------------------------------------------------------------- structure status
+  // ---------------------------------------------------------------- coronary stenoses (CAD-RADS 2.0)
+  const lesions: LesionVisual[] = [];
+  const coroIds: string[] = [];
+  for (const f of patient.coronaryFindings) {
+    const vessel = capabilities.coronaryStenosis?.[f.vessel];
+    const where = `${f.vessel}${f.segment ? ` ${f.segment}` : ""}`;
+    const fsrc: SourceRef = { path: `coronaryFindings[${where}]`, originalValue: `${f.stenosisPercent}%${f.plaque ? ` ${f.plaque}` : ""}`, normalizedValue: f.stenosisPercent, normalizedUnit: "% diameter" };
+    if (!vessel) {
+      unsupported.push({ path: fsrc.path, label: "Coronary stenosis", reason: capabilities.coronaryStenosis ? `The anatomy template has no ${f.vessel}.` : "This anatomy has no coronary lumen handles; choose the CT anatomy template." });
+      continue;
+    }
+    const category = stenosisCategory(f.stenosisPercent);
+    const id = change({ ruleId: "R-CORO-STEN-01", target: "coronary_vessels", property: "lumen diameter",
+      summary: `${VESSEL_LABEL[f.vessel]}${f.segment ? ` (${f.segment})` : ""}: lumen diameter narrowed by ${f.stenosisPercent}% at the lesion centre (reported; CAD-RADS ${category}).`,
+      sources: [fsrc], evidence: "reported_measurement", nature: "quantitative",
+      limitations: [
+        "Lesion position is the proximal / mid / distal third of the modelled vessel, not this patient's segment anatomy.",
+        `Lesion length (${LESION_LENGTH_MM} mm) and its tapered profile are illustrative.`,
+        "The vessel course is a template pattern (right-dominant), not this patient's coronary anatomy.",
+      ] });
+    coroIds.push(id);
+    lesions.push({ vessel: f.vessel, vesselId: VESSEL_ID[f.vessel], segment: f.segment, narrowing: Math.min(1, f.stenosisPercent / 100),
+      tCentre: segmentCentre(f.vessel, f.segment), tHalfWidth: Math.min(0.5, LESION_LENGTH_MM / 2 / vessel.lengthMm),
+      plaque: f.plaque ?? "unspecified", category, changeId: id });
+    highlights.push({ structure: "coronary_vessels", label: `${where} ${f.stenosisPercent}% (CAD-RADS ${category})`, changeId: id, kind: "finding" });
+  }
+  const cad = patient.coronaryFindings.length ? cadRads(patient.coronaryFindings) : null;
+
   const structureStatus = Object.fromEntries(STRUCTURE_IDS.map((s) => [s, { status: "default_unknown" as const, changeIds: [] as string[] }])) as PatientVisualState["structureStatus"];
   const setStatus = (s: StructureId, ids: string[]) => {
     if (!ids.length) return;
@@ -369,8 +398,9 @@ export function mapPatientToVisual(patient: NormalizedPatient, reference: Refere
   const hrChange = changes.find((c) => c.ruleId === "R-HR-01");
   if (hrChange) setStatus("myocardium", [hrChange.id]);
   for (const s of ["aorta", "pulmonary_artery", "vena_cava", "pulmonary_veins", "coronary_vessels"] as const) structureStatus[s].status = "display_only";
+  setStatus("coronary_vessels", coroIds);
 
-  const inputHash = fnv1a(stableStringify({ o: patient.observations, v: patient.valveFindings, w: patient.wallMotion, t: patient.wallThickness, i: patient.record.imaging?.findings ?? [] }));
+  const inputHash = fnv1a(stableStringify({ o: patient.observations, v: patient.valveFindings, c: patient.coronaryFindings, w: patient.wallMotion, t: patient.wallThickness, i: patient.record.imaging?.findings ?? [] }));
 
   return {
     mappingVersion: MAPPING_VERSION,
@@ -392,6 +422,7 @@ export function mapPatientToVisual(patient: NormalizedPatient, reference: Refere
     unsupported,
     unknowns,
     structureStatus,
+    coronary: { cadRads: cad?.category ?? null, driver: cad?.driver ? `${cad.driver.vessel}${cad.driver.segment ? ` ${cad.driver.segment}` : ""} ${cad.driver.stenosisPercent}%` : null, lesions },
     lvTargets: { edvMl: edvTarget, esvMl: edvTarget * rho, edvEvidence, esvEvidence },
   };
 }

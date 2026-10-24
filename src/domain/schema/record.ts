@@ -1,5 +1,6 @@
 // Executable runtime schema for patient-study records (schemaVersion 1.x).
 // Unknown values are absent or null — never zero. Every namespace below is optional.
+import { CORONARY_SEGMENTS, CORONARY_VESSELS, PLAQUE_TYPES } from "../coronary";
 import { z } from "zod";
 
 export const SCHEMA_VERSION = "1.0.0";
@@ -56,6 +57,25 @@ export const ValveFindingSchema = z.object({
   source: optStr,
   method: optStr,
   observedAt: dateish,
+  note: optStr,
+});
+
+const coronaryVessel = z.preprocess((v) => {
+  if (typeof v !== "string") return v;
+  const k = v.trim().toLowerCase().replace(/[\s_-]+/g, "");
+  const map: Record<string, string> = { lm: "LM", leftmain: "LM", lmca: "LM", lad: "LAD", leftanteriordescending: "LAD",
+    lcx: "LCx", cx: "LCx", circumflex: "LCx", leftcircumflex: "LCx", rca: "RCA", rightcoronary: "RCA", rightcoronaryartery: "RCA",
+    pda: "PDA", posteriordescending: "PDA" };
+  return map[k] ?? v;
+}, z.enum(CORONARY_VESSELS));
+
+export const CoronaryFindingSchema = z.object({
+  vessel: coronaryVessel,
+  segment: normEnum(CORONARY_SEGMENTS).optional(),
+  stenosisPercent: z.number().min(0).max(100),
+  plaque: normEnum(PLAQUE_TYPES).optional(),
+  source: optStr,
+  method: optStr,
   note: optStr,
 });
 
@@ -203,6 +223,7 @@ export const PatientRecordSchema = z.object({
   diagnoses: z.array(DiagnosisSchema).optional(),
   observations: ObservationsSchema.optional(),
   valveFindings: z.array(ValveFindingSchema).optional(),
+  coronaryFindings: z.array(CoronaryFindingSchema).optional(),
   symptoms: z.array(SymptomSchema).optional(),
   clinicianNotes: optStr,
   demographics: z.object({

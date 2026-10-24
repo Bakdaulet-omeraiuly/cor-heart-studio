@@ -144,6 +144,13 @@ export function HeartModel({ entry, spec, asset, pickAsset, clockId, primaryCloc
     if (!primaryClockId || primaryClockId === clockId) notifyPhase(state.clock.elapsedTime * 1000);
 
     // appearance uniforms (cheap, read from the store without re-rendering)
+    const lesionU = uniforms.uLesion.value as THREE.Vector4[], plaqueU = uniforms.uLesionPlaque.value as number[];
+    const lesions = visual.coronary?.lesions ?? [];
+    for (let i = 0; i < lesionU.length; i++) {
+      const L = lesions[i];
+      lesionU[i].set(L ? L.vesselId : 0, L ? L.tCentre : 0, L ? L.tHalfWidth : 0, L ? L.narrowing : 0);
+      plaqueU[i] = L ? { noncalcified: 1, partially_calcified: 2, calcified: 3, unspecified: 1 }[L.plaque] : 0;
+    }
     uniforms.uMode.value = s.mode === "clinical" ? 1 : 0;
     const hidden = uniforms.uHidden.value as number[];
     REGION_STRUCTURES.forEach((id, i) => { hidden[i] = s.hidden[id] || (i >= 4 && i <= 7 && !s.layers.vessels) ? 1 : 0; });

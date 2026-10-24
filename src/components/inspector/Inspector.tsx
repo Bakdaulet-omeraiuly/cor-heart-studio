@@ -1,4 +1,11 @@
 "use client";
+import { CAD_RADS_TEXT, VESSEL_LABEL, stenosisCategory } from "@/domain/coronary";
+import type { CameraPreset } from "@/state/store";
+
+/** Camera preset that shows each vessel's course on the template (right-dominant pattern). */
+const LESION_VIEW: Record<"LM" | "LAD" | "LAD_DISTAL" | "LCx" | "RCA" | "PDA", CameraPreset> = {
+  LM: "superior", LAD: "superior", LAD_DISTAL: "left_lateral", LCx: "left_lateral", RCA: "anterior", PDA: "inferior",
+};
 import { Fragment, useMemo } from "react";
 import { AlertTriangle, Ban, Crosshair, Download, Info, X } from "lucide-react";
 import { FIELDS, type FieldCategory } from "@/domain/schema/fields";
@@ -64,7 +71,7 @@ function Header({ entry }: { entry: PatientEntry }) {
           <p className="num truncate text-[11px] text-faint" title={`patientId ${p.patientId} · studyId ${p.studyId}`}>{p.patientId} · {p.studyId}{p.studyDate ? ` · ${p.studyDate}` : ""}</p>
         </div>
         <div className="flex shrink-0 items-center">
-          <IconButton label="Download normalized JSON" onClick={() => download(`${p.patientId}_${p.studyId}.normalized.json`, JSON.stringify({ original: p.original, normalized: { observations: p.observations, derived: p.derived, valveFindings: p.valveFindings, wallMotion: p.wallMotion, wallThickness: p.wallThickness, issues: p.issues }, visual: entry.visual }, null, 2))}>
+          <IconButton label="Download normalized JSON" onClick={() => download(`${p.patientId}_${p.studyId}.normalized.json`, JSON.stringify({ original: p.original, normalized: { observations: p.observations, derived: p.derived, valveFindings: p.valveFindings, coronaryFindings: p.coronaryFindings, wallMotion: p.wallMotion, wallThickness: p.wallThickness, issues: p.issues }, visual: entry.visual }, null, 2))}>
             <Download className="h-4 w-4" />
           </IconButton>
           <IconButton label="Close inspector" onClick={() => useApp.getState().set({ inspectorOpen: false })}>
@@ -125,6 +132,7 @@ function ObsRow({ o }: { o: NormalizedObservation }) {
 function Observations({ entry }: { entry: PatientEntry }) {
   const p = entry.patient;
   const r = p.record;
+  const requestCamera = useApp((st) => st.requestCamera);
   const byCat = new Map<FieldCategory, NormalizedObservation[]>();
   for (const f of FIELDS) {
     const o = p.observations[f.path];
@@ -164,6 +172,29 @@ function Observations({ entry }: { entry: PatientEntry }) {
               {v.measurements.map((m) => <div key={m.label} className="num text-[11px] text-muted">{m.label}: {fmt(m.value)} {m.unit ?? <span className="text-warn">no unit</span>}</div>)}
               {(v.source || v.note) && <div className="text-[10px] text-faint">{[v.source, v.note].filter(Boolean).join(" · ")}</div>}
             </li>))}</ul>
+        </section>
+      )}
+      {p.coronaryFindings.length > 0 && (
+        <section data-testid="coronary-findings">
+          <SectionTitle aside={entry.visual.coronary.cadRads && (
+            <span className="rounded bg-warn/15 px-1.5 py-0.5 text-[11px] font-medium text-warn" title={`CAD-RADS 2.0 (Cury et al. 2022): ${CAD_RADS_TEXT[entry.visual.coronary.cadRads]}. Most severe: ${entry.visual.coronary.driver}`}>
+              CAD-RADS {entry.visual.coronary.cadRads}
+            </span>
+          )}>Coronary arteries</SectionTitle>
+          <ul className="space-y-1.5">{p.coronaryFindings.map((c, i) => (
+            <li key={i} className="text-[12px]">
+              <div className="flex justify-between gap-2">
+                <span>{VESSEL_LABEL[c.vessel]}{c.segment ? ` · ${c.segment}` : ""}</span>
+                <span className="flex items-center gap-2">
+                  <span className="num">{c.stenosisPercent}% <span className="text-faint">· {stenosisCategory(c.stenosisPercent)}</span></span>
+                  {entry.visual.coronary.lesions.some((l) => l.vessel === c.vessel) && (
+                    <button className="rounded border border-line px-1 text-[10px] text-muted hover:text-ink" title="Turn the 3D view toward this lesion" onClick={() => requestCamera(LESION_VIEW[c.vessel === "LAD" && c.segment !== "proximal" ? "LAD_DISTAL" : c.vessel])}>View</button>
+                  )}
+                </span>
+              </div>
+              <div className="flex justify-between text-[10px] text-faint"><span>{c.plaque ? c.plaque.replace(/_/g, " ") + " plaque" : "plaque type not reported"}{c.source ? ` · ${c.source}` : ""}</span><EvidenceBadge evidence="reported_measurement" compact /></div>
+            </li>))}</ul>
+          {entry.visual.coronary.cadRads && <p className="mt-1 text-[10px] text-faint">{CAD_RADS_TEXT[entry.visual.coronary.cadRads]} — CAD-RADS 2.0, most severe diameter stenosis per patient.</p>}
         </section>
       )}
       {(p.wallMotion.length > 0 || p.wallThickness.length > 0) && (

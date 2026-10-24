@@ -1,3 +1,4 @@
+import type { CadRadsCategory, CoronaryVessel, LesionVisual } from "../coronary";
 import type { Severity, ValveId } from "../schema/record";
 import type { EvidenceClass, Issue } from "../types";
 import type { CyclePhases } from "./cycle";
@@ -125,6 +126,7 @@ export interface PatientVisualState {
   unsupported: UnsupportedFinding[];
   unknowns: UnknownItem[];
   structureStatus: Record<StructureId, { status: StructureStatus; changeIds: string[] }>;
+  coronary: { cadRads: CadRadsCategory | null; driver: string | null; lesions: LesionVisual[] };
   /** Rendered LV cavity volume targets in the asset frame (mL) — used by verification tests. */
   lvTargets: { edvMl: number; esvMl: number; edvEvidence: EvidenceClass; esvEvidence: EvidenceClass };
 }
@@ -172,4 +174,6 @@ export interface AssetCapabilities {
   valveLeaflets: ValveId[];
   regurgitationCue: boolean;
   tissueOverlay: boolean;
+  /** Coronary arteries that can draw a lumen narrowing (template `_CORO` attribute), with modelled lengths. */
+  coronaryStenosis: Partial<Record<CoronaryVessel, { lengthMm: number }>> | null;
 }

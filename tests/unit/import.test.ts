@@ -69,7 +69,7 @@ describe("import preview", () => {
     const p = buildImportPreview("synthetic-patients.json", readText("public/samples/synthetic-patients.json"), none);
     expect(p.fileIssues.filter((i) => i.severity === "error")).toEqual([]);
     expect(p.counts.rejected).toBe(0);
-    expect(p.rows).toHaveLength(7);
+    expect(p.rows).toHaveLength(8);
   });
 
   it("flags malformed CSV", () => {

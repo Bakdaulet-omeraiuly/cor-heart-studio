@@ -45,7 +45,7 @@ test("rejected and duplicate rows require an explicit decision", async ({ page }
   await ready(page);
   await page.getByRole("button", { name: "Import JSON / CSV" }).click();
   await page.getByTestId("file-input").setInputFiles(path.resolve(__dirname, "../../public/samples/synthetic-patients.json"));
-  await expect(page.locator("tbody tr[data-status=duplicate_existing]")).toHaveCount(7);
+  await expect(page.locator("tbody tr[data-status=duplicate_existing]")).toHaveCount(8);
   await expect(page.getByTestId("commit-import")).toBeDisabled();
   await page.getByRole("button", { name: "Skip all" }).click();
   await expect(page.getByTestId("commit-import")).toBeDisabled(); // 0 records to import
