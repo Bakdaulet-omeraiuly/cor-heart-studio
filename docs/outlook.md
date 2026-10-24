@@ -79,7 +79,50 @@ Code: `src/domain/outlook/` (evidence table, pure projection, heart record copy)
 * Under each heart the mid-ventricular short axis is drawn to scale (septum on the left, posterior wall on the right).
   The 3D short-axis cutaway is not offered here because clipping does not apply in the side-by-side views (an existing
   limitation of `CompareCanvas`).
-* There is no untreated arm. No verified per-year rate of progression in untreated hypertension was found.
+* The natural course (no button on) now comes from the placebo arm of Simpson 2009; see "Treatment buttons" below for what that does and does not show.
+
+## Treatment buttons (Now | In N years)
+
+Buttons turn a treatment on or off; the right-hand 3D organ is recomputed from the buttons that are on, and with every button off
+it shows the natural course. Code: `src/domain/treatments/` (evidence, selection, projection, chat proposals), `src/outlook/TreatmentButtons.tsx`,
+`src/outlook/TreatmentChat.tsx`, `src/app/api/treatments/`. Design: `docs/superpowers/specs/2026-10-24-treatment-scenarios-design.md`.
+
+**Evidence rule.** A treatment effect that moves a model comes only from a randomised trial or a meta-analysis of trials
+(`rct`, `meta-analysis`); a unit test fails otherwise. The natural course may come from a placebo arm or a prospective cohort and is
+labelled. Observational findings are never used to move a model. Every entry carries its DOI, study type, n, duration and a caveat.
+
+**Combination rules.**
+* Buttons in the same group (for example `bp-regimen`) are never summed: switching one on switches the others off. That is an assumption
+  made because no trial reports the sum of two blood-pressure regimens.
+* Across groups, hippocampal effects multiply as volume factors; only one such effect has evidence today.
+* A study's change is applied in proportion to elapsed time up to its follow-up and then **held**: nothing is extrapolated. The screen says so when a
+  projection is past the evidence.
+* Range: average = `likely`, slower = `best`, faster = `worst`. Where the unfavourable end of a treatment (or the favourable end of the natural
+  course) would pass "no change", it is held at no change, as in the sections above.
+
+**What the evidence does not support (shown honestly in the app).**
+* Aortic stenosis: statins did not slow progression in three randomised trials (SALTIRE, ASTRONOMER, SEAS), so the statin button is listed with no effect
+  on the valve. No verified randomised numbers for valve replacement were read, so there is no valve-replacement button in this version.
+* Aerobic exercise and the hippocampus is contested: one trial in healthy older adults found about +3.5 points against controls, two later trials in
+  people with memory problems found no volumetric difference. The likely value is therefore no effect; the favourable end is Erickson 2011.
+  None of the trials included people with Alzheimer's dementia.
+* Anti-amyloid antibodies are listed without a volumetric effect until the per-trial volume numbers are read from the primary papers.
+* LVH natural course: one small placebo arm (12 patients, normal office blood pressure, 1 year).
+
+**Adding evidence.** Edit `src/domain/treatments/evidence.json` (sources and entries); the schema and `tests/unit/treatments/evidence*.test.ts`
+reject missing DOIs, empty caveats and non-randomised effects. Regenerate the table below with `npx tsx scripts/evidence-table.ts`.
+
+| Id | Kind | Label | Change | Sources |
+|---|---|---|---|---|
+| `lvh-natural` | natural | Natural course | 1.97 (best 0, worst 8.65) g/m² LVMI over 1 y | [Simpson 2009](https://doi.org/10.1136/hrt.2009.177238) (rct, n=35) |
+| `lvh-bp-control` | treatment | Lower blood pressure | -4.68 (best -11.99, worst 0) g/m² LVMI over 1 y | [Simpson 2009](https://doi.org/10.1136/hrt.2009.177238) (rct, n=35) |
+| `lvh-losartan` | treatment | Losartan-based regimen | -21.7 (best -43.5, worst 0) g/m² LVMI over 4.8 y | [LIFE · Devereux 2004](https://doi.org/10.1161/01.CIR.0000141573.44737.5A) (rct, n=916); [Gerdts 2009](https://doi.org/10.1080/08037050903047202) (rct, n=883) |
+| `lvh-atenolol` | treatment | Atenolol-based regimen | -17.7 (best -37.3, worst 0) g/m² LVMI over 4.8 y | [LIFE · Devereux 2004](https://doi.org/10.1161/01.CIR.0000141573.44737.5A) (rct, n=916); [Gerdts 2009](https://doi.org/10.1080/08037050903047202) (rct, n=883) |
+| `as-natural` | natural | Natural course | no effect on the model | [Otto 1997](https://doi.org/10.1161/01.cir.95.9.2262) (prospective-cohort, n=123) |
+| `as-statin` | treatment | Statin | no effect on the model | [ASTRONOMER · Chan 2010](https://doi.org/10.1161/CIRCULATIONAHA.109.900027) (rct, n=269); [SALTIRE · Cowell 2005](https://doi.org/10.1056/NEJMoa043876) (rct, n=155); [SEAS · Rossebø 2008](https://doi.org/10.1056/NEJMoa0804602) (rct, n=1873) |
+| `ad-natural` | natural | Natural course | no effect on the model | [Barnes 2009](https://doi.org/10.1016/j.neurobiolaging.2008.01.010) (meta-analysis, n=807); [de Leon 1989](https://doi.org/10.2214/ajr.152.6.1257) (prospective-cohort, n=95); [Fjell 2009](https://doi.org/10.1523/JNEUROSCI.3252-09.2009) (prospective-cohort, n=142); [Sluimer 2008](https://doi.org/10.1212/01.wnl.0000311446.61861.e3) (prospective-cohort, n=65) |
+| `ad-exercise` | treatment | Aerobic exercise | 0 (best 3.46, worst 0) % hippocampus over 1 y | [Erickson 2011](https://doi.org/10.1073/pnas.1015950108) (rct, n=120); [ten Brinke 2014](https://doi.org/10.1136/bjsports-2013-093184) (rct, n=86); [EXERT · Baker 2025](https://doi.org/10.1002/alz.14586) (rct, n=296) |
+| `ad-antiamyloid` | treatment | Anti-amyloid antibody | no effect on the model | [Abushakra 2026](https://doi.org/10.1007/s40263-025-01251-y) (observational, n=13187) |
 
 ## Next candidates (not built)
 

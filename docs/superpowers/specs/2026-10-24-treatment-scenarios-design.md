@@ -108,7 +108,7 @@ These come from the assistant's recall and the existing `docs/outlook.md`; none 
 ## Evidence rule and research results (2026-10-24, user delegated: "pick the most accurate and start")
 
 **Rule.** A number may drive the 3D model only if it comes from a randomised trial or a meta-analysis of trials.
-Observational studies are shown as context behind ⓘ and never move the model. Each entry records study type, n,
+Observational studies are shown as context behind ⓘ and never move the model. The **natural course** is the exception: it may come from a placebo arm or a prospective cohort (there is no untreated randomised arm for it), labelled as such. Each entry records study type, n,
 duration, who it applies to, and a caveat.
 
 The three earlier open questions are settled by the rule (the builder re-verifies each number from the primary paper):
