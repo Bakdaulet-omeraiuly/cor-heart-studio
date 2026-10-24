@@ -4,6 +4,8 @@ Explainable 3D cardiac visualization of structured observations. Import or enter
 see the anatomical heart change, and trace every visual change back to its input, rule and evidence
 class. **Visualization demo with synthetic data — not a medical device, no diagnosis.**
 
+How the team used Kiro (specs, steering, hooks, property-based tests): [`KIRO.md`](KIRO.md). Kiro files: [`.kiro/`](.kiro).
+
 ## Quick start
 
 ```bash
