@@ -137,7 +137,7 @@ export function SliceView({ vol, view, useStore }: { vol: SliceVolume; view: Vie
         />
         <Edge pos="left" text={EDGES[view][0]} /><Edge pos="right" text={EDGES[view][1]} />
         <Edge pos="top" text={EDGES[view][2]} /><Edge pos="bottom" text={EDGES[view][3]} />
-        <span className="num pointer-events-none absolute bottom-1 left-2 text-[10px] text-white/55">x {posMm[0]} y {posMm[1]} z {posMm[2]} mm</span>
+        {view === "axial" && <span className="num pointer-events-none absolute bottom-1 left-2 text-[10px] text-white/55">x {posMm[0]} y {posMm[1]} z {posMm[2]} mm</span>}
       </div>
     </section>
   );

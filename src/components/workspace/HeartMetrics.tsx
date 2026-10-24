@@ -3,6 +3,7 @@
 // volumes; Tier A: the record's reported values. Unknown is shown as unknown, never as a default.
 import type { PatientEntry } from "@/lib/patients";
 import type { HeartAssetSpec } from "@/scene/asset-adapters/registry";
+import { InfoTip } from "../ui/primitives";
 
 interface Metric { label: string; value: string | null; unit: string; source: string }
 
@@ -47,14 +48,16 @@ export function HeartMetrics({ entry, spec }: { entry: PatientEntry; spec: Heart
   const metrics = spec.manifest.imaging ? fromCt(spec) : fromRecord(entry);
   return (
     <div className="grid shrink-0 grid-cols-3 divide-x divide-line border-t border-line bg-panel md:grid-cols-5" data-testid="heart-metrics">
-      {metrics.map((m) => (
-        <div key={m.label} className="min-w-0 px-3 py-1.5" title={`${m.label}: ${m.source}`}>
-          <p className="truncate text-[10px] uppercase tracking-wider text-faint">{m.label}</p>
+      {metrics.map((m, i) => (
+        <div key={m.label} className="min-w-0 px-3 py-1.5">
+          <p className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-faint">
+            <span className="truncate">{m.label}</span>
+            <InfoTip label={`${m.label}: source`} align={i >= 3 ? "right" : "left"}>{m.value ? m.source : "unknown"}</InfoTip>
+          </p>
           <p className="num text-[16px] leading-tight text-ink">
             {m.value ?? <span className="text-faint">—</span>}
             {m.value && <span className="ml-1 text-[11px] text-muted">{m.unit}</span>}
           </p>
-          <p className="truncate text-[10px] text-faint">{m.value ? m.source : "unknown"}</p>
         </div>
       ))}
     </div>

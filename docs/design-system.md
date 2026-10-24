@@ -15,6 +15,9 @@ Goal: read like professional imaging software (OHIF, 3D Slicer, cvi42, HeartFlow
    bar, not repeated per viewport.
 5. **Dense, aligned numbers.** Tabular mono digits, units in muted text, right-aligned columns.
 6. **Provenance is part of the picture.** Every view says where its data comes from (badge or corner text).
+7. **One line on screen, the rest behind ⓘ.** Each view shows its primary values and a one-line source
+   ("CT template · illustration · fit 89.1%"); methods, formulas, label codes, citations and per-metric
+   sources sit in `InfoTip` (hover or keyboard focus, kept in the DOM). Detail is moved, never deleted.
 
 ## Tokens (dark; light theme mirrors them)
 

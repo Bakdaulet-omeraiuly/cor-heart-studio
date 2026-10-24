@@ -58,6 +58,31 @@ export function EvidenceBadge({ evidence, compact }: { evidence: EvidenceClass; 
   );
 }
 
+/**
+ * ⓘ that reveals detail on hover or keyboard focus. Detail stays in the DOM (readable by screen readers
+ * and tests); only the primary value sits on screen. Provenance moves here, it is never deleted.
+ */
+export function InfoTip({ children, label = "Details", align = "left", side = "top", className }: { children: ReactNode; label?: string; align?: "left" | "right"; side?: "top" | "bottom"; className?: string }) {
+  return (
+    <span className={cx("group relative inline-flex align-middle", className)}>
+      <button type="button" aria-label={label} className="inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] leading-none text-faint hover:text-ink focus-visible:text-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-accent">
+        ⓘ
+      </button>
+      <span
+        role="tooltip"
+        className={cx(
+          "invisible absolute z-50 w-max max-w-[22rem] rounded-md border border-line bg-panel-2 px-2.5 py-2 text-left text-[11px] font-normal normal-case leading-snug tracking-normal text-muted opacity-0 shadow-lg transition-opacity",
+          "group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100",
+          side === "top" ? "bottom-full mb-1.5" : "top-full mt-1.5",
+          align === "left" ? "left-0" : "right-0",
+        )}
+      >
+        {children}
+      </span>
+    </span>
+  );
+}
+
 export function Pill({ children, tone = "neutral", title }: { children: ReactNode; tone?: "neutral" | "warn" | "error" | "info" | "ok" | "accent"; title?: string }) {
   return (
     <span

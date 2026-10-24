@@ -2,7 +2,7 @@
 // Brain module: structure list | 3D model + measurements | MRI evidence (axial, coronal, sagittal).
 import dynamic from "next/dynamic";
 import { Database, Loader2 } from "lucide-react";
-import { PanelHeader, Segmented, Switch } from "@/components/ui/primitives";
+import { InfoTip, PanelHeader, Segmented, Switch } from "@/components/ui/primitives";
 import { fmtMm, fmtPct } from "@/imaging/fidelity";
 import { useWebgl } from "@/components/workspace/HeartViewport";
 import { useBrain } from "./brainStore";
@@ -47,7 +47,6 @@ export function BrainWorkspace() {
           <SliceView vol={data.vol} view="coronal" useStore={useBrain} />
           <SliceView vol={data.vol} view="sagittal" useStore={useBrain} />
         </div>
-        <p className="border-t border-line bg-panel px-3 py-1.5 text-[10px] leading-snug text-faint">Click or drag to move the crosshair · wheel: next slice · shift-drag: window/level</p>
       </section>
       )}
     </div>
@@ -75,6 +74,7 @@ function SliceControls() {
       <Segmented<"fill" | "outline" | "off"> label="Segmentation overlay" value={s.overlay} onChange={(v) => s.set({ overlay: v })}
         options={[{ value: "fill", label: "Fill" }, { value: "outline", label: "Outline" }, { value: "off", label: "Off" }]} />
       <button className="text-[11px] text-muted hover:text-ink" onClick={() => s.set({ windowCenter: 128, windowWidth: 256 })} title="Reset window/level">W/L</button>
+      <InfoTip label="Slice controls" align="right" side="bottom">Click or drag to move the crosshair · wheel: next slice · shift-drag: window/level</InfoTip>
     </>
   );
 }
@@ -90,18 +90,25 @@ function Selection({ data }: { data: BrainData }) {
   const fit = data.manifest.fidelity?.structures.find((r) => r.index === st.index);
   return (
     <div className="absolute left-3 top-3 w-[260px] rounded-lg border border-line bg-panel/90 p-2.5 text-[12px] shadow-[var(--shadow)] backdrop-blur" data-testid="brain-selection">
-      <p className="font-medium text-ink">{st.name}</p>
+      <div className="flex items-center gap-1.5 font-medium text-ink">
+        {st.name}
+        <InfoTip label={`${st.name}: details`} side="bottom">
+          <dl className="grid grid-cols-[auto_auto] gap-x-3 gap-y-0.5">
+            {twin && <><dt className="text-faint">Contralateral</dt><dd className="num">{twin.volumeMl.toFixed(2)} mL</dd></>}
+            <dt className="text-faint">Labelled</dt><dd>{st.method === "manual" ? "Manually (DKT31)" : st.method.startsWith("automatic (FreeSurfer") ? "Automatically (FreeSurfer)" : st.method}</dd>
+            <dt className="text-faint">Labels</dt><dd className="num">{st.labels.join(", ")}</dd>
+            {fit && fit.nsdPercent != null && <>
+              <dt className="text-faint">COR-Fit ≤1 vox</dt><dd className="num text-ink">{fmtPct(fit.nsdPercent)}</dd>
+              <dt className="text-faint">Mean / HD95</dt><dd className="num">{fmtMm(fit.meanMm)} / {fmtMm(fit.hd95Mm)}</dd>
+              {fit.volumeErrorPercent != null && <><dt className="text-faint">3D vs label volume</dt><dd className="num">{fit.volumeErrorPercent >= 0 ? "+" : ""}{fit.volumeErrorPercent.toFixed(1)} %</dd></>}
+            </>}
+          </dl>
+          <span className="mt-1 block text-faint">COR-Fit: share of this structure&apos;s 3D surface within one voxel of its labels (both directions). Asymmetry: (this − other) / mean.</span>
+        </InfoTip>
+      </div>
       <dl className="mt-1.5 grid grid-cols-[1fr_auto] gap-y-0.5 text-[11px]">
         <dt className="text-faint">Volume</dt><dd className="num text-ink">{st.volumeMl.toFixed(2)} mL</dd>
-        {twin && <><dt className="text-faint">Contralateral</dt><dd className="num">{twin.volumeMl.toFixed(2)} mL</dd></>}
-        {asym !== null && <><dt className="text-faint" title="(this − other) / mean, derived from the two volumes">Asymmetry</dt><dd className="num">{asym >= 0 ? "+" : ""}{asym.toFixed(1)} %</dd></>}
-        <dt className="text-faint">Labelled</dt><dd>{st.method === "manual" ? "Manually (DKT31)" : "Automatically (FreeSurfer)"}</dd>
-        <dt className="text-faint">Labels</dt><dd className="num">{st.labels.join(", ")}</dd>
-        {fit && fit.nsdPercent != null && <>
-          <dt className="text-faint" title="COR-Fit: share of this structure's 3D surface within one voxel of its labels (both directions)">COR-Fit ≤1 vox</dt><dd className="num text-ink">{fmtPct(fit.nsdPercent)}</dd>
-          <dt className="text-faint">Mean / HD95</dt><dd className="num">{fmtMm(fit.meanMm)} / {fmtMm(fit.hd95Mm)}</dd>
-          {fit.volumeErrorPercent != null && <><dt className="text-faint">3D vs label volume</dt><dd className="num">{fit.volumeErrorPercent >= 0 ? "+" : ""}{fit.volumeErrorPercent.toFixed(1)} %</dd></>}
-        </>}
+        {asym !== null && <><dt className="text-faint">Asymmetry</dt><dd className="num">{asym >= 0 ? "+" : ""}{asym.toFixed(1)} %</dd></>}
       </dl>
       {!selected && <p className="mt-1 text-[10px] text-faint">Hover preview — click to select</p>}
     </div>
@@ -121,21 +128,21 @@ function Summary({ data }: { data: BrainData }) {
   );
   return (
     <div className="shrink-0 border-t border-line bg-panel">
-      <div className="grid grid-cols-2 divide-x divide-line md:grid-cols-6">
+      <div className="grid grid-cols-2 divide-x divide-line md:grid-cols-4">
         {metric("Labelled brain volume", `${m.totals.brainMl.toFixed(0)} mL`, "All labelled voxels (skull and CSF outside the labels excluded)")}
-        {metric("Cortex L / R", `${m.totals.cortexLeftMl.toFixed(0)} / ${m.totals.cortexRightMl.toFixed(0)} mL`, "Sum of manual cortical labels per hemisphere")}
-        {metric("Cortical asymmetry", `${asym >= 0 ? "+" : ""}${asym.toFixed(1)} %`, "(left − right) / mean, derived")}
+        {metric("Cortex L / R", `${m.totals.cortexLeftMl.toFixed(0)} / ${m.totals.cortexRightMl.toFixed(0)} mL`, `Sum of cortical labels per hemisphere; asymmetry (left − right) / mean ${asym >= 0 ? "+" : ""}${asym.toFixed(1)} %`)}
         {metric("Hippocampi", `${hip.toFixed(2)} mL`, "Left + right, FreeSurfer automatic labels")}
         {metric("Ventricles", `${ventricles.toFixed(1)} mL`, "Lateral, third and fourth ventricles, FreeSurfer automatic labels")}
-        {m.fidelity && metric(`COR-Fit ≤ ${m.fidelity.toleranceMm} mm`, fmtPct(m.fidelity.overall.nsdPercent),
-          `Share of the 3D surface within one MRI voxel of the segmentation (both directions); mean ${m.fidelity.overall.meanMm} mm. Cortex ${m.fidelity.cortex.nsdPercent}%, deep structures ${m.fidelity.deep.nsdPercent}%. Fidelity to the labels, not clinical accuracy.`)}
       </div>
-      <p className="flex items-start gap-1.5 border-t border-line px-3 py-1.5 text-[10px] leading-snug text-faint" data-testid="brain-provenance">
-        <Database className="mt-0.5 h-3 w-3 shrink-0" />
-        <span>
-          {m.modality}, healthy adult volunteer ({m.subject}). Cortex: {m.provenance.cortex}. Deep structures: {m.provenance.subcortical}. Not reviewed by a clinician; no normative comparison.
-          Data: {m.dataset.name}, {m.dataset.license} — {m.dataset.source}.
-        </span>
+      <p className="flex items-center gap-1.5 border-t border-line px-3 py-1.5 text-[11px] text-faint" data-testid="brain-provenance">
+        <Database className="h-3 w-3 shrink-0" />
+        <span className="truncate">Healthy adult volunteer · {m.dataset.license}</span>
+        {m.fidelity && <span className="num text-muted">· fit {fmtPct(m.fidelity.overall.nsdPercent)}</span>}
+        <InfoTip label="Data source and accuracy">
+          <span className="block">{m.modality}, healthy adult volunteer ({m.subject}). Cortex: {m.provenance.cortex}. Deep structures: {m.provenance.subcortical}. Not reviewed by a clinician; no normative comparison.</span>
+          {m.fidelity && <span className="mt-1 block">COR-Fit ≤ {m.fidelity.toleranceMm} mm: {fmtPct(m.fidelity.overall.nsdPercent)} of the 3D surface within one MRI voxel of the segmentation (both directions); mean {m.fidelity.overall.meanMm} mm. Cortex {m.fidelity.cortex.nsdPercent}%, deep structures {m.fidelity.deep.nsdPercent}%. Fidelity to the labels, not clinical accuracy.</span>}
+          <span className="mt-1 block text-faint">Data: {m.dataset.name}, {m.dataset.license} — {m.dataset.source}.</span>
+        </InfoTip>
       </p>
     </div>
   );

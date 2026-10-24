@@ -2,7 +2,7 @@
 // Structure tree: every labelled structure with its measured volume and how it was labelled.
 import { useMemo, useState } from "react";
 import { ChevronRight, Eye, EyeOff, Search } from "lucide-react";
-import { PanelHeader, cx } from "@/components/ui/primitives";
+import { InfoTip, PanelHeader, cx } from "@/components/ui/primitives";
 import { useBrain } from "./brainStore";
 import { flatIndex, type Vec3 } from "@/imaging/sliceGeometry";
 import type { BrainData } from "./useBrainData";
@@ -57,7 +57,11 @@ export function StructurePanel({ data }: { data: BrainData }) {
 
   return (
     <aside className="flex h-full min-h-0 flex-col" aria-label="Brain structures">
-      <PanelHeader title="Structures" count={structures.length} />
+      <PanelHeader title="Structures" count={structures.length} aside={
+        <InfoTip label="How structures were labelled" align="right" side="bottom">
+          Volumes: voxel counts of each label in this scan (mL). Cortical regions: {structures.some((x) => x.method === "manual") ? "manual labels (DKT31 protocol)" : structures.find((x) => x.group === "cortex")?.method ?? "—"}. Deep structures: FreeSurfer automatic labels, not manually reviewed.
+        </InfoTip>
+      } />
       <label className="flex items-center gap-2 border-b border-line px-3 py-2">
         <Search className="h-3.5 w-3.5 text-faint" aria-hidden />
         <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Find structure" aria-label="Find structure" className="w-full bg-transparent text-[12px] outline-none placeholder:text-faint" />
@@ -82,7 +86,6 @@ export function StructurePanel({ data }: { data: BrainData }) {
                       <button className="min-w-0 flex-1 truncate py-1 text-left" onClick={() => select(st)} title={`${st.name} — labels ${st.labels.join(", ")} · ${st.method}`}>
                         {st.name.replace(/ \((left|right)\)$/, g.id.startsWith("ctx") ? "" : " ($1)")}
                       </button>
-                      <span className={cx("shrink-0 rounded px-1 text-[9px] uppercase tracking-wide", st.method === "manual" ? "bg-ok/15 text-ok" : "bg-panel-3 text-faint")} title={st.method}>{st.method === "manual" ? "man" : "auto"}</span>
                       <span className="num w-14 shrink-0 text-right text-[11px] text-muted">{st.volumeMl.toFixed(2)}</span>
                       {st.group !== "cortex" && (
                         <button className="shrink-0 rounded p-0.5 text-faint opacity-60 hover:text-ink group-hover:opacity-100" aria-label={s.hidden.has(st.index) ? `Show ${st.name}` : `Hide ${st.name}`} onClick={() => s.toggleHidden(st.index)}>
@@ -97,7 +100,6 @@ export function StructurePanel({ data }: { data: BrainData }) {
           );
         })}
       </div>
-      <p className="border-t border-line px-3 py-2 text-[10px] leading-snug text-faint">Volumes: voxel counts of each label in this scan (mL). <span className="text-ok">man</span> = manual cortical label (DKT31); auto = FreeSurfer automatic, not manually reviewed.</p>
     </aside>
   );
 }

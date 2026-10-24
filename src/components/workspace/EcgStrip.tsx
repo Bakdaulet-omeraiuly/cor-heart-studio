@@ -7,7 +7,7 @@ import { ecgAt, ecgTiming, type Interval } from "@/domain/ecg";
 import type { PatientEntry } from "@/lib/patients";
 import { useApp } from "@/state/store";
 import { getClock } from "@/scene/animation/clock";
-import { cx } from "../ui/primitives";
+import { cx, InfoTip } from "../ui/primitives";
 
 const BEATS = 2.5; // RR intervals visible
 const EV_LABEL: Record<Interval["evidence"], string> = { reported: "reported", derived: "derived", population_default: "default" };
@@ -95,18 +95,23 @@ export function EcgStrip({ entry }: { entry: PatientEntry }) {
         <button className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider text-muted hover:text-ink" onClick={() => setOpen(!open)} aria-expanded={open}>
           {open ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />} ECG · lead II schematic
         </button>
-        {row("PR", timing.pr)}
-        {row("QRS", timing.qrs)}
-        {row("QT", timing.qt)}
-        <span className="whitespace-nowrap" title="Rate-corrected QT: Bazett QT/√RR, Fridericia QT/∛RR, Framingham QT + 0.154(1 − RR) (Sagie 1992)">
-          <span className="text-faint">QTc</span> <span className="num text-ink">{Math.round(q.bazett)}</span><span className="text-faint"> Bazett · </span>
-          <span className="num text-ink">{Math.round(q.fridericia)}</span><span className="text-faint"> Fridericia · </span>
-          <span className="num text-ink">{Math.round(q.framingham)}</span><span className="text-faint"> Framingham</span>
-          {q.reported && <span className="text-faint"> (reported {q.reported.ms}{q.reported.method ? ` ${q.reported.method}` : ""})</span>}
+        <span className="whitespace-nowrap">
+          <span className="text-faint">QTc</span> <span className="num text-ink">{Math.round(q.fridericia)}</span><span className="text-faint"> ms (Fridericia)</span>
         </span>
-        <span className="whitespace-nowrap text-faint" title="Weissler 1968 systolic time intervals (men): PEP = 131 − 0.4·HR, QS2 = 546 − 2.1·HR. QRS onset is placed one PEP before aortic valve opening in the 3D cycle.">
-          PEP <span className="num text-muted">{Math.round(timing.pep)}</span> · QS2 <span className="num text-muted">{Math.round(timing.qs2)}</span> ms
-        </span>
+        <InfoTip label="ECG intervals and sources">
+          <span className="flex flex-col gap-1">
+            <span className="flex flex-wrap gap-x-3">{row("PR", timing.pr)}{row("QRS", timing.qrs)}{row("QT", timing.qt)}</span>
+            <span title="Rate-corrected QT: Bazett QT/√RR, Fridericia QT/∛RR, Framingham QT + 0.154(1 − RR) (Sagie 1992)">
+              <span className="text-faint">QTc</span> <span className="num text-ink">{Math.round(q.bazett)}</span><span className="text-faint"> Bazett · </span>
+              <span className="num text-ink">{Math.round(q.fridericia)}</span><span className="text-faint"> Fridericia · </span>
+              <span className="num text-ink">{Math.round(q.framingham)}</span><span className="text-faint"> Framingham</span>
+              {q.reported && <span className="text-faint"> (reported {q.reported.ms}{q.reported.method ? ` ${q.reported.method}` : ""})</span>}
+            </span>
+            <span className="text-faint">
+              PEP <span className="num text-muted">{Math.round(timing.pep)}</span> · QS2 <span className="num text-muted">{Math.round(timing.qs2)}</span> ms — Weissler 1968 (men): PEP = 131 − 0.4·HR, QS2 = 546 − 2.1·HR; QRS onset is placed one PEP before aortic valve opening.
+            </span>
+          </span>
+        </InfoTip>
       </div>
       {open && (
         <div className="relative h-[86px] px-3 pb-1.5">

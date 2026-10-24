@@ -22,3 +22,21 @@ test("ECG strip: intervals with their provenance, rate-corrected QT, locked to t
   await strip.screenshot({ path: `${shots}/e2e-ecg-strip.png` });
   expect(errors).toEqual([]);
 });
+
+test("details sit behind ⓘ: hidden at rest, shown on hover and keyboard focus", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /^Synthetic 01/ }).click();
+  const strip = page.getByTestId("ecg-strip");
+  await expect(strip.getByText("ms (Fridericia)")).toBeVisible();
+  const tip = strip.getByRole("tooltip");
+  await expect(tip).toBeHidden();
+  await strip.getByRole("button", { name: "ECG intervals and sources" }).hover();
+  await expect(tip).toBeVisible();
+  await expect(tip).toContainText("PR 160 ms reported");
+
+  const badge = page.getByTestId("geometry-badge");
+  await expect(badge.getByRole("tooltip")).toBeHidden();
+  await badge.getByRole("button", { name: "Shape source and accuracy" }).focus();
+  await expect(badge.getByRole("tooltip")).toBeVisible();
+  await expect(badge.getByRole("tooltip")).toContainText("Tier A · Geometry");
+});
