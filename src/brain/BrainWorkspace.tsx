@@ -9,12 +9,15 @@ import { useBrain } from "./brainStore";
 import { SliceView } from "@/imaging/SliceView";
 import { StructurePanel } from "./StructurePanel";
 import { BRAIN_SUBJECTS, useBrainData, type BrainData } from "./useBrainData";
+import { BrainOutlookPanel } from "./BrainOutlook";
+import { useOutlook } from "@/outlook/outlookStore";
 
 const BrainCanvas = dynamic(() => import("./BrainCanvas"), { ssr: false });
 
 export function BrainWorkspace() {
   const { data, error } = useBrainData(BRAIN_SUBJECTS[0].base);
   const webgl = useWebgl();
+  const outlook = useOutlook((s) => s.open);
   if (error) return <div className="p-6 text-[13px] text-muted" role="alert">The brain dataset failed to load: {error}</div>;
   if (!data) {
     return (
@@ -34,6 +37,9 @@ export function BrainWorkspace() {
         </div>
         <Summary data={data} />
       </section>
+      {outlook ? (
+        <div className="order-2 min-h-[520px] border-line lg:order-3 lg:min-h-0 lg:border-l"><BrainOutlookPanel manifest={data.manifest} /></div>
+      ) : (
       <section className="order-2 flex min-h-[720px] flex-col border-line bg-black lg:order-3 lg:min-h-0 lg:border-l" aria-label="Source MRI with segmentation">
         <PanelHeader title="Source MRI · T1" aside={<SliceControls />} />
         <div className="grid min-h-0 flex-1 grid-rows-3">
@@ -43,6 +49,7 @@ export function BrainWorkspace() {
         </div>
         <p className="border-t border-line bg-panel px-3 py-1.5 text-[10px] leading-snug text-faint">Click or drag to move the crosshair · wheel: next slice · shift-drag: window/level</p>
       </section>
+      )}
     </div>
   );
 }

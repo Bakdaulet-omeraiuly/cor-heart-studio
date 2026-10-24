@@ -7,6 +7,8 @@ import * as THREE from "three";
 import { useBrain } from "./brainStore";
 import { appToVoxel, voxelToApp, type Vec3 } from "@/imaging/sliceGeometry";
 import type { BrainData } from "./useBrainData";
+import { OUTLOOK_TARGET_KEYS, useBrainProjection } from "./BrainOutlook";
+import { cortexShiftMm } from "@/domain/outlook/project";
 
 const PLANE_COLOUR = { axial: "#e5484d", coronal: "#46a758", sagittal: "#3e8ed0" };
 const HIGHLIGHT = new THREE.Color("#ffd166");
@@ -124,6 +126,61 @@ function SlicePlanes({ data }: { data: BrainData }) {
   );
 }
 
+/** Baseline vertex positions, kept so the outlook deformation is always applied from today's anatomy. */
+const basePositions = new WeakMap<THREE.BufferGeometry, Float32Array>();
+function base(g: THREE.BufferGeometry) {
+  let p = basePositions.get(g);
+  if (!p) { p = (g.getAttribute("position").array as Float32Array).slice(); basePositions.set(g, p); }
+  return p;
+}
+
+/** Outlook: scale hippocampi/ventricles about their centre, move the cortex inward (see BrainOutlook.tsx). */
+function OutlookDeform({ data }: { data: BrainData }) {
+  const proj = useBrainProjection(data.manifest);
+  useEffect(() => {
+    for (const m of data.meshes) {
+      const isCortex = m.name.startsWith("cortex_");
+      const target = isCortex ? "cortex" : OUTLOOK_TARGET_KEYS.hippocampus(m.name) ? "hippocampus" : OUTLOOK_TARGET_KEYS.ventricles(m.name) ? "ventricles" : null;
+      if (!target) continue;
+      const b = base(m.geometry);
+      const pos = m.geometry.getAttribute("position") as THREE.BufferAttribute;
+      const out = pos.array as Float32Array;
+      const ratio = proj?.[target].ratio ?? 1;
+      if (isCortex) {
+        const nrm = m.geometry.getAttribute("normal") as THREE.BufferAttribute;
+        // computed normals may face either way: orient "inward" toward the mesh centre
+        let cx = 0, cy = 0, cz = 0;
+        const n = b.length / 3;
+        for (let i = 0; i < n; i++) { cx += b[3 * i]; cy += b[3 * i + 1]; cz += b[3 * i + 2]; }
+        cx /= n; cy /= n; cz /= n;
+        let facing = 0;
+        for (let i = 0; i < n; i += 97) facing += (b[3 * i] - cx) * nrm.getX(i) + (b[3 * i + 1] - cy) * nrm.getY(i) + (b[3 * i + 2] - cz) * nrm.getZ(i);
+        const d = -(cortexShiftMm(ratio) / 10) * Math.sign(facing || 1); // app frame is in cm
+        for (let i = 0; i < n; i++) {
+          out[3 * i] = b[3 * i] + d * nrm.getX(i);
+          out[3 * i + 1] = b[3 * i + 1] + d * nrm.getY(i);
+          out[3 * i + 2] = b[3 * i + 2] + d * nrm.getZ(i);
+        }
+      } else {
+        const s = Math.cbrt(ratio);
+        const n = b.length / 3;
+        let cx = 0, cy = 0, cz = 0;
+        for (let i = 0; i < n; i++) { cx += b[3 * i]; cy += b[3 * i + 1]; cz += b[3 * i + 2]; }
+        cx /= n; cy /= n; cz /= n;
+        for (let i = 0; i < n; i++) {
+          out[3 * i] = cx + (b[3 * i] - cx) * s;
+          out[3 * i + 1] = cy + (b[3 * i + 1] - cy) * s;
+          out[3 * i + 2] = cz + (b[3 * i + 2] - cz) * s;
+        }
+      }
+      pos.needsUpdate = true;
+      m.geometry.computeBoundingSphere();
+      m.geometry.computeBoundingBox();
+    }
+  }, [data, proj]);
+  return null;
+}
+
 /** Centroid (app frame, cm) of every vertex carrying a structure's region id. */
 function regionCentroid(data: BrainData, index: number): THREE.Vector3 | null {
   const c = new THREE.Vector3();
@@ -185,6 +242,7 @@ export default function BrainCanvas({ data }: { data: BrainData }) {
       <directionalLight position={[-20, 30, 25]} intensity={1.4} />
       <directionalLight position={[25, -10, -20]} intensity={0.5} />
       <BrainMeshes data={data} />
+      <OutlookDeform data={data} />
       <SlicePlanes data={data} />
       <OrbitControls makeDefault enableDamping dampingFactor={0.12} minDistance={10} maxDistance={90} />
       <CameraFocus data={data} />
