@@ -1,0 +1,5 @@
+# Never upload source scans, labels or pipeline outputs (data/), nor the Python pipeline and its venv.
+data
+pipeline
+test-results
+playwright-report
