@@ -10,7 +10,7 @@ import type { PatientRecord } from "@/domain/schema/record";
 import type { Assessment } from "./types";
 
 const DISCLAIMER =
-  "Not a diagnosis — decision support for clinicians. Demo app on synthetic data; every number and grade comes from the record.";
+  "Not a diagnosis — decision support for clinicians. Demo on synthetic data; numbers come from the record and grades from the rules engine.";
 
 const SRC_ACC2020 =
   "ACC/AHA 2020 Valvular Heart Disease (Circulation 143:e72–e227, doi:10.1161/CIR.0000000000000923)";
@@ -52,24 +52,7 @@ export const AORTIC_STENOSIS: Assessment = {
       ],
     },
   ],
-  differential: [
-    {
-      condition: "aortic-sclerosis",
-      label: "Aortic valve sclerosis without obstruction",
-      basis: "possible",
-      organ: "heart",
-      target: "aortic_valve",
-      evidence: [
-        {
-          field: "valveFindings[valve=aortic_valve].peakVelocity",
-          value: 4.3,
-          unit: "m/s",
-          rule: "R-VALVE-STEN-01",
-          source: SRC_ACC2020,
-        },
-      ],
-    },
-  ],
+  differential: [],
   missing: [
     {
       field: "observations.aorticValveAreaIndexed",
