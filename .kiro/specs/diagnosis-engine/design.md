@@ -109,7 +109,7 @@ Sources (full citations in `sources.ts` and `docs/research/diagnosis-engine.md`)
 | R-DX-LA-01 | `observations.laVolume` + BSA | LAVI < 35 normal; 35–41 mild; 42–48 moderate; > 48 severe | finding `la-enlargement` | ASE15 | R-LA-VOL-01 |
 | R-DX-RV-01 | `observations.rvBasalDiameter` | > 41 mm | finding `rv-dilatation` | ASE15 | R-RV-DIM-01 |
 | R-DX-RV-02 | `observations.tapse`, `observations.rvEjectionFraction` | TAPSE < 17 mm; RVEF < 45 % | finding `rv-systolic-dysfunction` | ASE15 | R-RV-EF-01 |
-| R-DX-RA-01 | `observations.raMinorDimension` | > 44 mm | finding `ra-enlargement` | RUDSKI10 | R-RA-DIM-01 |
+| R-DX-RA-01 | `observations.raMinorDimension` | > 44 mm (2010 limit, superseded by ASE 2025 RA area / RAVI) | finding `ra-enlargement`, `supported` | RUDSKI10 | R-RA-DIM-01 |
 | R-DX-CAD-01 | `coronaryFindings[]` | `cadRads()` categories 0–5, 4B | finding `coronary-stenosis`, target `coronary_vessels#<vessel>:<segment>` | CADRADS2 | R-CORO-STEN-01 |
 | R-DX-CAD-02 | category | 4B or 5 → red flag; 3 or 4A without functional test → missing | redFlags / missing | CADRADS2 | |
 | R-DX-QTC-01 | `ecg.qtc` (+method) or `ecg.qtInterval` + `ecg.heartRate` / `observations.heartRate`, sex | prolonged ≥ 450 (M) / ≥ 460 (F); short ≤ 390; Bazett vs Fridericia disagree → formula-dependent | finding `qtc` | AHA09QT | — (ecg.ts) |

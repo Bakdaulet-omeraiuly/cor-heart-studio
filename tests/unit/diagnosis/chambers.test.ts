@@ -34,6 +34,6 @@ describe("RV and RA", () => {
   });
   it("RA minor axis > 44 mm", () => {
     expect(find(obsRec({ raMinorDimension: o(44, "mm") }), "ra-enlargement")).toBeUndefined();
-    expect(find(obsRec({ raMinorDimension: o(4.5, "cm") }), "ra-enlargement")?.grade).toBe("enlarged");
+    expect(find(obsRec({ raMinorDimension: o(4.5, "cm") }), "ra-enlargement")).toMatchObject({ grade: "enlarged", basis: "supported" });
   });
 });

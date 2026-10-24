@@ -45,7 +45,10 @@ function rightVentricle(c: Ctx) {
 function rightAtrium(c: Ctx) {
   const ra = c.num("observations.raMinorDimension");
   if (ra && ra.value > RA_MINOR_UPPER_MM) {
-    c.finding({ condition: "ra-enlargement", label: "RA enlargement", grade: "enlarged", basis: "rule-defined", evidence: [c.evNum("R-DX-RA-01", ra)], organ: "heart", target: "ra" });
+    // "supported", not rule-defined: the minor-axis limit is from the 2010 ASE right-heart guideline, which the 2025 ASE
+    // guideline replaced with RA area / volume index; the record holds no RA area or volume (docs/research/diagnosis-engine.md §2.4).
+    c.finding({ condition: "ra-enlargement", label: "RA enlargement by minor-axis dimension (older ASE limit; RA area or volume index preferred)", grade: "enlarged",
+      basis: "supported", evidence: [c.evNum("R-DX-RA-01", ra)], organ: "heart", target: "ra" });
   }
 }
 

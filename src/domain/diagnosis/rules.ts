@@ -27,7 +27,7 @@ export const RULES = R({
   "R-DX-LA-01": { title: "Left atrial volume index", sources: ["ASE15"] },
   "R-DX-RV-01": { title: "RV basal diameter", sources: ["ASE15"] },
   "R-DX-RV-02": { title: "RV systolic function (TAPSE, RVEF)", sources: ["ASE15"] },
-  "R-DX-RA-01": { title: "RA minor-axis dimension", sources: ["RUDSKI10"] },
+  "R-DX-RA-01": { title: "RA minor-axis dimension (2010 limit; superseded by RA area / volume index)", sources: ["RUDSKI10"] },
   "R-DX-CAD-01": { title: "CAD-RADS 2.0 category", sources: ["CADRADS2"] },
   "R-DX-CAD-02": { title: "CAD-RADS high-risk anatomy and next test", sources: ["CADRADS2"] },
   "R-DX-QTC-01": { title: "QTc classification", sources: ["AHA09QT"] },

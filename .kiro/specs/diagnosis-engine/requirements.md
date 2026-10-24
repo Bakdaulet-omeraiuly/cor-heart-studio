@@ -99,7 +99,8 @@ Glossary:
    42–48, severe > 48 mL/m²). WHEN BSA is unknown THEN it SHALL list height and weight as missing.
 2. WHEN RV basal diameter > 41 mm THEN the engine SHALL report RV dilatation.
 3. WHEN TAPSE < 17 mm or RVEF < 45 % THEN the engine SHALL report RV systolic dysfunction.
-4. WHEN RA minor-axis dimension > 44 mm THEN the engine SHALL report RA enlargement.
+4. WHEN RA minor-axis dimension > 44 mm THEN the engine SHALL report RA enlargement as `supported` (not
+   rule-defined), because this 2010 limit was superseded by RA area / volume index (ASE 2025).
 
 ### Requirement 7 — Coronary arteries (CAD-RADS 2.0)
 1. WHEN coronary findings are present THEN the engine SHALL report the CAD-RADS category from `cadRads()`
