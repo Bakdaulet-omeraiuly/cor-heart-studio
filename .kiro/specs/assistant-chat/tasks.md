@@ -5,7 +5,7 @@ Each top-level task is one small push: run `npm run typecheck && npm run lint &&
 Before the first task, read `node_modules/next/dist/docs/01-app/01-getting-started/15-route-handlers.md` and
 `.../03-api-reference/03-file-conventions/route.md`.
 
-- [ ] 1. Engine boundary and fixtures
+- [x] 1. Engine boundary and fixtures
   - Create `src/app/api/assistant/__fixtures__/types.ts` as a TEMPORARY copy of the agreed `Assessment`, `Finding`,
     `Evidence` types from `docs/tasks/kerimku1.md`, with a header comment saying it is replaced by
     `src/domain/diagnosis/types.ts`.
