@@ -14,6 +14,7 @@ import { Legend } from "./Legend";
 import { GeometryBadge } from "./GeometryBadge";
 import { CtEvidencePanel } from "./CtEvidencePanel";
 import { HeartMetrics } from "./HeartMetrics";
+import { EcgStrip } from "./EcgStrip";
 
 const HeartCanvas = dynamic(() => import("@/scene/HeartCanvas"), { ssr: false });
 
@@ -84,6 +85,7 @@ export function HeartViewport() {
           </div>
         </div>
         <HeartMetrics entry={entry} spec={spec} />
+        <EcgStrip entry={entry} />
         <PlaybackBar />
       </div>
       {spec.manifest.imaging && <CtEvidencePanel spec={spec} />}

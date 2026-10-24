@@ -18,6 +18,9 @@
   --error: #f0736a;
   --info: #79b0ff;
   --ok: #6cc59b;
+  --ecg-bg: #0b0f0d;
+  --ecg-minor: rgb(108 197 155 / 0.07);
+  --ecg-major: rgb(108 197 155 / 0.18);
   --measured: #79b0ff;
   --assessed: #c49cf2;
   --derived: #6cc59b;
@@ -43,6 +46,9 @@
   --error: #c23b30;
   --info: #1f63c9;
   --ok: #1d7f52;
+  --ecg-bg: #fff8f6;
+  --ecg-minor: rgb(220 90 80 / 0.12);
+  --ecg-major: rgb(220 90 80 / 0.3);
   --measured: #1f63c9;
   --assessed: #7a3fc0;
   --derived: #1d7f52;

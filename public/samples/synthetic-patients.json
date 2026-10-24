@@ -163,7 +163,25 @@
         ]
       },
       "symptoms": [],
-      "clinicianNotes": "Fictional demonstration record with explicitly supplied findings. Not a reference range."
+      "clinicianNotes": "Fictional demonstration record with explicitly supplied findings. Not a reference range.",
+      "ecg": {
+        "rhythm": "Sinus rhythm",
+        "prInterval": {
+          "value": 160,
+          "unit": "ms",
+          "source": "synthetic ECG report"
+        },
+        "qrsDuration": {
+          "value": 92,
+          "unit": "ms",
+          "source": "synthetic ECG report"
+        },
+        "qtInterval": {
+          "value": 392,
+          "unit": "ms",
+          "source": "synthetic ECG report"
+        }
+      }
     },
     {
       "patientId": "SYN-002",
@@ -358,7 +376,22 @@
             ],
             "description": "Lateral ST-T changes (synthetic text only)"
           }
-        ]
+        ],
+        "prInterval": {
+          "value": 172,
+          "unit": "ms",
+          "source": "synthetic ECG report"
+        },
+        "qrsDuration": {
+          "value": 104,
+          "unit": "ms",
+          "source": "synthetic ECG report"
+        },
+        "qtInterval": {
+          "value": 420,
+          "unit": "ms",
+          "source": "synthetic ECG report"
+        }
       },
       "symptoms": [
         "Occasional headaches"
@@ -727,7 +760,25 @@
       "symptoms": [
         "Exertional chest pressure"
       ],
-      "clinicianNotes": "Fictional demonstration record. Lesion positions are the proximal / mid / distal thirds of the template's modelled vessels."
+      "clinicianNotes": "Fictional demonstration record. Lesion positions are the proximal / mid / distal thirds of the template's modelled vessels.",
+      "ecg": {
+        "rhythm": "Sinus rhythm",
+        "prInterval": {
+          "value": 164,
+          "unit": "ms",
+          "source": "synthetic ECG report"
+        },
+        "qrsDuration": {
+          "value": 98,
+          "unit": "ms",
+          "source": "synthetic ECG report"
+        },
+        "qtInterval": {
+          "value": 388,
+          "unit": "ms",
+          "source": "synthetic ECG report"
+        }
+      }
     }
   ]
 }
