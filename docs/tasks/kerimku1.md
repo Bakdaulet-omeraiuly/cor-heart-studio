@@ -41,8 +41,7 @@
 
 ## Ортақ келісім — интерфейс (екі файлда бірдей)
 
-Екеуіңді байланыстыратын **жалғыз** нәрсе. Бірінші күні осы файлды @HyorinmaruK PR етіп ашады, екеуің мақұлдайсыңдар.
-Кейін өзгерту — тек екеуі мақұлдаған PR арқылы.
+Екеуіңді байланыстыратын **жалғыз** нәрсе. Бірінші күні осы файлды @HyorinmaruK push жасайды. Кейін өзгертсең — екіншісіне алдын ала айт, себебі екеуіңнің кодың соған сүйенеді.
 
 ```ts
 // src/domain/diagnosis/types.ts
@@ -89,9 +88,9 @@ export type Assess = (record: PatientRecord) => Assessment;   // таза фун
 - Claude API құжаттамасын (tool use, streaming) ағымдағы нұсқасынан оқы, есте сақталғанға сенбе.
 
 **2. Kiro Spec** `assistant-chat` → `.kiro/specs/assistant-chat/{requirements,design,tasks}.md`
-- Spec PR-ын ашып, екінші адам қарап шыққан соң merge жасап, кодқа көш.
+- Spec-ті push жасап, кодқа көш.
 
-**3. Жалған қозғалтқышпен баста:** HyorinmaruK-тің `types.ts` PR-ы merge болғанша, `Assessment` түріндегі
+**3. Жалған қозғалтқышпен баста:** HyorinmaruK `types.ts`-ті push жасағанша, `Assessment` түріндегі
 қолдан жазылған мысалмен (fixture) жұмыс істе. Қозғалтқыш дайын болғанда — тек импортты ауыстырасың.
 
 **4. Сервер** `src/app/api/assistant/`:
@@ -115,7 +114,7 @@ export type Assess = (record: PatientRecord) => Assessment;   // таза фун
 | # | Нәтиже |
 |---|---|
 | K1 | `docs/research/assistant-chat.md` + модель салыстыру |
-| K2 | Kiro spec дайын (екінші адам қарап шықты) |
+| K2 | Kiro spec дайын |
 | K3 | API route + чат панелі, жалған қозғалтқышпен, e2e тест |
 | K4 | Нақты қозғалтқышқа қосу, 3D сілтемелер |
 | K5 | `npm run eval:assistant` — барлық шарт орындалды |
@@ -123,12 +122,12 @@ export type Assess = (record: PatientRecord) => Assessment;   // таза фун
 ## Шатаспау үшін ережелер
 
 - **Әркім тек өз папкаларын өзгертеді** (жоғарыдағы кестеде). Басқасының файлына тию керек болса — алдымен
-  Issue/PR комментарийі.
-- Тармақ аттары: `engine/<тақырып>` (HyorinmaruK), `chat/<тақырып>` (kerimku1).
-- Әр PR-ды екінші адам review жасайды, `main`-ге тікелей push жоқ.
-- PR алдында: `npm run typecheck && npm run lint && npm test`; UI өзгерсе `npm run build && npm run test:e2e`.
-- Әр PR-да Vercel preview сілтемесі шығады — PR-ға қосыңдар.
-- Жұмыс алдында `git pull` (main), жиі шағын PR — үлкен конфликт болмайды.
+  оған айт.
+- Әркім **өз бетімен push жасайды** — тікелей `main`-ге немесе өз тармағына, қалауыңша. Ешкімнің рұқсаты керек емес.
+- Push алдында: `git pull --rebase`, сосын `npm run typecheck && npm run lint && npm test`; UI өзгерсе
+  `npm run build && npm run test:e2e`.
+- `main`-ге push болған сайын Vercel сайтты production-ға өзі шығарады. Бір нәрсе бұзылса — `git revert <sha>` және push.
+- Тармақ ашсаң — Vercel оған preview сілтемесін өзі береді.
 - `.env*`, кілттер, нақты пациент деректері — ешқашан git-ке емес.
 
 ## Дайын болды деген шарттар (бүкіл жоба)
@@ -144,4 +143,4 @@ export type Assess = (record: PatientRecord) => Assessment;   // таза фун
 | Ауқымнан тыс / пациентке диагноз сұрау | сыпайы бас тарту + не істеуге болатыны |
 | Prompt injection (жазба ішіндегі "ережені елеме") | 0 сәтті шабуыл |
 
-`main`-ге merge болған сайын Vercel сайтты production-ға өзі шығарады — сондықтан тек барлық тест өткен PR-ды merge жасаңдар. Бір нәрсе бұзылса — revert PR.
+`main`-ге push болған сайын Vercel сайтты production-ға өзі шығарады — сондықтан тек тесттер өтсе push жаса.

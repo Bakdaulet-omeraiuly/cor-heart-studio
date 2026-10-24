@@ -14,9 +14,10 @@ Next.js 16 + React Three Fiber app: Heart and Brain modules rendered from open, 
 Visualization demo with synthetic/open data — **not a medical device, no diagnosis**.
 
 ## Workflow
-- Never commit to `main` directly. Branch (`git checkout -b <feature>`), open a pull request, get one review.
-- Before every PR: `npm run typecheck && npm run lint && npm test`. UI changes also: `npm run build && npm run test:e2e`.
-- Keep PRs small and about one thing. Pull `main` before starting work.
+- Each contributor works and pushes on their own — straight to `main` or via a branch/PR, their choice. No approval needed.
+- Stay in your own area (see `docs/tasks/`) so you don't overwrite each other; `git pull --rebase` before every push.
+- Before every push: `npm run typecheck && npm run lint && npm test`. UI changes also: `npm run build && npm run test:e2e`.
+  A push to `main` deploys to production automatically — if it breaks the site, `git revert` and push.
 
 ## Data and honesty
 - `data/` and `pipeline/` (CT/MRI sources, Python pipeline) are not in git and never go to Vercel (`.vercelignore`).

@@ -11,14 +11,13 @@ Needs Node 24 and Google Chrome (for the e2e tests).
 
 ## Every task
 ```bash
-git checkout main && git pull
-git checkout -b my-feature
+git pull --rebase
 # … work (by hand, with Claude Code or Kiro) …
 npm run typecheck && npm run lint && npm test
-git push -u origin my-feature
-gh pr create        # or open the PR on github.com
+git add -A && git commit -m "what changed"
+git pull --rebase && git push       # straight to main is fine; a branch/PR is optional
 ```
-Merge only after review. Don't push to `main`.
+No approval needed. A push to `main` deploys to production automatically — if it breaks, `git revert <sha>` and push.
 
 ## AI agents
 Claude Code reads `CLAUDE.md`, Kiro reads `AGENTS.md` — both point to the same rules in `AGENTS.md`.
