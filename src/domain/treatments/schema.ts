@@ -8,7 +8,7 @@ const Source = z.object({
   doi: z.string().min(1),
   studyType: z.enum(["rct", "meta-analysis", "placebo-arm", "prospective-cohort", "observational", "guideline"]),
   n: z.number().int().positive(),
-  durationMonths: z.number().positive(),
+  durationMonths: z.number().positive().optional(),
   population: z.string().min(1),
 });
 

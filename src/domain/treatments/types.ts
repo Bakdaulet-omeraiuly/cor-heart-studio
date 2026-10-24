@@ -16,7 +16,7 @@ export interface EvidenceSource {
   doi: string;
   studyType: StudyType;
   n: number;
-  durationMonths: number;
+  durationMonths?: number;
   population: string;
 }
 
