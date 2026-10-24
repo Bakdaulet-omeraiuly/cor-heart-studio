@@ -4,8 +4,10 @@ import { useMemo } from "react";
 import { PanelHeader, Segmented } from "@/components/ui/primitives";
 import { BRAIN_SCENARIOS, SOURCES, SPREAD_LABEL, type BrainScenarioId, type BrainTarget } from "@/domain/outlook/evidence";
 import { cortexShiftMm, projectBrain, type BrainProjection } from "@/domain/outlook/project";
+import { projectBrainTreated } from "@/domain/treatments/project";
 import { useOutlook } from "@/outlook/outlookStore";
 import { HorizonControls, OutlookCaveat, SourceList, fmtSigned } from "@/outlook/shared";
+import { TreatmentButtons } from "@/outlook/TreatmentButtons";
 import type { BrainManifest } from "./types";
 
 /** Structure keys whose meshes each outlook target deforms. */
@@ -29,20 +31,39 @@ export function brainBaseline(m: BrainManifest): Record<BrainTarget, number> {
   };
 }
 
-/** Current projection, or null while the outlook is closed (3D stays at baseline). */
-export function useBrainProjection(m: BrainManifest): Record<BrainTarget, BrainProjection> | null {
+export interface BrainProjectionResult {
+  targets: Record<BrainTarget, BrainProjection>;
+  /** True when a treatment effect is held past the duration of the study it comes from. */
+  heldBeyondEvidence: boolean;
+}
+
+/** Current projection (with the active treatment buttons for Alzheimer's), or null while the outlook is closed (3D stays at baseline). */
+export function useBrainProjectionResult(m: BrainManifest): BrainProjectionResult | null {
   const open = useOutlook((s) => s.open);
   const years = useOutlook((s) => s.years);
   const pace = useOutlook((s) => s.pace);
   const scenario = useOutlook((s) => s.brainScenario);
-  return useMemo(() => (open ? projectBrain(brainBaseline(m), scenario, years, pace) : null), [m, open, years, pace, scenario]);
+  const active = useOutlook((s) => s.active);
+  return useMemo(() => {
+    if (!open) return null;
+    const baseline = brainBaseline(m);
+    return scenario === "alzheimers"
+      ? projectBrainTreated(baseline, active, years, pace)
+      : { targets: projectBrain(baseline, scenario, years, pace), heldBeyondEvidence: false };
+  }, [m, open, years, pace, scenario, active]);
+}
+
+/** Just the per-structure projection (what the 3D deformation reads). */
+export function useBrainProjection(m: BrainManifest): Record<BrainTarget, BrainProjection> | null {
+  return useBrainProjectionResult(m)?.targets ?? null;
 }
 
 export function BrainOutlookPanel({ manifest }: { manifest: BrainManifest }) {
   const scenario = useOutlook((s) => s.brainScenario);
   const years = useOutlook((s) => s.years);
   const set = useOutlook((s) => s.set);
-  const proj = useBrainProjection(manifest);
+  const result = useBrainProjectionResult(manifest);
+  const proj = result?.targets ?? null;
   const sc = BRAIN_SCENARIOS[scenario];
   if (!proj) return null;
   const ids = [...new Set(Object.values(sc.rates).map((r) => r.source))];
@@ -55,6 +76,7 @@ export function BrainOutlookPanel({ manifest }: { manifest: BrainManifest }) {
             options={Object.values(BRAIN_SCENARIOS).map((s) => ({ value: s.id, label: s.label }))} />
           <p className="mt-1.5 text-[11px] text-faint">Rates from: {sc.cohort}.</p>
         </div>
+        {scenario === "alzheimers" && <TreatmentButtons condition="ad" />}
         <HorizonControls paceHint="Slower and faster ends of each source's reported spread (see the column note)." />
 
         <table className="w-full text-[12px]" data-testid="brain-outlook-table">
@@ -91,6 +113,10 @@ export function BrainOutlookPanel({ manifest }: { manifest: BrainManifest }) {
             return <li key={t}><span className="text-ink">{TARGET_LABEL[t].name}:</span> range = {SPREAD_LABEL[r.spread]}.{r.caveat ? ` ${r.caveat}` : ""}</li>;
           })}
         </ul>
+
+        {result?.heldBeyondEvidence && (
+          <p className="text-[11px] leading-snug text-muted" data-testid="held-beyond-evidence">A treatment effect is held at its last measured value beyond the study&apos;s follow-up; there is no trial data past it.</p>
+        )}
 
         <OutlookCaveat>
           The anatomy is one healthy adult volunteer ({manifest.subject}); the rates are averages from older cohorts. This shows what the

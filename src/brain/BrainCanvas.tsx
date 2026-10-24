@@ -4,6 +4,7 @@ import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber"
 import { GizmoHelper, GizmoViewport, OrbitControls } from "@react-three/drei";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { useBrain } from "./brainStore";
 import { appToVoxel, voxelToApp, type Vec3 } from "@/imaging/sliceGeometry";
 import type { BrainData } from "./useBrainData";
@@ -135,8 +136,9 @@ function base(g: THREE.BufferGeometry) {
 }
 
 /** Outlook: scale hippocampi/ventricles about their centre, move the cortex inward (see BrainOutlook.tsx). */
-function OutlookDeform({ data }: { data: BrainData }) {
-  const proj = useBrainProjection(data.manifest);
+function OutlookDeform({ data, enabled }: { data: BrainData; enabled: boolean }) {
+  const projected = useBrainProjection(data.manifest);
+  const proj = enabled ? projected : null;
   useEffect(() => {
     for (const m of data.meshes) {
       const isCortex = m.name.startsWith("cortex_");
@@ -228,7 +230,40 @@ function CameraFocus({ data }: { data: BrainData }) {
   return null;
 }
 
-export default function BrainCanvas({ data }: { data: BrainData }) {
+/** Both canvases of the Now | In N years view share one camera: orbit one and the other follows. */
+const syncPeers = new Map<string, { camera: THREE.Camera; controls: OrbitControlsImpl }>();
+function CameraSync({ id }: { id: string }) {
+  const camera = useThree((s) => s.camera);
+  const controls = useThree((s) => s.controls) as OrbitControlsImpl | null;
+  useEffect(() => {
+    if (!controls) return;
+    syncPeers.set(id, { camera, controls });
+    let busy = false;
+    const onChange = () => {
+      if (busy) return;
+      busy = true;
+      for (const [other, peer] of syncPeers) {
+        if (other === id) continue;
+        peer.camera.position.copy(camera.position);
+        peer.controls.target.copy(controls.target);
+        peer.controls.update();
+      }
+      busy = false;
+    };
+    controls.addEventListener("change", onChange);
+    return () => { controls.removeEventListener("change", onChange); syncPeers.delete(id); };
+  }, [id, camera, controls]);
+  return null;
+}
+
+/**
+ * `today` draws the measured anatomy; `projected` draws a copy of it deformed by the outlook (own geometries, so today stays untouched).
+ * With no mode the single canvas is today's anatomy.
+ */
+export default function BrainCanvas({ data, mode }: { data: BrainData; mode?: "today" | "projected" }) {
+  const projected = mode === "projected";
+  const shown = useMemo<BrainData>(() => (projected ? { ...data, meshes: data.meshes.map((m) => ({ ...m, geometry: m.geometry.clone() })) } : data), [data, projected]);
+  useEffect(() => () => { if (projected) for (const m of shown.meshes) m.geometry.dispose(); }, [projected, shown]);
   return (
     <Canvas
       dpr={[1, 2]}
@@ -241,11 +276,12 @@ export default function BrainCanvas({ data }: { data: BrainData }) {
       <hemisphereLight args={["#dfe7f2", "#20242b", 0.9]} />
       <directionalLight position={[-20, 30, 25]} intensity={1.4} />
       <directionalLight position={[25, -10, -20]} intensity={0.5} />
-      <BrainMeshes data={data} />
-      <OutlookDeform data={data} />
-      <SlicePlanes data={data} />
+      <BrainMeshes data={shown} />
+      <OutlookDeform data={shown} enabled={projected} />
+      {!projected && <SlicePlanes data={data} />}
       <OrbitControls makeDefault enableDamping dampingFactor={0.12} minDistance={10} maxDistance={90} />
       <CameraFocus data={data} />
+      {mode && <CameraSync id={mode} />}
       <GizmoHelper alignment="bottom-right" margin={[56, 56]}>
         <GizmoViewport axisColors={["#e8836b", "#8fbf7f", "#79b0ff"]} labels={["L", "S", "A"]} labelColor="#0b0d10" axisHeadScale={0.9} />
       </GizmoHelper>
