@@ -2,12 +2,13 @@
 import { useApp } from "@/state/store";
 import { entryFromRaw, type PatientEntry } from "./patients";
 
-/** Loads the bundled synthetic sample file (same file offered for download). */
+/** Bundled samples: synthetic records (same file offered for download) and open-dataset CT cases. */
+const SAMPLE_FILES = ["/samples/synthetic-patients.json", "/samples/open-ct-patients.json"];
+
 export async function loadSamples() {
-  const res = await fetch("/samples/synthetic-patients.json");
-  const data = (await res.json()) as { patients: unknown[] };
+  const files = await Promise.all(SAMPLE_FILES.map(async (url) => ((await (await fetch(url)).json()) as { patients: unknown[] }).patients));
   const now = Date.now();
-  const entries = data.patients
+  const entries = files.flat()
     .map((p, i) => entryFromRaw(p, "sample", now + i))
     .filter((e): e is PatientEntry => !("error" in e));
   const s = useApp.getState();

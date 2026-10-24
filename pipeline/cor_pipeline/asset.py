@@ -27,6 +27,7 @@ WALL_MM = {"rv": 3.0, "la": 2.0, "ra": 2.0, "aorta": 2.0, "pulmonary_artery": 1.
 MARGIN_MM = WALL_MM["rv"] + 4 * FINE_MM
 ISO_OFFSET_MM = 0.013
 MIN_PIECE_MM3 = 500.0
+VALVE_MIN_DEPTH_MM = 6.0
 # Soft-max membership, as in scripts/heart-asset/build.ts (tau 0.28 model units ~ 3.2 mm there).
 WEIGHT_TAU_MM = 3.0
 KIND_MYOCARDIUM, KIND_GREAT_ARTERY = 0, 1
@@ -212,10 +213,16 @@ def voxel_points(mask: np.ndarray, affine: np.ndarray) -> np.ndarray:
     return idx @ affine[:3, :3].T + affine[:3, 3]
 
 
-def find_valve(up: np.ndarray, down: np.ndarray, affine: np.ndarray, frame: Frame, default_radius: float):
-    """Valve plane from the voxels where two blood pools touch."""
+def find_valve(up: np.ndarray, down: np.ndarray, affine: np.ndarray, frame: Frame, default_radius: float, heart: np.ndarray):
+    """Valve plane from the voxels where two blood pools touch, away from the heart's outer surface.
+
+    Labels can also meet along the outside of the AV groove (where they include wall); those contacts
+    would drag the annulus to the epicardium, so only contacts >= VALVE_MIN_DEPTH_MM inside count.
+    """
     touching = up & ndimage.binary_dilation(down, iterations=2)
     touching |= down & ndimage.binary_dilation(up, iterations=2)
+    spacing = np.linalg.norm(affine[:3, :3], axis=0)
+    touching &= ndimage.distance_transform_edt(heart, sampling=spacing) >= VALVE_MIN_DEPTH_MM
     up_c = frame.point(voxel_points(up, affine).mean(axis=0))
     down_c = frame.point(voxel_points(down, affine).mean(axis=0))
     flow = _unit(down_c - up_c)
@@ -304,6 +311,19 @@ def lv_frame(masks, affine, frame: Frame, mitral_centre):
     }
 
 
+def snap_inside(target, mask: np.ndarray, affine: np.ndarray, frame: Frame, min_depth_mm: float):
+    """Nearest point to `target` (app cm) that lies inside `mask` at least min_depth_mm from its wall.
+
+    Papillary muscles are placed by rule; this keeps them (and their chordae) inside the cavity even
+    when the cavity is a thin crescent like the RV.
+    """
+    spacing = np.linalg.norm(affine[:3, :3], axis=0)
+    depth = ndimage.distance_transform_edt(mask, sampling=spacing)
+    deep = depth >= min(min_depth_mm, 0.6 * float(depth.max()))
+    pts = frame.point(voxel_points(deep, affine))
+    return pts[np.argmin(np.sum((pts - np.asarray(target)) ** 2, axis=1))]
+
+
 def lv_point(lv, s, theta_deg, r):
     along = lv["cavityBaseAlong"] + s * (lv["cavityApexAlong"] - lv["cavityBaseAlong"])
     t = np.radians(theta_deg)
@@ -338,6 +358,7 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
         if (n := open_edge_count(mesh)) > 0:
             qa.append({"level": "info" if n < 50 else "warning", "structure": f"heart_tissue ({lod})", "message": f"{n} open edges after decimation"})
 
+    heart = np.logical_or.reduce(list(masks.values()))
     valves = {}
     for name, (up, down, default_r) in VALVES.items():
         if down in ("aorta", "pulmonary_artery"):
@@ -345,7 +366,7 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
             if not v["found"]:
                 qa.append({"level": "info", "structure": name, "message": f"{v['gapMm']} mm gap between chamber and vessel labels; valve placed at the vessel root"})
         else:
-            v = find_valve(masks[up], masks[down], affine, frame, default_r)
+            v = find_valve(masks[up], masks[down], affine, frame, default_r, heart)
             if not v["found"]:
                 qa.append({"level": "warning", "structure": name, "message": "blood pools do not touch; valve placed between them with a default radius"})
         if not 0.7 <= v["radius"] <= 2.5:
@@ -396,8 +417,12 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
         qa.append({"level": "warning", "structure": k, "message": "no surface vertex for the label anchor; using the heart centre"})
         anchors[k] = heart_c
 
+    def inside(target, role, depth_mm):
+        return snap_inside(target, masks[role], affine, frame, depth_mm)
+
     def pap(s_base, s_tip, theta):
-        return {"base": _r(lv_point(lv, s_base, theta, 0.85 * sep_r)), "tip": _r(lv_point(lv, s_tip, theta, 0.45 * sep_r))}
+        return {"base": _r(inside(lv_point(lv, s_base, theta, 0.85 * sep_r), "lv_cavity", 3.0)),
+                "tip": _r(inside(lv_point(lv, s_tip, theta, 0.45 * sep_r), "lv_cavity", 5.0))}
 
     vox_ml = abs(np.linalg.det(affine[:3, :3])) / 1000
     ml = lambda role: float(np.count_nonzero(masks[role]) * vox_ml)
@@ -474,7 +499,8 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
         "papillary": {
             "anterolateral": pap(0.62, 0.35, 150),
             "posteromedial": pap(0.62, 0.35, 270),
-            "rvAnterior": {"base": _r(rv_c + lv["axis"] * 1.2 - rv_sep * 1.0), "tip": _r(rv_c + lv["axis"] * 0.3 - rv_sep * 0.3)},
+            "rvAnterior": {"base": _r(inside(rv_c + lv["axis"] * 1.2 - rv_sep * 1.0, "rv", 3.0)),
+                           "tip": _r(inside(rv_c + lv["axis"] * 0.3 - rv_sep * 0.3, "rv", 5.0))},
         },
         "coronaryOstia": {
             "left": _r(ao["center"] + ao["normal"] * 0.8 + _unit(np.cross(ao["normal"], np.cross([1.0, 0, 0], ao["normal"]))) * ao["radius"]),

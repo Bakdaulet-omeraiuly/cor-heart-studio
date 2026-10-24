@@ -5,7 +5,8 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { useApp } from "@/state/store";
-import { cameraPose, type CameraPose } from "./geometry/sceneFrame";
+import type { HeartAssetSpec } from "./asset-adapters/registry";
+import { sceneFrame, type CameraPose } from "./geometry/sceneFrame";
 
 export interface CameraSync {
   version: number;
@@ -19,7 +20,7 @@ export const cameraSync: CameraSync = { version: 0, source: "", position: new TH
 const reducedMotion = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
 /** Orbit/pan/zoom with animated anatomical presets; optional camera synchronisation between views. */
-export function CameraRig({ id, sync = false, distanceScale = 1 }: { id: string; sync?: boolean; distanceScale?: number }) {
+export function CameraRig({ id, spec, sync = false, distanceScale = 1 }: { id: string; spec: HeartAssetSpec; sync?: boolean; distanceScale?: number }) {
   const controls = useRef<OrbitControlsImpl>(null);
   const { camera } = useThree();
   const anim = useRef<{ from: CameraPose; to: CameraPose; t: number } | null>(null);
@@ -30,11 +31,11 @@ export function CameraRig({ id, sync = false, distanceScale = 1 }: { id: string;
 
   useEffect(() => {
     if (!request || !controls.current) return;
-    const to = cameraPose(request.preset);
+    const to = sceneFrame(spec).cameraPose(request.preset);
     to.position.sub(to.target).multiplyScalar(distanceScale).add(to.target);
     const from = { position: camera.position.clone(), target: controls.current.target.clone(), up: camera.up.clone() };
     anim.current = { from, to, t: reducedMotion() ? 1 : 0 };
-  }, [request, camera, distanceScale]);
+  }, [request, camera, distanceScale, spec]);
 
   useFrame((_, dt) => {
     const c = controls.current;

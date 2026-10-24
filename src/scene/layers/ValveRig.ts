@@ -3,7 +3,8 @@ import * as THREE from "three";
 import type { CycleSample } from "@/domain/mapping/cycle";
 import type { PatientVisualState, StructureId } from "@/domain/mapping/types";
 import type { Severity, ValveId } from "@/domain/schema/record";
-import { HEART_MANIFEST, type AttributeSampler, type SampledAttributes } from "../asset-adapters/heartAsset";
+import type { AttributeSampler, SampledAttributes } from "../asset-adapters/heartAsset";
+import type { HeartManifest } from "../asset-adapters/manifest";
 import { deformPoint, type DeformParams } from "../animation/deform";
 import {
   RING_SAMPLES, VALVE_SPECS, chordaeCount, createLeafletGeometry, restAnnulus, updateLeaflets, updateRingTube,
@@ -38,12 +39,12 @@ export class ValveRig {
   private tmpArr: [number, number, number] = [0, 0, 0];
   private matrix = new THREE.Matrix4();
 
-  constructor(sampler: AttributeSampler, clipping: THREE.Plane[]) {
+  constructor(sampler: AttributeSampler, clipping: THREE.Plane[], manifest: HeartManifest) {
     // thin fibrous membrane: warm off-white, soft sheen, slight translucency (approximation; no transmission pass)
     this.leafletMaterial = new THREE.MeshPhysicalMaterial({ color: 0xead2bb, roughness: 0.58, clearcoat: 0.25, clearcoatRoughness: 0.45, sheen: 0.85, sheenRoughness: 0.45, sheenColor: new THREE.Color(1.0, 0.68, 0.6), side: THREE.DoubleSide, transparent: true, opacity: 0.88, depthWrite: true, clippingPlanes: clipping });
     this.annulusMaterial = new THREE.MeshPhysicalMaterial({ color: 0xd8b8a0, roughness: 0.55, clearcoat: 0.2, clippingPlanes: clipping });
     this.chordMaterial = new THREE.MeshStandardMaterial({ color: 0xf0e4d4, roughness: 0.5, clippingPlanes: clipping });
-    const m = HEART_MANIFEST;
+    const m = manifest;
     const lvBase = V(m.deformation.lv.base), axis = V(m.deformation.lv.axis), sep = V(m.deformation.lv.septalDir);
     const septalPap = lvBase.clone().addScaledVector(axis, 3.4).addScaledVector(sep, m.deformation.lv.meanCavityRadius + m.deformation.lv.meanWallThickness + 0.15);
     const papRest: Record<ValveId, THREE.Vector3[]> = {

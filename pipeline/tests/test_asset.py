@@ -75,3 +75,25 @@ def test_lv_cavity_proxy_volume(asset):
     _, manifest, proxy, *_ = asset
     mesh = trimesh.Trimesh(np.reshape(proxy["positions"], (-1, 3)), np.reshape(proxy["indices"], (-1, 3)))
     assert mesh.volume == pytest.approx(manifest["baseline"]["lvEndDiastolicVolumeMl"], rel=0.05)
+
+
+
+def test_snap_inside_moves_a_point_into_a_crescent_cavity():
+    from scipy import ndimage
+
+    from cor_pipeline.asset import Frame, snap_inside, voxel_points
+
+    # RV-like crescent: a shell between two spheres, open on one side; its centroid is outside it
+    g = np.indices((60, 60, 60)) - 30
+    r = np.sqrt((g**2).sum(axis=0))
+    mask = (r > 12) & (r < 27) & (g[0] > 0)  # 15 voxels thick: room for 3 mm depth
+    affine = np.eye(4)
+    frame = Frame([0, 0, 0])
+    centroid = frame.point(voxel_points(mask, affine).mean(axis=0))
+    from cor_pipeline.mesh import RAS_TO_APP
+
+    idx = lambda p: tuple(np.round(np.linalg.solve(RAS_TO_APP, p)).astype(int))  # identity affine: voxel = RAS mm
+    assert not mask[idx(centroid)]
+    p = snap_inside(centroid, mask, affine, frame, 3.0)
+    depth = ndimage.distance_transform_edt(mask)
+    assert mask[idx(p)] and depth[idx(p)] >= 3.0

@@ -1,0 +1,425 @@
+{
+  "manifestVersion": "1.0.0",
+  "assetId": "cor-ct-s0270",
+  "assetVersion": "1.0.0",
+  "source": "CT segmentation (totalseg_v1), case s0270, built by pipeline/cor_pipeline/asset.py",
+  "author": "COR Heart Studio project (generated code)",
+  "license": "CC BY 4.0",
+  "attribution": "TotalSegmentator dataset v1.0 (Wasserthal et al., Radiology: AI 2023) \u2014 https://zenodo.org/records/6802614",
+  "redistribution": "Derived from the dataset above; follow its license",
+  "units": "cm",
+  "axes": {
+    "x": "patient left",
+    "y": "superior",
+    "z": "anterior"
+  },
+  "anatomicalOrientation": "Patient frame from the CT affine; anterior view looks along -Z",
+  "center": [
+    0,
+    0,
+    0
+  ],
+  "bounds": {
+    "min": [
+      -7.0928,
+      -6.9487,
+      -8.7987
+    ],
+    "max": [
+      7.0928,
+      6.9487,
+      8.7987
+    ]
+  },
+  "provenanceTier": "B",
+  "provenance": {
+    "geometry": "CT segmentation (totalseg_v1)",
+    "reviewedByClinician": false,
+    "motion": "illustrative (template handles); single-phase CT"
+  },
+  "files": {
+    "high": {
+      "url": "/models/ct/s0270/heart-high.glb",
+      "bytes": 8396420,
+      "triangles": [
+        299940
+      ]
+    },
+    "low": {
+      "url": "/models/ct/s0270/heart-low.glb",
+      "bytes": 3330388,
+      "triangles": [
+        118990
+      ]
+    }
+  },
+  "attributes": {
+    "_weights": "uint8 normalized vec4: deformation membership (lv, rv, la, ra); remainder = anchored vessels",
+    "_tissue": "uint8 normalized vec4: x wall depth (0 epicardium .. 1 endocardium), y epicardial fat (always 0), z tissue kind byte, w region byte",
+    "tissueKinds": {
+      "myocardium": 0,
+      "greatArtery": 1,
+      "greatVein": 2,
+      "coronaryArtery": 3,
+      "coronaryVein": 4
+    },
+    "regions": [
+      "lv",
+      "rv",
+      "la",
+      "ra",
+      "aorta",
+      "pulmonary_artery",
+      "vena_cava",
+      "pulmonary_veins",
+      "coronary_vessels"
+    ]
+  },
+  "structureToMesh": {
+    "myocardium": {
+      "mesh": "heart_tissue",
+      "note": "LV wall from imaging; other walls fixed thickness"
+    },
+    "lv": {
+      "mesh": "heart_tissue",
+      "region": 0
+    },
+    "rv": {
+      "mesh": "heart_tissue",
+      "region": 1
+    },
+    "la": {
+      "mesh": "heart_tissue",
+      "region": 2
+    },
+    "ra": {
+      "mesh": "heart_tissue",
+      "region": 3
+    },
+    "aorta": {
+      "mesh": "heart_tissue",
+      "region": 4
+    },
+    "pulmonary_artery": {
+      "mesh": "heart_tissue",
+      "region": 5
+    },
+    "vena_cava": {
+      "mesh": null,
+      "region": null,
+      "absent": true,
+      "note": "not in the segmentation labels"
+    },
+    "pulmonary_veins": {
+      "mesh": null,
+      "region": null,
+      "absent": true,
+      "note": "not in the segmentation labels"
+    },
+    "coronary_vessels": {
+      "mesh": null,
+      "region": null,
+      "absent": true,
+      "note": "not in the segmentation labels"
+    },
+    "mitral_valve": {
+      "runtime": "valve generator"
+    },
+    "aortic_valve": {
+      "runtime": "valve generator"
+    },
+    "tricuspid_valve": {
+      "runtime": "valve generator"
+    },
+    "pulmonary_valve": {
+      "runtime": "valve generator"
+    }
+  },
+  "deformation": {
+    "method": "Same vertex-shader handles as the procedural asset, on chamber frames measured from the segmentation",
+    "lv": {
+      "base": [
+        1.3519,
+        0.5555,
+        -0.6203
+      ],
+      "axis": [
+        0.5254,
+        -0.1421,
+        0.8389
+      ],
+      "septalDir": [
+        -0.8436,
+        0.0413,
+        0.5353
+      ],
+      "anteriorDir": [
+        0.1107,
+        0.989,
+        0.0982
+      ],
+      "cavityBaseAlong": 0.0,
+      "cavityApexAlong": 8.2795,
+      "epiApexAlong": 8.9544,
+      "meanCavityRadius": 2.2824,
+      "meanWallThickness": 1.1625
+    },
+    "rv": {
+      "center": [
+        -0.3064,
+        0.1261,
+        5.574
+      ],
+      "axis": [
+        0.5254,
+        -0.1421,
+        0.8389
+      ],
+      "septalDir": [
+        0.8436,
+        -0.0413,
+        -0.5353
+      ],
+      "wall": 0.3
+    },
+    "la": {
+      "center": [
+        -0.8354,
+        2.106,
+        -2.2039
+      ]
+    },
+    "ra": {
+      "center": [
+        -4.3061,
+        0.3478,
+        1.9043
+      ]
+    },
+    "segmentConvention": "AHA 17-segment; angle measured around the LV long axis from the septal direction toward anterior"
+  },
+  "valves": {
+    "mitral_valve": {
+      "center": [
+        1.129,
+        0.6781,
+        -0.46
+      ],
+      "normal": [
+        0.7032,
+        -0.2173,
+        0.6769
+      ],
+      "radius": 1.4423,
+      "fromImaging": true
+    },
+    "aortic_valve": {
+      "center": [
+        -0.7129,
+        1.6021,
+        1.0252
+      ],
+      "normal": [
+        0.2031,
+        0.3708,
+        0.9062
+      ],
+      "radius": 0.7359,
+      "fromImaging": true
+    },
+    "tricuspid_valve": {
+      "center": [
+        -2.6169,
+        -1.0195,
+        2.8435
+      ],
+      "normal": [
+        0.7388,
+        -0.0954,
+        0.6671
+      ],
+      "radius": 1.33,
+      "fromImaging": true
+    },
+    "pulmonary_valve": {
+      "center": [
+        0.1174,
+        4.7668,
+        3.565
+      ],
+      "normal": [
+        -0.0234,
+        -0.002,
+        -0.9997
+      ],
+      "radius": 1.4486,
+      "fromImaging": true
+    }
+  },
+  "papillary": {
+    "anterolateral": {
+      "base": [
+        5.4059,
+        0.75,
+        2.95
+      ],
+      "tip": [
+        3.7559,
+        0.6,
+        1.45
+      ]
+    },
+    "posteromedial": {
+      "base": [
+        3.9059,
+        -2.1,
+        3.55
+      ],
+      "tip": [
+        2.7059,
+        -0.9,
+        1.75
+      ]
+    },
+    "rvAnterior": {
+      "base": [
+        -0.5941,
+        -0.0,
+        7.15
+      ],
+      "tip": [
+        -0.4441,
+        0.15,
+        5.95
+      ]
+    }
+  },
+  "coronaryOstia": {
+    "left": [
+      0.1702,
+      1.8422,
+      1.6118
+    ],
+    "right": [
+      -0.8708,
+      1.3138,
+      2.0613
+    ]
+  },
+  "anchors": {
+    "lv": [
+      6.2157,
+      -0.116,
+      0.661
+    ],
+    "rv": [
+      3.1231,
+      -2.1612,
+      8.6205
+    ],
+    "la": [
+      -1.1503,
+      4.1921,
+      -4.5846
+    ],
+    "ra": [
+      -6.8922,
+      1.1012,
+      4.0547
+    ],
+    "apex": [
+      5.9515,
+      -0.6882,
+      6.7238
+    ],
+    "aorta": [
+      -2.943,
+      6.7934,
+      4.0677
+    ],
+    "pulmonary_artery": [
+      3.9766,
+      6.3364,
+      -5.8966
+    ],
+    "vena_cava": [
+      -5.3996,
+      4.6129,
+      2.8134
+    ],
+    "pulmonary_veins": [
+      -0.8921,
+      4.3848,
+      -4.5212
+    ],
+    "coronary_vessels": [
+      1.7515,
+      3.1654,
+      3.0257
+    ],
+    "myocardium": [
+      5.9982,
+      -0.0571,
+      0.3137
+    ],
+    "mitral_valve": [
+      1.129,
+      0.6781,
+      -0.46
+    ],
+    "aortic_valve": [
+      -0.7129,
+      1.6021,
+      1.0252
+    ],
+    "tricuspid_valve": [
+      -2.6169,
+      -1.0195,
+      2.8435
+    ],
+    "pulmonary_valve": [
+      0.1174,
+      4.7668,
+      3.565
+    ]
+  },
+  "baseline": {
+    "note": "Measured from this segmentation (cardiac phase unknown). Not a clinical report.",
+    "lvEndDiastolicVolumeMl": 126.5,
+    "lvEpicardialVolumeMl": 293.3,
+    "lvEndDiastolicDiameterMm": 41.5,
+    "ivsThicknessMm": 13.1,
+    "lvPosteriorWallThicknessMm": 12.1,
+    "laVolumeMl": 78.5,
+    "rvBasalDiameterMm": 38.8,
+    "raMinorDimensionMm": 32.2,
+    "measurementLevelAlong": 2.4838
+  },
+  "morphTargets": [],
+  "layers": [
+    "outer",
+    "chambers",
+    "vessels",
+    "valves",
+    "overlays"
+  ],
+  "cutaway": "Clip plane with back-face section shading; closed solid mesh so wall thickness reads in section",
+  "animationChannels": [
+    "ventricular volume",
+    "longitudinal shortening",
+    "torsion",
+    "atrial volume",
+    "valve opening"
+  ],
+  "knownLimitations": [
+    "Shape from a CT segmentation, not reviewed by a clinician",
+    "Single phase, cardiac phase unknown: motion is the template's illustrative motion",
+    "Only the LV wall is from imaging; RV (3.0 mm), atrial (2.0 mm) and vessel walls are a fixed thickness",
+    "No coronary arteries, veins, venae cavae or pulmonary veins in the labels; their label anchors are placed on the atria",
+    "Valves are generated at runtime at the label-derived annulus; leaflets are illustrative",
+    "Papillary muscles and coronary ostia positions are illustrative (placed from the LV frame)",
+    "No epicardial fat in the labels",
+    "Labels are 1.5 mm resampled; scans are mostly not ECG-gated, so the cardiac phase is unknown.",
+    "RV volume is consistently ~1.5x LV in sampled cases: the RV/atrial labels may include their walls (only LV myocardium is a separate label). Unverified - do not report RV volume as RVEDV."
+  ]
+}

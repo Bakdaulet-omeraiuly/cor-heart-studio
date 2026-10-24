@@ -206,7 +206,7 @@ export function normalizeRecord(raw: unknown): NormalizeResult {
   });
 
   if (rec.imaging?.assets?.length) {
-    issues.push({ severity: "info", code: "imaging.unsupported", path: "imaging.assets", message: `${rec.imaging.assets.length} imaging attachment(s) listed. Image reconstruction (Tier C) is not implemented; attachments are shown as references only.` });
+    issues.push({ severity: "info", code: "imaging.unsupported", path: "imaging.assets", message: `${rec.imaging.assets.length} imaging attachment(s) listed. A mesh that references a bundled CT-derived heart (Tier B) is rendered; images are never reconstructed here and other attachments are references only.` });
   }
   for (const [i, wf] of (rec.ecg?.waveforms ?? []).entries()) {
     if (!wf.samples) issues.push({ severity: "info", code: "ecg.waveform_reference", path: `ecg.waveforms.${i}`, message: `Waveform "${wf.attachmentRef ?? wf.format ?? "attachment"}" has no inline samples; only inline numeric samples can be plotted.` });

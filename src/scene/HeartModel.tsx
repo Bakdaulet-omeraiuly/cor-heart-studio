@@ -7,10 +7,11 @@ import { sampleCycle, type CycleSample } from "@/domain/mapping/cycle";
 import type { StructureId } from "@/domain/mapping/types";
 import type { PatientEntry } from "@/lib/patients";
 import { useApp } from "@/state/store";
-import { HEART_CENTER, HEART_MANIFEST, type HeartAsset } from "./asset-adapters/heartAsset";
+import { specCenter, type HeartAsset } from "./asset-adapters/heartAsset";
+import type { HeartAssetSpec } from "./asset-adapters/registry";
 import { advance, getClock, notifyPhase } from "./animation/clock";
 import { deformPoint, frameParams, lvCoords, restParams, segmentAt } from "./animation/deform";
-import { cutPlane, DISABLED_PLANE } from "./geometry/sceneFrame";
+import { DISABLED_PLANE, sceneFrame } from "./geometry/sceneFrame";
 import { LabelOverlay, type LabelAnchor } from "./annotations/LabelOverlay";
 import { FlowRig } from "./layers/FlowRig";
 import { ValveRig } from "./layers/ValveRig";
@@ -23,6 +24,8 @@ const CHAMBERS = new Set<StructureId>(["lv", "rv", "la", "ra"]);
 
 export interface HeartModelProps {
   entry: PatientEntry;
+  /** Asset the entry is rendered with; `asset`/`pickAsset` must be loaded from it. */
+  spec: HeartAssetSpec;
   asset: HeartAsset;
   pickAsset: HeartAsset;
   clockId: string;
@@ -32,16 +35,21 @@ export interface HeartModelProps {
   showLabels?: boolean;
 }
 
-export function HeartModel({ entry, asset, pickAsset, clockId, primaryClockId, interactive = true, scale = 1, showLabels = true }: HeartModelProps) {
+export function HeartModel({ entry, spec, asset, pickAsset, clockId, primaryClockId, interactive = true, scale = 1, showLabels = true }: HeartModelProps) {
   const visual = entry.visual;
   const uniforms = useMemo(() => createTissueUniforms(), []);
   const plane = useMemo(() => new THREE.Plane().copy(DISABLED_PLANE), []);
   const clipping = useMemo(() => [plane], [plane]);
   const tissueMat = useMemo(() => createTissueMaterial(uniforms, { clippingPlanes: clipping }), [uniforms, clipping]);
   const ghostMat = useMemo(() => createTissueMaterial(uniforms, { clippingPlanes: clipping, ghost: true }), [uniforms, clipping]);
-  const params = useMemo(() => restParams(), []);
-  const valves = useMemo(() => new ValveRig(pickAsset.sampler, clipping), [pickAsset, clipping]);
-  const flow = useMemo(() => new FlowRig(pickAsset.sampler, clipping), [pickAsset, clipping]);
+  const manifest = spec.manifest;
+  const center = useMemo(() => specCenter(spec), [spec]);
+  const frame = sceneFrame(spec);
+  const params = useMemo(() => restParams(manifest), [manifest]);
+  const valves = useMemo(() => new ValveRig(pickAsset.sampler, clipping, manifest), [pickAsset, clipping, manifest]);
+  const flow = useMemo(() => new FlowRig(pickAsset.sampler, clipping, manifest), [pickAsset, clipping, manifest]);
+  // structures the asset does not contain get no label (their manifest anchors are placeholders)
+  const labelled = useMemo(() => LABELLED.filter((id) => spec.capabilities.structures.includes(id)), [spec]);
   const cycRef = useRef<CycleSample>(sampleCycle(visual.timing.phases, 0));
   const ghostRef = useRef<THREE.Mesh>(null);
   const tissueRef = useRef<THREE.Mesh>(null);
@@ -59,7 +67,7 @@ export function HeartModel({ entry, asset, pickAsset, clockId, primaryClockId, i
     const rest = src.getAttribute("position") as THREE.BufferAttribute;
     const W = src.getAttribute("_weights") as THREE.BufferAttribute;
     const T = src.getAttribute("_tissue") as THREE.BufferAttribute;
-    const P = frameParams(visual, { ventricular: 0, atrial: 0 }, restParams());
+    const P = frameParams(visual, { ventricular: 0, atrial: 0 }, restParams(manifest));
     const out = new Float32Array(rest.count * 3);
     const v: [number, number, number] = [0, 0, 0];
     const w = [0, 0, 0, 0];
@@ -73,13 +81,13 @@ export function HeartModel({ entry, asset, pickAsset, clockId, primaryClockId, i
     g.setIndex(src.getIndex()!.clone()); // MeshBVH reorders the index in place: never share it
     g.boundsTree = new MeshBVH(g);
     return g;
-  }, [pickAsset, visual]);
+  }, [pickAsset, visual, manifest]);
   useEffect(() => () => { pick.boundsTree = undefined; pick.dispose(); }, [pick]);
 
   // label anchors: snapped onto the outer surface (ray from outside toward the heart centre), then
   // carried by the same deformation as the tissue vertex they sit on
   const anchors = useMemo(() => {
-    const centre = HEART_CENTER.clone();
+    const centre = center.clone();
     const rest = pickAsset.tissue.getAttribute("position") as THREE.BufferAttribute;
     const nor = pickAsset.tissue.getAttribute("normal") as THREE.BufferAttribute;
     const W = pickAsset.tissue.getAttribute("_weights") as THREE.BufferAttribute;
@@ -89,8 +97,8 @@ export function HeartModel({ entry, asset, pickAsset, clockId, primaryClockId, i
     const ray = new THREE.Raycaster();
     (ray as THREE.Raycaster & { firstHitOnly?: boolean }).firstHitOnly = true;
     const res: Partial<Record<StructureId, { rest: THREE.Vector3; attrs: { w: number[]; depth: number; region: number } }>> = {};
-    for (const id of LABELLED) {
-      const a = (HEART_MANIFEST.anchors as Record<string, number[]>)[id];
+    for (const id of labelled) {
+      const a = manifest.anchors[id];
       if (!a) continue;
       const p = new THREE.Vector3(a[0], a[1], a[2]);
       if (VALVES.has(id)) { res[id] = { rest: p, attrs: pickAsset.sampler.nearest(p) }; continue; }
@@ -103,8 +111,8 @@ export function HeartModel({ entry, asset, pickAsset, clockId, primaryClockId, i
       res[id] = { rest: rp, attrs: { w: [W.getX(vi), W.getY(vi), W.getZ(vi), W.getW(vi)], depth: T.getX(vi), region: Math.round(T.getW(vi) * 255) } };
     }
     return res;
-  }, [pickAsset, pick]);
-  const labelAnchors = useMemo<LabelAnchor[]>(() => LABELLED.filter((id) => anchors[id]).map((id) => ({ id, position: new THREE.Vector3(), visible: false, occludable: !VALVES.has(id) })), [anchors]);
+  }, [pickAsset, pick, center, manifest, labelled]);
+  const labelAnchors = useMemo<LabelAnchor[]>(() => labelled.filter((id) => anchors[id]).map((id) => ({ id, position: new THREE.Vector3(), visible: false, occludable: !VALVES.has(id) })), [anchors, labelled]);
 
   const visibleRegion = (region: number, depth: number) => {
     const s = useApp.getState();
@@ -151,7 +159,7 @@ export function HeartModel({ entry, asset, pickAsset, clockId, primaryClockId, i
     for (const h of visual.highlights) for (const sg of h.segments ?? []) segFlag[sg - 1] = 1;
     uniforms.uTime.value = state.clock.elapsedTime;
 
-    if (s.cutaway.enabled) cutPlane(s.cutaway.axis, s.cutaway.offset, plane);
+    if (s.cutaway.enabled) frame.cutPlane(s.cutaway.axis, s.cutaway.offset, plane);
     else plane.copy(DISABLED_PLANE);
     // the heart group is translated by -HEART_CENTER*scale; clipping planes are in world space already
 
@@ -178,7 +186,7 @@ export function HeartModel({ entry, asset, pickAsset, clockId, primaryClockId, i
         deformPoint(params, a.rest.x, a.rest.y, a.rest.z, a.attrs.w, a.attrs.depth, a.attrs.region, tmp);
         la.position.set(tmp[0], tmp[1], tmp[2]);
       }
-      la.position.sub(HEART_CENTER).multiplyScalar(scale);
+      la.position.sub(center).multiplyScalar(scale);
       const structureShown = !s.hidden[la.id] && (!s.isolate || s.isolate === la.id);
       la.visible = structureShown && plane.distanceToPoint(la.position) >= 0 &&
         (VALVES.has(la.id) ? s.layers.valves && (interiorExposed || s.isolate === la.id) : la.id === "coronary_vessels" ? s.layers.coronary : CHAMBERS.has(la.id) ? s.layers.outer || s.layers.chambers : s.layers.vessels);
@@ -224,7 +232,7 @@ export function HeartModel({ entry, asset, pickAsset, clockId, primaryClockId, i
     useApp.getState().selectStructure(h?.structure ?? null, h?.segment ?? null);
   };
 
-  const offset = useMemo(() => HEART_CENTER.clone().multiplyScalar(-1), []);
+  const offset = useMemo(() => center.clone().multiplyScalar(-1), [center]);
   const layersLabels = useApp((s) => s.layers.labels);
   const selected = useApp((s) => s.selectedStructure);
 
@@ -233,7 +241,7 @@ export function HeartModel({ entry, asset, pickAsset, clockId, primaryClockId, i
       <group position={offset}>
         <mesh ref={tissueRef} geometry={asset.tissue} material={tissueMat} frustumCulled={false} />
         <mesh ref={ghostRef} geometry={asset.tissue} material={ghostMat} frustumCulled={false} renderOrder={10} visible={false} />
-        {[asset.coronaryArteries, asset.cardiacVeins].map((g, i) => (
+        {[asset.coronaryArteries, asset.cardiacVeins].map((g, i) => g && (
           <mesh key={i} ref={(m) => { coronaryRefs.current[i] = m; }} geometry={g} material={tissueMat} frustumCulled={false} />
         ))}
         <primitive object={valves.group} onPointerMove={onMove} onClick={onClick} onPointerOut={onOut} />

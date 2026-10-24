@@ -4,7 +4,8 @@ import * as THREE from "three";
 import type { CycleSample } from "@/domain/mapping/cycle";
 import type { PatientVisualState } from "@/domain/mapping/types";
 import type { Severity, ValveId } from "@/domain/schema/record";
-import { HEART_MANIFEST, type AttributeSampler, type SampledAttributes } from "../asset-adapters/heartAsset";
+import type { AttributeSampler, SampledAttributes } from "../asset-adapters/heartAsset";
+import type { HeartManifest } from "../asset-adapters/manifest";
 import { deformPoint, type DeformParams } from "../animation/deform";
 
 const V = (a: number[]) => new THREE.Vector3(a[0], a[1], a[2]);
@@ -32,8 +33,8 @@ export class FlowRig {
   readonly count = 260;
   readonly jetCount = 180;
 
-  constructor(sampler: AttributeSampler, clipping: THREE.Plane[]) {
-    const m = HEART_MANIFEST;
+  constructor(sampler: AttributeSampler, clipping: THREE.Plane[], manifest: HeartManifest) {
+    const m = manifest;
     const lvBase = V(m.deformation.lv.base), axis = V(m.deformation.lv.axis);
     const right = [V(m.anchors.vena_cava).add(new THREE.Vector3(0, 2.2, 0)), V(m.anchors.vena_cava), V(m.deformation.ra.center), V(m.valves.tricuspid_valve.center), V(m.deformation.rv.center).add(new THREE.Vector3(0.2, -0.6, -0.2)),
       V(m.valves.pulmonary_valve.center).addScaledVector(V(m.valves.pulmonary_valve.normal), -1.2), V(m.valves.pulmonary_valve.center), V(m.anchors.pulmonary_artery), V(m.anchors.pulmonary_artery).add(new THREE.Vector3(0, 1.4, -1.6))];

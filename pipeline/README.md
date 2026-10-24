@@ -49,8 +49,15 @@ the procedural heart (docs/asset-pipeline.md), `provenanceTier: "B"`:
   valves at the vessel root. Papillary muscles and coronary ostia are illustrative (LV frame).
 - Not in the labels, so not in the mesh: coronary vessels, venae cavae, pulmonary veins.
 
-The app cannot load it yet: it imports the procedural manifest statically and requires the
-`coronary_arteries` / `cardiac_veins` meshes. That is step 5 (Tier B loader).
+Publish a built case into the app (copies GLBs, manifest, LV-cavity test fixture and the sample
+record), then add its manifest to `src/scene/asset-adapters/registry.ts`:
+
+```bash
+.venv/bin/python -m cor_pipeline.publish ../data/out/s0270 --meta ../data/totalseg_v1/meta.csv
+```
+
+Valves: AV annuli use label contacts ≥ 6 mm inside the heart (outer AV-groove contacts are ignored);
+papillary points are snapped ≥ 3–5 mm inside their cavity.
 
 Not done yet: TotalSegmentator inference for unlabelled scans; aortic annulus radius tends to read
 small (0.74–1.08 cm on the five cases) because the root slab tapers.

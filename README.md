@@ -38,6 +38,9 @@ npm run build:data     # CSV twin, templates, JSON Schema
 npx tsx scripts/generate-data-dictionary.ts
 ```
 
+CT-derived hearts (Tier B) come from the Python pipeline in `pipeline/` (see `pipeline/README.md`):
+fetch an open case → `build --asset` → `publish` → register it in `src/scene/asset-adapters/registry.ts`.
+
 ## Docs
 
 - `docs/data-to-visual-mapping.md` — rules, formulas, bounds, limitations
@@ -48,6 +51,21 @@ npx tsx scripts/generate-data-dictionary.ts
 
 ## Honest limits
 
-Tier A only: a procedural anatomical heart adapted to measurements. Shape beyond measured dimensions,
-motion waveform, valve geometry and flow particles are illustrative. No DICOM, segmentation, CFD or
-clinical thresholds. Tools used: code only (no Blender/Figma/Meshy/Tripo). License: MIT (see `LICENSE`).
+Tier A: a procedural anatomical heart adapted to measurements. Shape beyond measured dimensions,
+motion waveform, valve geometry and flow particles are illustrative.
+
+Tier B (two bundled "Open CT" cases): chamber and great-artery shape from an open CT segmentation,
+not reviewed by a clinician. Single-phase scans, so motion is the same illustrative motion; only the
+LV wall is from imaging (other walls fixed thickness); no coronaries or veins; valves are placed at
+label-derived annuli but leaflets are illustrative. The viewport badge and Inspector say this per
+patient. No DICOM is processed in the app or deployed; no CFD or clinical thresholds.
+
+Tools used: code only (no Blender/Figma/Meshy/Tripo). License: MIT (see `LICENSE`).
+
+## Data credits
+
+The Tier B hearts (`public/models/ct/`, `src/scene/asset-adapters/ct/`, `public/samples/open-ct-patients.json`)
+are derived from the TotalSegmentator dataset v1.0 — Wasserthal J. et al., "TotalSegmentator: Robust
+Segmentation of 104 Anatomic Structures in CT Images", Radiology: Artificial Intelligence 2023 —
+https://zenodo.org/records/6802614, licensed CC BY 4.0. Changes: label masks were converted to meshes,
+measurements and the app's attribute contract by `pipeline/`. Only labels were used, never the CT images.

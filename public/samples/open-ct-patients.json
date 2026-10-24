@@ -1,0 +1,177 @@
+{
+  "schemaVersion": "1.0.0",
+  "patients": [
+    {
+      "patientId": "OPEN-CT-s0270",
+      "studyId": "TOTALSEG-V1-s0270",
+      "displayName": "Open CT \u00b7 s0270 \u00b7 CT-derived shape",
+      "synthetic": false,
+      "clinicianNotes": "De-identified case from an open research dataset. Only the 3D shape and the volumes below come from imaging (automatic + expert-refined segmentation). No echo, ECG or diagnosis is available: motion and timing are illustrative defaults. Cardiac phase of the scan is unknown.",
+      "imaging": {
+        "findings": [
+          {
+            "modality": "CT",
+            "category": "ventricular_volume",
+            "finding": "LV cavity volume (segmentation, phase unknown)",
+            "value": 126.5,
+            "unit": "mL",
+            "source": "CT segmentation, TotalSegmentator dataset v1.0 (Wasserthal et al., Radiology: AI 2023) \u2014 https://zenodo.org/records/6802614 (CC BY 4.0); not reviewed by a clinician"
+          },
+          {
+            "modality": "CT",
+            "category": "myocardial_thickness",
+            "finding": "LV myocardium volume (segmentation)",
+            "value": 166.8,
+            "unit": "mL",
+            "source": "CT segmentation, TotalSegmentator dataset v1.0 (Wasserthal et al., Radiology: AI 2023) \u2014 https://zenodo.org/records/6802614 (CC BY 4.0); not reviewed by a clinician"
+          },
+          {
+            "modality": "CT",
+            "category": "myocardial_thickness",
+            "finding": "LV wall thickness, septal, mid-basal level",
+            "value": 13.1,
+            "unit": "mm",
+            "source": "CT segmentation, TotalSegmentator dataset v1.0 (Wasserthal et al., Radiology: AI 2023) \u2014 https://zenodo.org/records/6802614 (CC BY 4.0); not reviewed by a clinician"
+          },
+          {
+            "modality": "CT",
+            "category": "myocardial_thickness",
+            "finding": "LV wall thickness, lateral, mid-basal level",
+            "value": 12.1,
+            "unit": "mm",
+            "source": "CT segmentation, TotalSegmentator dataset v1.0 (Wasserthal et al., Radiology: AI 2023) \u2014 https://zenodo.org/records/6802614 (CC BY 4.0); not reviewed by a clinician"
+          },
+          {
+            "modality": "CT",
+            "category": "chamber_geometry",
+            "finding": "LA volume (segmentation)",
+            "value": 78.5,
+            "unit": "mL",
+            "source": "CT segmentation, TotalSegmentator dataset v1.0 (Wasserthal et al., Radiology: AI 2023) \u2014 https://zenodo.org/records/6802614 (CC BY 4.0); not reviewed by a clinician"
+          },
+          {
+            "modality": "CT",
+            "category": "chamber_geometry",
+            "finding": "RV label volume (may include the RV wall)",
+            "value": 197.1,
+            "unit": "mL",
+            "source": "CT segmentation, TotalSegmentator dataset v1.0 (Wasserthal et al., Radiology: AI 2023) \u2014 https://zenodo.org/records/6802614 (CC BY 4.0); not reviewed by a clinician"
+          }
+        ],
+        "assets": [
+          {
+            "kind": "mesh",
+            "reference": "cor-ct-s0270",
+            "format": "glTF 2.0 (COR attribute contract)",
+            "deidentified": true,
+            "units": "cm",
+            "orientation": "+X patient left, +Y superior, +Z anterior",
+            "structureLabels": [
+              "lv",
+              "lv_myocardium",
+              "rv",
+              "la",
+              "ra",
+              "aorta",
+              "pulmonary_artery"
+            ],
+            "license": "CC BY 4.0"
+          }
+        ]
+      },
+      "demographics": {
+        "age": {
+          "value": 66,
+          "unit": "years"
+        },
+        "biologicalSex": "male"
+      }
+    },
+    {
+      "patientId": "OPEN-CT-s0338",
+      "studyId": "TOTALSEG-V1-s0338",
+      "displayName": "Open CT \u00b7 s0338 \u00b7 CT-derived shape",
+      "synthetic": false,
+      "clinicianNotes": "De-identified case from an open research dataset. Only the 3D shape and the volumes below come from imaging (automatic + expert-refined segmentation). No echo, ECG or diagnosis is available: motion and timing are illustrative defaults. Cardiac phase of the scan is unknown.",
+      "imaging": {
+        "findings": [
+          {
+            "modality": "CT",
+            "category": "ventricular_volume",
+            "finding": "LV cavity volume (segmentation, phase unknown)",
+            "value": 132.2,
+            "unit": "mL",
+            "source": "CT segmentation, TotalSegmentator dataset v1.0 (Wasserthal et al., Radiology: AI 2023) \u2014 https://zenodo.org/records/6802614 (CC BY 4.0); not reviewed by a clinician"
+          },
+          {
+            "modality": "CT",
+            "category": "myocardial_thickness",
+            "finding": "LV myocardium volume (segmentation)",
+            "value": 170.2,
+            "unit": "mL",
+            "source": "CT segmentation, TotalSegmentator dataset v1.0 (Wasserthal et al., Radiology: AI 2023) \u2014 https://zenodo.org/records/6802614 (CC BY 4.0); not reviewed by a clinician"
+          },
+          {
+            "modality": "CT",
+            "category": "myocardial_thickness",
+            "finding": "LV wall thickness, septal, mid-basal level",
+            "value": 13.9,
+            "unit": "mm",
+            "source": "CT segmentation, TotalSegmentator dataset v1.0 (Wasserthal et al., Radiology: AI 2023) \u2014 https://zenodo.org/records/6802614 (CC BY 4.0); not reviewed by a clinician"
+          },
+          {
+            "modality": "CT",
+            "category": "myocardial_thickness",
+            "finding": "LV wall thickness, lateral, mid-basal level",
+            "value": 13.7,
+            "unit": "mm",
+            "source": "CT segmentation, TotalSegmentator dataset v1.0 (Wasserthal et al., Radiology: AI 2023) \u2014 https://zenodo.org/records/6802614 (CC BY 4.0); not reviewed by a clinician"
+          },
+          {
+            "modality": "CT",
+            "category": "chamber_geometry",
+            "finding": "LA volume (segmentation)",
+            "value": 68.3,
+            "unit": "mL",
+            "source": "CT segmentation, TotalSegmentator dataset v1.0 (Wasserthal et al., Radiology: AI 2023) \u2014 https://zenodo.org/records/6802614 (CC BY 4.0); not reviewed by a clinician"
+          },
+          {
+            "modality": "CT",
+            "category": "chamber_geometry",
+            "finding": "RV label volume (may include the RV wall)",
+            "value": 215.5,
+            "unit": "mL",
+            "source": "CT segmentation, TotalSegmentator dataset v1.0 (Wasserthal et al., Radiology: AI 2023) \u2014 https://zenodo.org/records/6802614 (CC BY 4.0); not reviewed by a clinician"
+          }
+        ],
+        "assets": [
+          {
+            "kind": "mesh",
+            "reference": "cor-ct-s0338",
+            "format": "glTF 2.0 (COR attribute contract)",
+            "deidentified": true,
+            "units": "cm",
+            "orientation": "+X patient left, +Y superior, +Z anterior",
+            "structureLabels": [
+              "lv",
+              "lv_myocardium",
+              "rv",
+              "la",
+              "ra",
+              "aorta",
+              "pulmonary_artery"
+            ],
+            "license": "CC BY 4.0"
+          }
+        ]
+      },
+      "demographics": {
+        "age": {
+          "value": 58,
+          "unit": "years"
+        },
+        "biologicalSex": "male"
+      }
+    }
+  ]
+}

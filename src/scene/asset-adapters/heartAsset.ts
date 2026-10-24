@@ -1,31 +1,34 @@
-// Asset adapter for the procedural COR heart (manifest-described GLB). A licensed GLB with the same
-// attribute contract (_weights, _tissue) and manifest fields can replace it — see docs/asset-pipeline.md.
+// Asset adapter for manifest-described heart GLBs (the procedural COR heart and CT-derived Tier B
+// hearts, see registry.ts). Any GLB with the attribute contract (_weights, _tissue) and the manifest
+// fields can be added — see docs/asset-pipeline.md.
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import manifest from "./procedural-heart-v1.manifest.json";
+import type { HeartAssetSpec } from "./registry";
 
 export type Lod = "low" | "high";
 
 export interface HeartAsset {
+  specId: string;
   lod: Lod;
   tissue: THREE.BufferGeometry;
-  coronaryArteries: THREE.BufferGeometry;
-  cardiacVeins: THREE.BufferGeometry;
+  /** Absent when the source has no coronary vessels (CT segmentations without coronary labels). */
+  coronaryArteries: THREE.BufferGeometry | null;
+  cardiacVeins: THREE.BufferGeometry | null;
   sampler: AttributeSampler;
   bytes: number;
 }
 
-export const HEART_MANIFEST = manifest;
-/** Centre of the heart in asset space (used to put the organ at the scene origin). */
-export const HEART_CENTER = new THREE.Vector3(0.75, 1.55, -0.55).multiplyScalar(1.15);
+/** Centre of the heart in asset space (the scene puts it at the origin). */
+export const specCenter = (spec: HeartAssetSpec) => new THREE.Vector3(...spec.center);
 
-const cache = new Map<Lod, Promise<HeartAsset>>();
+const cache = new Map<string, Promise<HeartAsset>>();
 
-export function loadHeartAsset(lod: Lod): Promise<HeartAsset> {
-  let p = cache.get(lod);
+export function loadHeartAsset(spec: HeartAssetSpec, lod: Lod): Promise<HeartAsset> {
+  const key = `${spec.id}:${lod}`;
+  let p = cache.get(key);
   if (!p) {
     p = (async () => {
-      const url = manifest.files[lod].url;
+      const url = spec.manifest.files[lod].url;
       const res = await fetch(url);
       if (!res.ok) throw new Error(`Heart asset ${url} failed to load (HTTP ${res.status})`);
       const buf = await res.arrayBuffer();
@@ -33,12 +36,13 @@ export function loadHeartAsset(lod: Lod): Promise<HeartAsset> {
       const byName = (n: string) => {
         let g: THREE.BufferGeometry | undefined;
         gltf.scene.traverse((o) => { if ((o as THREE.Mesh).isMesh && o.name === n) g = (o as THREE.Mesh).geometry; });
-        if (!g) throw new Error(`Heart asset is missing mesh "${n}"`);
-        if (!g.getAttribute("_weights") || !g.getAttribute("_tissue")) throw new Error(`Mesh "${n}" lacks the _weights/_tissue attribute contract`);
-        return g;
+        if (g && (!g.getAttribute("_weights") || !g.getAttribute("_tissue"))) throw new Error(`Mesh "${n}" lacks the _weights/_tissue attribute contract`);
+        return g ?? null;
       };
       const tissue = byName("heart_tissue");
+      if (!tissue) throw new Error(`Heart asset ${url} is missing mesh "heart_tissue"`);
       return {
+        specId: spec.id,
         lod,
         tissue,
         coronaryArteries: byName("coronary_arteries"),
@@ -47,8 +51,8 @@ export function loadHeartAsset(lod: Lod): Promise<HeartAsset> {
         bytes: buf.byteLength,
       };
     })();
-    p.catch(() => cache.delete(lod));
-    cache.set(lod, p);
+    p.catch(() => cache.delete(key));
+    cache.set(key, p);
   }
   return p;
 }
@@ -99,6 +103,6 @@ export class AttributeSampler {
 
 export function disposeHeartAsset(a: HeartAsset) {
   a.tissue.dispose();
-  a.coronaryArteries.dispose();
-  a.cardiacVeins.dispose();
+  a.coronaryArteries?.dispose();
+  a.cardiacVeins?.dispose();
 }

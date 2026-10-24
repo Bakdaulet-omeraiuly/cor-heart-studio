@@ -4,8 +4,12 @@ Status 2026-10-24: **in progress.** Working data now: **TotalSegmentator v1 data
 CC BY 4.0, per-chamber labels, fetched per case without registration). MM-WHS CT stays the planned
 higher-quality source once its access/terms are sorted. Step 2 + 4 (meshes, volumes, QA) work on 5 real
 cardiac CTs (s0270 s0335 s0338 s0356 s0368) → `data/out/<case>/`. Step 3 done (`--asset`: GLBs +
-manifest in the app contract, see `pipeline/README.md`). Next: step 5 — make the app's manifest
-per-patient (today 7 files import it statically) and coronary meshes optional, then load a CT asset.
+manifest in the app contract, see `pipeline/README.md`). Step 5 done: asset registry, per-asset
+manifest everywhere, optional coronaries, two "Open CT" sample patients (s0270, s0338) with a Tier B
+badge; unit + e2e tests (tests/unit/tier-b.test.ts, tests/e2e/tier-b.spec.ts).
+Next ideas: smoother endocardium (cut shows speckles), pulmonary valve sits near the PA cut end on
+short PA labels, measured RV/atrial walls (needs a model that labels them), multi-phase data for real
+motion, MM-WHS once access is sorted.
 Read this first in a new session.
 
 ## Decisions (made with the user)

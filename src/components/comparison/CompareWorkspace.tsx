@@ -7,7 +7,8 @@ import type { EvidenceClass } from "@/domain/types";
 import { patientTitle, type PatientEntry } from "@/lib/patients";
 import { useApp } from "@/state/store";
 import { detectTier } from "@/scene/performance/quality";
-import { useHeartAssets } from "@/scene/useHeartAssets";
+import { useLowAssets } from "@/scene/useHeartAssets";
+import { getHeartAssetSpec } from "@/scene/asset-adapters/registry";
 import { EvidenceBadge, Pill, Segmented, Switch, cx } from "../ui/primitives";
 import { useWebgl } from "../workspace/HeartViewport";
 
@@ -51,12 +52,13 @@ function cell(e: PatientEntry, r: Row): { text: string; value?: number; unit?: s
 export function CompareWorkspace() {
   const s = useApp();
   const tier = useMemo(() => detectTier(s.quality), [s.quality]);
-  const assets = useHeartAssets(false); // comparison always uses the low LOD (performance cap)
   const webgl = useWebgl();
   const [syncCamera, setSyncCamera] = useState(true);
   const entries = s.compareKeys.map((k) => s.entries[k]).filter(Boolean);
   const cap = tier.maxCompareViews;
   const shown = entries.slice(0, cap);
+  const assets = useLowAssets(shown.map((e) => getHeartAssetSpec(e.assetId))); // comparison always uses the low LOD (performance cap)
+  const ready = shown.every((e) => assets.assets[getHeartAssetSpec(e.assetId).id]);
 
   return (
     <div className="flex h-full min-h-0 flex-col" data-testid="compare">
@@ -78,8 +80,10 @@ export function CompareWorkspace() {
           <div className="flex h-full items-center justify-center p-6 text-center text-[13px] text-muted">Tick 2–4 records in the patient list to compare them side by side.</div>
         ) : !webgl ? (
           <div className="p-6 text-[13px] text-muted">WebGL is unavailable — use the difference table below.</div>
-        ) : assets.low ? (
-          <CompareCanvas entries={shown} asset={assets.low} syncCamera={syncCamera} sharedScale={s.sharedScale} />
+        ) : assets.error ? (
+          <div className="p-6 text-[13px] text-muted" role="alert">An anatomical asset failed to load: {assets.error}</div>
+        ) : ready ? (
+          <CompareCanvas entries={shown} assets={assets.assets} syncCamera={syncCamera} sharedScale={s.sharedScale} />
         ) : <div className="p-6 text-[13px] text-muted" role="status">Loading anatomical asset…</div>}
       </div>
       {entries.length >= 2 && <DifferenceTable entries={entries} />}

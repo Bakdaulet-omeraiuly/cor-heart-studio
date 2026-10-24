@@ -9,6 +9,7 @@ import { EVIDENCE_LABEL, type EvidenceClass, type Issue, type NormalizedObservat
 import { patientTitle, type PatientEntry } from "@/lib/patients";
 import { useApp, type InspectorTab } from "@/state/store";
 import { EvidenceBadge, IconButton, Pill, SectionTitle, cx, download } from "../ui/primitives";
+import { getHeartAssetSpec } from "@/scene/asset-adapters/registry";
 import { EcgWaveform } from "./EcgWaveform";
 
 const CATEGORY_LABEL: Record<FieldCategory, string> = {
@@ -254,6 +255,7 @@ function Changes({ entry }: { entry: PatientEntry }) {
 
 function Evidence({ entry }: { entry: PatientEntry }) {
   const v = entry.visual;
+  const spec = getHeartAssetSpec(entry.assetId);
   const classes: EvidenceClass[] = ["reported_measurement", "reported_assessment", "derived", "illustrative_inference", "default_unknown"];
   return (
     <div className="text-[12px]">
@@ -271,15 +273,18 @@ function Evidence({ entry }: { entry: PatientEntry }) {
       {v.unknowns.length ? <ul className="space-y-1">{v.unknowns.map((u, i) => <li key={i} className="flex gap-2"><EvidenceBadge evidence="default_unknown" compact /><span>{u.message}</span></li>)}</ul> : <p className="text-muted">Nothing.</p>}
       <SectionTitle>Always illustrative</SectionTitle>
       <ul className="list-disc space-y-1 pl-4 text-muted">
-        <li>The full 3D shape: only measured dimensions are data-driven; everything else comes from the baseline asset.</li>
+        {spec.tier === "B"
+          ? <li>Walls other than the LV (fixed thickness), papillary muscles, coronary ostia and the cardiac phase of the scan. The chamber and great-artery shapes come from the CT segmentation.</li>
+          : <li>The full 3D shape: only measured dimensions are data-driven; everything else comes from the baseline asset.</li>}
         <li>Contraction waveform, torsion and the longitudinal/radial split of shortening.</li>
         <li>Valve opening fractions for qualitative severities; leaflet shapes.</li>
         <li>Flow particles and reverse-flow cues (not measured flow, velocity, pressure or oxygenation).</li>
-        <li>Surface tissue texture, fat distribution and coronary course (one common pattern).</li>
+        <li>{spec.tier === "B" ? "Surface tissue texture. No coronary vessels, venae cavae or pulmonary veins (not in the segmentation)." : "Surface tissue texture, fat distribution and coronary course (one common pattern)."}</li>
       </ul>
       <SectionTitle>Provenance tier & versions</SectionTitle>
       <dl className="grid grid-cols-[120px_1fr] gap-y-0.5 text-[11px]">
-        <dt className="text-faint">Tier</dt><dd>A — parameterized anatomy (no imaging reconstruction)</dd>
+        <dt className="text-faint">Tier</dt><dd>{spec.tier === "B" ? `B — ${spec.geometrySource}` : "A — parameterized anatomy (no imaging reconstruction)"}</dd>
+        {spec.tier === "B" && <><dt className="text-faint">Data</dt><dd>{spec.manifest.attribution} · {spec.manifest.license}</dd></>}
         <dt className="text-faint">Mapping</dt><dd className="num">v{v.mappingVersion}</dd>
         <dt className="text-faint">Asset</dt><dd className="num">{v.assetId} v{v.assetVersion}</dd>
         <dt className="text-faint">Reference</dt><dd className="num">{v.referenceProfileId}</dd>

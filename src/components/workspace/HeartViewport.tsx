@@ -4,12 +4,14 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 import { AlertTriangle, Loader2, RotateCcw } from "lucide-react";
 import { useApp } from "@/state/store";
 import { useHeartAssets } from "@/scene/useHeartAssets";
+import { getHeartAssetSpec } from "@/scene/asset-adapters/registry";
 import { detectTier, webglAvailable } from "@/scene/performance/quality";
 import { Button } from "../ui/primitives";
 import { Fallback2D } from "./Fallback2D";
 import { SceneToolbar } from "./SceneToolbar";
 import { PlaybackBar } from "./PlaybackBar";
 import { Legend } from "./Legend";
+import { GeometryBadge } from "./GeometryBadge";
 
 const HeartCanvas = dynamic(() => import("@/scene/HeartCanvas"), { ssr: false });
 
@@ -22,7 +24,8 @@ export function HeartViewport() {
   const entry = useApp((s) => (s.selectedKey ? s.entries[s.selectedKey] : null));
   const quality = useApp((s) => s.quality);
   const tier = useMemo(() => detectTier(quality), [quality]);
-  const assets = useHeartAssets(tier.lod === "high");
+  const spec = getHeartAssetSpec(entry?.assetId);
+  const assets = useHeartAssets(spec, tier.lod === "high");
   const webgl = useWebgl();
   const [lost, setLost] = useState(false);
   const [canvasKey, setCanvasKey] = useState(0);
@@ -48,7 +51,7 @@ export function HeartViewport() {
   return (
     <div className="relative h-full w-full overflow-hidden" data-testid="viewport">
       {asset && assets.low && !lost && (
-        <HeartCanvas key={canvasKey} entry={entry} asset={asset} pickAsset={assets.low} tier={tier} onContextLost={() => setLost(true)} />
+        <HeartCanvas key={`${canvasKey}:${spec.id}`} entry={entry} spec={spec} asset={asset} pickAsset={assets.low} tier={tier} onContextLost={() => setLost(true)} />
       )}
       {!assets.low && (
         <div className="absolute inset-0 flex items-center justify-center" role="status">
@@ -72,6 +75,7 @@ export function HeartViewport() {
       <SceneToolbar onFallback={() => setForceFallback(true)} tierName={tier.name} lod={assets.high ? "high" : "low"} />
       {/* legend and player share one bottom column so they can never overlap each other */}
       <div className="pointer-events-none absolute inset-x-3 bottom-3 z-20 flex flex-col items-start gap-2">
+        <GeometryBadge spec={spec} />
         <Legend />
         <PlaybackBar />
       </div>

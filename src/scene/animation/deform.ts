@@ -1,6 +1,7 @@
 // Chamber-handle deformation. This TypeScript implementation is the reference for the GLSL copy in
 // scene/materials/deformGlsl.ts (keep them in sync). Used for picking, label anchors and volume tests.
-import manifest from "@/scene/asset-adapters/procedural-heart-v1.manifest.json";
+import proceduralManifest from "@/scene/asset-adapters/procedural-heart-v1.manifest.json";
+import type { HeartManifest } from "@/scene/asset-adapters/manifest";
 import type { CycleSample } from "@/domain/mapping/cycle";
 import type { PatientVisualState } from "@/domain/mapping/types";
 
@@ -17,20 +18,22 @@ export interface DeformParams {
   segMotion: Float32Array; // 17
   segThick: Float32Array; // 17, cm
   rvR0: number; // septal reference radius from the LV axis
+  rvR0Rest: number; // rvR0 of the asset at rest (mean LV cavity radius + wall)
   rvStatic: Vec3; rvCycle: Vec3;
   laCenter: Vec3; raCenter: Vec3;
   laScale: number; raScale: number;
 }
 
-const L = manifest.deformation.lv;
-
-export function restParams(): DeformParams {
+/** Rest parameters of an asset (defaults to the procedural heart). */
+export function restParams(manifest: HeartManifest = proceduralManifest): DeformParams {
+  const L = manifest.deformation.lv;
   return {
     lvBase: L.base as Vec3, lvAxis: L.axis as Vec3, lvSep: L.septalDir as Vec3, lvAnt: L.anteriorDir as Vec3,
     cavBase: L.cavityBaseAlong, cavApex: L.cavityApexAlong, epiApex: L.epiApexAlong,
     lvStatic: [1, 1, 1], lvCycle: [1, 1, 1], lvTwist: 0,
     segMotion: new Float32Array(17).fill(1), segThick: new Float32Array(17),
     rvR0: L.meanCavityRadius + L.meanWallThickness,
+    rvR0Rest: L.meanCavityRadius + L.meanWallThickness,
     rvStatic: [1, 1, 1], rvCycle: [1, 1, 1],
     laCenter: manifest.deformation.la.center as Vec3, raCenter: manifest.deformation.ra.center as Vec3,
     laScale: 1, raScale: 1,
@@ -45,7 +48,7 @@ export function frameParams(vs: PatientVisualState, cyc: Pick<CycleSample, "vent
   out.lvTwist = c * vs.lv.twistRad;
   out.segMotion.set(vs.segments.motion);
   out.segThick.set(vs.segments.thicknessDeltaCm);
-  out.rvR0 = (L.meanCavityRadius + L.meanWallThickness) * vs.lv.edRadialEpi;
+  out.rvR0 = out.rvR0Rest * vs.lv.edRadialEpi;
   out.rvStatic = [vs.rv.edRadial, vs.rv.edRadialEpi, vs.rv.edLong];
   out.rvCycle = [1 + c * (vs.rv.esRadialEndo - 1), 1 + c * (vs.rv.esRadialEpi - 1), 1 + c * (vs.rv.esLong - 1)];
   out.laScale = vs.la.edScale * (1 + vs.la.swing * cyc.atrial);

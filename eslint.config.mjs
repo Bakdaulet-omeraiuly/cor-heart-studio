@@ -21,6 +21,9 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     "playwright-report/**",
     "test-results/**",
+    // Python CT pipeline: its virtualenv ships third-party JS
+    "pipeline/**",
+    "data/**",
   ]),
 ]);
 

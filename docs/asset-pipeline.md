@@ -91,11 +91,22 @@ textures, but also no baked normal/roughness maps — documented as a gap relati
    `tests/fixtures/lv-cavity-proxy.json` from the new LV cavity; run `npm test`.
 4. Re-run the visual review (docs/anatomy-review.md) — realism must be re-verified, not assumed.
 
-A *patient-supplied* mesh (Tier B) would additionally need validation of units, orientation, labels,
-provenance and de-identification before any patient-specific claim. That path is designed for but **not
-implemented**; imaging attachments are listed as unsupported.
+## Tier B: CT-derived assets (implemented for bundled open-data cases)
+
+`pipeline/cor_pipeline/asset.py` builds a GLB + manifest in this contract from a CT label volume
+(`provenanceTier: "B"`, plus `center`, `provenance`, `valves.*.fromImaging` and `structureToMesh.*.absent`
+for structures the labels lack). `publish.py` copies them into `public/models/ct/` and
+`src/scene/asset-adapters/ct/`; `src/scene/asset-adapters/registry.ts` lists every asset with its own
+reference profile (its rest pose is the baseline) and capabilities. A record selects one with
+`imaging.assets[]: { kind: "mesh", reference: "<assetId>" }`; anything else gets the procedural heart.
+Coronary meshes are optional. Everything that used to import the procedural manifest now takes the
+asset spec (deformation rest params, valve/flow rigs, camera presets and cut planes, label anchors).
+
+Not supported: uploading a patient's own mesh or images in the app. A user-supplied mesh would still
+need validation of units, orientation, labels, provenance and de-identification first.
 
 ## License
 
-The asset is generated entirely by this repository's code and contains no third-party data. It is
-covered by the repository's MIT license (`LICENSE`).
+The procedural asset is generated entirely by this repository's code and contains no third-party data.
+It is covered by the repository's MIT license (`LICENSE`). The Tier B assets are derived from the
+TotalSegmentator dataset v1.0 (CC BY 4.0) — see "Data credits" in the README.
