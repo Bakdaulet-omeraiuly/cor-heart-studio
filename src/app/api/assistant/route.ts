@@ -6,8 +6,8 @@
 // next.config.ts where `cacheComponents: true`): a route handler is this
 // `route.ts` exporting `POST(request: Request)`; non-GET handlers are never
 // cached. With Cache Components enabled, the segment options `dynamic`,
-// `revalidate` and `fetchCache` are REMOVED — only `runtime` and `maxDuration`
-// remain. So this file exports exactly those two and nothing else.
+// `revalidate` and `fetchCache` are REMOVED, and `runtime` is rejected too (the
+// Node.js runtime is the fixed default). So this file exports only `maxDuration`.
 //
 // Every numbered pipeline step below is a pure function living in its own module
 // (except runChat, which takes an injected client), so the whole route is unit
@@ -56,13 +56,15 @@ import { fallbackText } from "./fallback";
 import { rateLimit, rateLimitKey } from "./rateLimit";
 
 // --- Segment config (Requirement 2.1; Next 16.4.2 + cacheComponents) ----------
-// `nodejs` because the pipeline uses Buffer (size check) and the Anthropic SDK;
+// The Node.js runtime is needed for Buffer (size check) and the Anthropic SDK;
 // `maxDuration = 60` is the platform function ceiling. The inner model call is
 // bounded more tightly to 45 s (see RUN_CHAT_TIMEOUT_MS) so a timeout still
 // leaves headroom to build and return the 504 response within the 60 s budget.
 // Do NOT add `dynamic`/`revalidate`/`fetchCache`: they are removed under
 // cacheComponents and would be a build error.
-export const runtime = "nodejs";
+// No `runtime` export either: with cacheComponents, Next 16.4.2 rejects it at
+// build time — even `runtime = "nodejs"` — and always uses the Node.js runtime
+// (node_modules/next/dist/docs/.../02-route-segment-config/runtime.md).
 export const maxDuration = 60;
 
 /** Model-call timeout. The route aborts runChat at 45 s (design.md "runChat"). */

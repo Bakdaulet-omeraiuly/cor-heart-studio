@@ -5,6 +5,7 @@ import { useRef } from "react";
 import { PanelRightOpen } from "lucide-react";
 import { useApp } from "@/state/store";
 import { Inspector } from "../inspector/Inspector";
+import { AssistantPanel } from "../assistant/AssistantPanel";
 
 export const INSPECTOR_MIN = 280;
 export const INSPECTOR_MAX = 640;
@@ -32,7 +33,7 @@ export function InspectorColumn() {
     );
   }
   return (
-    <div className="relative order-3 min-h-0 border-line bg-panel lg:border-l">
+    <div className="relative order-3 flex min-h-0 flex-col border-line bg-panel lg:border-l">
       <div
         role="separator"
         aria-orientation="vertical"
@@ -53,6 +54,7 @@ export function InspectorColumn() {
         title="Drag to resize · double-click to reset"
       />
       <Inspector />
+      <AssistantPanel />
     </div>
   );
 }

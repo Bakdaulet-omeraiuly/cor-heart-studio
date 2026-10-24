@@ -331,6 +331,16 @@
         "executionId": "37614299-dc27-4d62-9373-b12054843338",
         "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
         "timestamp": 1792864539042
+      },
+      {
+        "executionId": "d0cb7ff4-e9be-45ad-a3ec-7922ffc6770b",
+        "chatSessionId": "sess_c52a24b3-aaf9-42c9-ac8e-8506271ac4cc",
+        "timestamp": 1792870644735
+      },
+      {
+        "executionId": "d0cb7ff4-e9be-45ad-a3ec-7922ffc6770b",
+        "chatSessionId": "sess_c52a24b3-aaf9-42c9-ac8e-8506271ac4cc",
+        "timestamp": 1792870838511
       }
     ],
     "8.2 Implement `AssistantPanel` and `ReplyText` per `docs/design-system.md`: header, always-visible disclaimer,": [
@@ -338,6 +348,16 @@
         "executionId": "37614299-dc27-4d62-9373-b12054843338",
         "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
         "timestamp": 1792864539061
+      },
+      {
+        "executionId": "d0cb7ff4-e9be-45ad-a3ec-7922ffc6770b",
+        "chatSessionId": "sess_c52a24b3-aaf9-42c9-ac8e-8506271ac4cc",
+        "timestamp": 1792870839494
+      },
+      {
+        "executionId": "d0cb7ff4-e9be-45ad-a3ec-7922ffc6770b",
+        "chatSessionId": "sess_c52a24b3-aaf9-42c9-ac8e-8506271ac4cc",
+        "timestamp": 1792871141791
       }
     ],
     "8.3 Mount `<AssistantPanel />` in `src/components/workspace/InspectorColumn.tsx` (one import, one element —": [
@@ -345,6 +365,21 @@
         "executionId": "37614299-dc27-4d62-9373-b12054843338",
         "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
         "timestamp": 1792864539080
+      },
+      {
+        "executionId": "d0cb7ff4-e9be-45ad-a3ec-7922ffc6770b",
+        "chatSessionId": "sess_c52a24b3-aaf9-42c9-ac8e-8506271ac4cc",
+        "timestamp": 1792871147409
+      },
+      {
+        "executionId": "881670ce-44bd-4ae9-b44d-e1f08355bb33",
+        "chatSessionId": "sess_c52a24b3-aaf9-42c9-ac8e-8506271ac4cc",
+        "timestamp": 1792871355028
+      },
+      {
+        "executionId": "881670ce-44bd-4ae9-b44d-e1f08355bb33",
+        "chatSessionId": "sess_c52a24b3-aaf9-42c9-ac8e-8506271ac4cc",
+        "timestamp": 1792871571564
       }
     ],
     "9.1 Implement `focusTarget()`: structure selection, valve close-ups, coronary view like the inspector's": [
@@ -352,6 +387,16 @@
         "executionId": "37614299-dc27-4d62-9373-b12054843338",
         "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
         "timestamp": 1792864539100
+      },
+      {
+        "executionId": "0139e7ca-1153-4c0d-9caa-4dbabe00dac0",
+        "chatSessionId": "sess_566ef764-b3d0-42eb-ac18-9b290b1ca934",
+        "timestamp": 1792871597011
+      },
+      {
+        "executionId": "0139e7ca-1153-4c0d-9caa-4dbabe00dac0",
+        "chatSessionId": "sess_566ef764-b3d0-42eb-ac18-9b290b1ca934",
+        "timestamp": 1792871913143
       }
     ],
     "10.1 Write `tests/e2e/assistant.spec.ts` with `page.route(\"**/api/assistant\")` canned responses: disclaimer,": [
@@ -359,6 +404,16 @@
         "executionId": "37614299-dc27-4d62-9373-b12054843338",
         "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
         "timestamp": 1792864539118
+      },
+      {
+        "executionId": "c40b5414-2da9-45ab-82b0-9f7ffbc8dc34",
+        "chatSessionId": "sess_acfa3e34-1449-4ebc-a290-571b2acabec3",
+        "timestamp": 1792871940759
+      },
+      {
+        "executionId": "c40b5414-2da9-45ab-82b0-9f7ffbc8dc34",
+        "chatSessionId": "sess_acfa3e34-1449-4ebc-a290-571b2acabec3",
+        "timestamp": 1792872272306
       }
     ],
     "11.1 Write `scripts/eval-assistant.ts` reusing the route's functions; arms per `EVAL_MODELS` plus the LLM-only": [
@@ -366,6 +421,21 @@
         "executionId": "37614299-dc27-4d62-9373-b12054843338",
         "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
         "timestamp": 1792864539142
+      },
+      {
+        "executionId": "24db3102-ed93-450f-bf90-e1208c9bdccf",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792872304000
+      },
+      {
+        "executionId": "0474fd1b-0b3d-4d6d-9cd6-f72cdc049b9f",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792872398207
+      },
+      {
+        "executionId": "0474fd1b-0b3d-4d6d-9cd6-f72cdc049b9f",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792872815511
       }
     ],
     "11.2 Add `\"eval:assistant\": \"tsx scripts/eval-assistant.ts\"` to `package.json`.": [
@@ -373,6 +443,16 @@
         "executionId": "37614299-dc27-4d62-9373-b12054843338",
         "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
         "timestamp": 1792864539163
+      },
+      {
+        "executionId": "0474fd1b-0b3d-4d6d-9cd6-f72cdc049b9f",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792872816308
+      },
+      {
+        "executionId": "0474fd1b-0b3d-4d6d-9cd6-f72cdc049b9f",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792872864379
       }
     ],
     "12. Switch to the real engine (after @HyorinmaruK pushes `src/domain/diagnosis/types.ts` and `assess()`)": [
@@ -408,6 +488,34 @@
         "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
         "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
         "timestamp": 1792866881001
+      }
+    ],
+    "8. Chat panel": [
+      {
+        "executionId": "881670ce-44bd-4ae9-b44d-e1f08355bb33",
+        "chatSessionId": "sess_c52a24b3-aaf9-42c9-ac8e-8506271ac4cc",
+        "timestamp": 1792871571628
+      }
+    ],
+    "9. Links to the 3D view": [
+      {
+        "executionId": "0139e7ca-1153-4c0d-9caa-4dbabe00dac0",
+        "chatSessionId": "sess_566ef764-b3d0-42eb-ac18-9b290b1ca934",
+        "timestamp": 1792871913228
+      }
+    ],
+    "10. End-to-end test": [
+      {
+        "executionId": "c40b5414-2da9-45ab-82b0-9f7ffbc8dc34",
+        "chatSessionId": "sess_acfa3e34-1449-4ebc-a290-571b2acabec3",
+        "timestamp": 1792872272352
+      }
+    ],
+    "11. Evaluation script": [
+      {
+        "executionId": "0474fd1b-0b3d-4d6d-9cd6-f72cdc049b9f",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792872864413
       }
     ]
   }

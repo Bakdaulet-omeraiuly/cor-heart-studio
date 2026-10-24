@@ -66,33 +66,33 @@ Before the first task, read `node_modules/next/dist/docs/01-app/01-getting-start
   - [ ] 7.4 Manual check with a local key in `.env.local` (never committed): ask about SYN-004 and SYN-003.
     - _Requirements: 4.1_
 
-- [ ] 8. Chat panel
-  - [ ] 8.1 Implement `useAssistant()` (in-memory state, reset on record change, fetch with abort).
+- [x] 8. Chat panel
+  - [x] 8.1 Implement `useAssistant()` (in-memory state, reset on record change, fetch with abort).
     - _Requirements: 1.3, 1.4, 1.5, 1.6_
-  - [ ] 8.2 Implement `AssistantPanel` and `ReplyText` per `docs/design-system.md`: header, always-visible disclaimer,
+  - [x] 8.2 Implement `AssistantPanel` and `ReplyText` per `docs/design-system.md`: header, always-visible disclaimer,
     messages with `aria-live`, input, send/cancel, id buttons with InfoTip, fallback and error states with retry,
     disabled state without a selected record, collapse toggle.
     - _Requirements: 1.1, 1.2, 7.2, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7_
-  - [ ] 8.3 Mount `<AssistantPanel />` in `src/components/workspace/InspectorColumn.tsx` (one import, one element —
+  - [x] 8.3 Mount `<AssistantPanel />` in `src/components/workspace/InspectorColumn.tsx` (one import, one element —
     shared file, tell the team).
     - _Requirements: 10.7_
 
-- [ ] 9. Links to the 3D view
-  - [ ] 9.1 Implement `focusTarget()`: structure selection, valve close-ups, coronary view like the inspector's
+- [x] 9. Links to the 3D view
+  - [x] 9.1 Implement `focusTarget()`: structure selection, valve close-ups, coronary view like the inspector's
     `LESION_VIEW`, safe no-op otherwise.
     - _Requirements: 11.1, 11.2, 11.3_
 
-- [ ] 10. End-to-end test
-  - [ ] 10.1 Write `tests/e2e/assistant.spec.ts` with `page.route("**/api/assistant")` canned responses: disclaimer,
+- [x] 10. End-to-end test
+  - [x] 10.1 Write `tests/e2e/assistant.spec.ts` with `page.route("**/api/assistant")` canned responses: disclaimer,
     reply with id link, click selects the structure, fallback, error + retry.
     - _Requirements: 12.2, 12.3_
 
-- [ ] 11. Evaluation script
-  - [ ] 11.1 Write `scripts/eval-assistant.ts` reusing the route's functions; arms per `EVAL_MODELS` plus the LLM-only
+- [x] 11. Evaluation script
+  - [x] 11.1 Write `scripts/eval-assistant.ts` reusing the route's functions; arms per `EVAL_MODELS` plus the LLM-only
     control; 3 runs; metrics and Markdown table as in `docs/research/assistant-chat.md` §7; clean exit without a key
     or cases.
     - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5_
-  - [ ] 11.2 Add `"eval:assistant": "tsx scripts/eval-assistant.ts"` to `package.json`.
+  - [x] 11.2 Add `"eval:assistant": "tsx scripts/eval-assistant.ts"` to `package.json`.
     - _Requirements: 13.1_
 
 - [ ] 12. Switch to the real engine (after @HyorinmaruK pushes `src/domain/diagnosis/types.ts` and `assess()`)
