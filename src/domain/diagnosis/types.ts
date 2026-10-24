@@ -2,8 +2,10 @@
 // Agreed in docs/tasks/HyorinmaruK.md and docs/tasks/kerimku1.md. Tell the other person before changing anything here.
 //
 // Conventions (comments only, the types are exactly as agreed):
-// - Evidence.field is a dotted record path ("observations.lvEjectionFraction", "valveFindings[aortic_valve].peakVelocity",
-//   "coronaryFindings[LAD proximal].stenosisPercent") or "derived.<id>" for a value the engine computed from record values.
+// - Evidence.field is a dotted record path ("observations.lvEjectionFraction", "valveFindings[aortic_valve stenosis].peakVelocity",
+//   "doppler[mitral_valve].EROA", "coronaryFindings[LAD proximal].stenosisPercent", "echo.regionalWallMotion[7]") or
+//   "derived.<id>" for a value the engine computed from record values (derived.lvMassIndex, derived.qtcBazett, …).
+//   Numeric values are in canonical units (Vmax m/s, gradients mmHg, areas cm², lengths mm, VC cm).
 // - Evidence.value never holds free text copied from the record; strings are engine-defined enums ("severe", "akinetic").
 // - Finding.target is a heart StructureId ("aortic_valve", "lv", "coronary_vessels", …) or a brain target
 //   ("hippocampus", "ventricles", "cortex"), optionally followed by "#<detail>": "lv#7" (AHA segment 7),

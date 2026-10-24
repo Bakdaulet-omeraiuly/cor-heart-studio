@@ -234,7 +234,7 @@ keyword list. A sentence in the notes does not count.
 
 1. The signature stays `(record: PatientRecord) => Assessment` as agreed. Internally `assess()` calls `normalizeRecord()`,
    so the engine and the 3D view read the same normalized values and statuses.
-2. Field paths are real record paths: `observations.lvEjectionFraction`, `valveFindings[aortic_valve].peakVelocity`,
+2. Field paths are real record paths: `observations.lvEjectionFraction`, `valveFindings[aortic_valve stenosis].peakVelocity`,
    `coronaryFindings[LAD proximal].stenosisPercent`, `doppler[mitral_valve].EROA`, `echo.regionalWallMotion[7]`. Engine-computed
    values use `derived.<id>` (`derived.lvMassIndex`, `derived.qtcBazett`). Documented in `types.ts`.
 3. `target` is a `StructureId` or a brain target, optionally `#detail`: `lv#7`, `coronary_vessels#LAD:proximal`.
@@ -242,9 +242,52 @@ keyword list. A sentence in the notes does not count.
 5. `redFlags` stays `string[]`. Each string repeats the numbers it is based on, all of which are also in some `Evidence`, so
    the number guard can check it.
 
-## 6. Open items
+## 6. Measured results (H5)
 
-- Re-check the **M** rows against the full texts: AS stage table, AR moderate band, ASE EF partitions, LVEDVi and
-  wall-thickness limits, RA minor axis, QTc > 500, QRS ≥ 120, PR > 200, HR 50/100, 17-segment territories, SBP 140,
-  HCM 15 mm.
-- **Clinician review:** 20 of the cases in `tests/assistant/cases/` should be checked by a physician. Not done yet; results go here.
+`tests/assistant/cases/` holds 94 cases (format in its `README.md`):
+
+| Category | Cases |
+|---|---|
+| guideline | 27 |
+| boundary | 40 |
+| synthetic-sample | 8 |
+| synthetic | 1 |
+| incomplete | 8 |
+| out-of-scope | 3 |
+| patient-facing | 1 |
+| injection | 6 |
+| **Total** | **94** |
+
+`tests/unit/diagnosis/cases.test.ts` runs them all.
+
+| Criterion (task brief) | Result |
+|---|---|
+| Rule-defined grades (AS, CAD-RADS, EF, QTc, …) | 94 / 94 cases match exactly (no missing or extra rule-defined finding) |
+| Invented numbers in the `Assessment` | 0: every non-derived numeric evidence value occurs in the record |
+| Citation | every evidence item has a rule id and a DOI |
+| Missing data | the expected `missing` items are listed in every case; nothing is filled in by guessing |
+| Prompt injection inside the record | 0 changes: the same `Assessment` with and without injected text (`assess.test.ts`, 9 records) |
+| Out-of-scope / patient-facing questions | expected behaviour is recorded per case for the chat evaluation (`expected.behavior`) |
+
+The engine meets these by construction: thresholds are code. The real test of the last row is
+@kerimku1's `scripts/eval-assistant.ts`.
+
+## 7. Open items
+
+- Re-check the **M** rows against the full texts:
+  - AS stage table and AR moderate band;
+  - ASE EF partitions, LVEDVi and wall-thickness limits;
+  - RA minor axis;
+  - QTc > 500, QRS ≥ 120, PR > 200, HR 50/100;
+  - 17-segment territories;
+  - SBP 140 and HCM 15 mm.
+- **Clinician review:** 20 of the cases (suggested: `as-01`, `as-10`, `as-11`, `as-12`, `mr-04`, `ar-01`, `lv-04`, `lv-06`,
+  `lv-13`, `lv-15`, `lv-17`, `lv-18`, `ch-03`, `ch-05`, `cad-04`, `cad-05`, `ecg-05`, `ecg-08`, `br-01`, `br-03`) should be
+  checked by a physician. **Not done yet**: every case has `"reviewedByClinician": false`. Results go here.
+- Brain inputs are three `observations.*VolumeChangePerYear` keys that are not in the field registry
+  (`src/domain/schema/fields.ts`, not owned here). Normalization lists them as "unsupported observation" info issues.
+  Adding them to the registry is a shared change.
+- For @kerimku1's number guard:
+  - `Evidence.source` strings contain years and page numbers;
+  - valve values are given in canonical units (430 cm/s → 4.3 m/s);
+  - CAD-RADS grades are strings ("4A").
