@@ -1,6 +1,7 @@
 // Heart outlook: read today's aortic stenosis measurements from a record and write a projected copy
 // that the ordinary mapping engine renders (so the projected heart obeys the same rules as a real record).
-import type { NormalizedPatient, NormalizedValveFinding } from "../types";
+import type { NormalizedObservation, NormalizedPatient, NormalizedValveFinding } from "../types";
+import { FIELD_BY_PATH } from "../schema/fields";
 import { gradeToSeverity, type AsProjection } from "./project";
 
 export interface AsBaseline {
@@ -40,5 +41,42 @@ export function withProjectedAorticStenosis(p: NormalizedPatient, proj: AsProjec
     key: `${p.key}${keySuffix}`,
     displayName: `${p.displayName ?? p.patientId} · ${proj.years === 0 ? "today" : `+${proj.years} y (projected)`}`,
     valveFindings: proj.grade === "none" ? others : [...others, finding],
+  };
+}
+
+export interface LvhBaseline {
+  ivsMm: number | null;
+  pwMm: number | null;
+  lvidMm: number | null;
+  bsaM2: number | null;
+}
+
+/** End-diastolic septum, posterior wall, LV diameter and derived BSA, when usable. */
+export function readLvhBaseline(p: NormalizedPatient): LvhBaseline {
+  const v = (path: string) => (p.observations[path]?.status === "ok" ? p.observations[path].value ?? null : null);
+  return {
+    ivsMm: v("observations.ivsThickness"),
+    pwMm: v("observations.lvPosteriorWallThickness"),
+    lvidMm: v("observations.lvEndDiastolicDiameter"),
+    bsaM2: p.derived.find((d) => d.id === "bsaMosteller")?.value ?? null,
+  };
+}
+
+/** A copy of the record with projected septal / posterior wall thickness (all else unchanged). */
+export function withProjectedWalls(p: NormalizedPatient, ivsMm: number, pwMm: number, keySuffix: string, label: string): NormalizedPatient {
+  const r1 = (x: number) => Math.round(x * 10) / 10;
+  const set = (path: string, value: number) => {
+    const f = FIELD_BY_PATH.get(path)!;
+    const o: NormalizedObservation = p.observations[path] ?? {
+      path, label: f.label, short: f.short, category: f.category, rendering: f.rendering,
+      original: { value, unit: "mm" }, value, unit: "mm", status: "ok", evidence: "reported_measurement",
+    };
+    return { ...o, status: "ok" as const, value: r1(value), unit: "mm", source: `COR Outlook projection (${label})` };
+  };
+  return {
+    ...p,
+    key: `${p.key}${keySuffix}`,
+    displayName: `${p.displayName ?? p.patientId} · ${label}`,
+    observations: { ...p.observations, "observations.ivsThickness": set("observations.ivsThickness", ivsMm), "observations.lvPosteriorWallThickness": set("observations.lvPosteriorWallThickness", pwMm) },
   };
 }

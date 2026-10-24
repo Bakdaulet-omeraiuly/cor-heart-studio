@@ -69,3 +69,26 @@ test("outlook: aortic stenosis today vs projected, from the record's own numbers
   await expect(page.getByTestId("viewport")).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+test("outlook: hypertensive LVH regresses on treatment, walls drawn through the thickness rule", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/");
+  await page.getByText("Synthetic 03 · Concentric wall thickening").first().click();
+  await page.getByTestId("outlook-toggle").click();
+  const view = page.getByTestId("heart-outlook");
+  await view.getByRole("radio", { name: "LVH on treatment" }).click();
+  await expect(page.getByRole("spinbutton", { name: "IVSd today" })).toHaveValue("15");
+  await expect(view).toContainText("from record");
+  await expect(view).toContainText("LIFE · Devereux 2004");
+
+  await page.getByRole("slider", { name: "Years from today" }).fill("5");
+  const states = page.getByTestId("outlook-state");
+  // LIFE losartan arm: −21.7 g/m² reached at 4.8 years, held after
+  await expect(states.nth(1)).toContainText("-21.7");
+  await view.getByRole("radio", { name: "Atenolol-based" }).click();
+  await expect(states.nth(1)).toContainText("-17.7");
+  await page.waitForTimeout(1500);
+  await view.screenshot({ path: `${shots}/e2e-outlook-heart-lvh-5y.png` });
+  expect(errors).toEqual([]);
+});

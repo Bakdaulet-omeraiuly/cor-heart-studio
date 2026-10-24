@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { BRAIN_SCENARIOS, SOURCES } from "@/domain/outlook/evidence";
-import { compound, cortexShiftMm, gradeByArea, gradeByVelocity, MIN_AVA_CM2, projectAorticStenosis, projectBrain } from "@/domain/outlook/project";
-import { readAsBaseline, withProjectedAorticStenosis } from "@/domain/outlook/heart";
+import { compound, cortexShiftMm, gradeByArea, gradeByVelocity, lvMassAse, MIN_AVA_CM2, MIN_WALL_MM, projectAorticStenosis, projectBrain, projectLvh, wallsForMass } from "@/domain/outlook/project";
+import { readAsBaseline, readLvhBaseline, withProjectedAorticStenosis, withProjectedWalls } from "@/domain/outlook/heart";
 import { map, minimal, norm, samplePatients } from "./helpers";
 
 const BASE = { hippocampus: 8, ventricles: 16, cortex: 500 };
@@ -100,5 +100,52 @@ describe("heart outlook record", () => {
     expect(v0.stenosis).toBe("moderate");
     expect(v5.stenosis).toBe("severe");
     expect(v5.maxOpening).toBeLessThan(v0.maxOpening);
+  });
+});
+
+describe("hypertensive LVH on treatment", () => {
+  const SYN3 = { ivsMm: 15, pwMm: 14, lvidMm: 44, bsaM2: 1.9 };
+
+  it("computes LV mass with the ASE cube formula and the Devereux 1986 correction", () => {
+    // 0.8 · 1.04 · [(1.5 + 4.4 + 1.4)³ − 4.4³] + 0.6
+    expect(lvMassAse(15, 44, 14)).toBeCloseTo(0.8 * 1.04 * (7.3 ** 3 - 4.4 ** 3) + 0.6, 6);
+  });
+
+  it("finds walls that reproduce a target mass with the cavity held", () => {
+    const w = wallsForMass(15, 44, 14, 200);
+    expect(lvMassAse(w.ivsMm, 44, w.pwMm)).toBeCloseTo(200, 6);
+    expect(w.ivsMm / w.pwMm).toBeCloseTo(15 / 14, 9);
+  });
+
+  it("applies the LIFE change in full at the 4.8-year follow-up and holds it after", () => {
+    const at = projectLvh(SYN3, "losartan", 4.8, "mean"), later = projectLvh(SYN3, "losartan", 10, "mean");
+    expect(at.lvmiChange).toBeCloseTo(-21.7, 6);
+    expect(later.lvmiChange).toBeCloseTo(-21.7, 6);
+    expect(projectLvh(SYN3, "losartan", 2.4, "mean").lvmiChange).toBeCloseTo(-21.7 / 2, 6);
+    expect(at.ivsMm).toBeLessThan(15);
+  });
+
+  it("regresses more with losartan than atenolol, and never thickens on the slow end", () => {
+    expect(projectLvh(SYN3, "losartan", 5, "mean").lvmiChange).toBeLessThan(projectLvh(SYN3, "atenolol", 5, "mean").lvmiChange);
+    expect(projectLvh(SYN3, "losartan", 5, "slow").lvmiChange).toBeCloseTo(0, 9);
+    const r = projectLvh(SYN3, "atenolol", 5, "mean");
+    expect(r.lvmiRange[0]).toBeLessThanOrEqual(r.lvmiChange);
+    expect(r.lvmiRange[1]).toBeGreaterThanOrEqual(r.lvmiChange);
+  });
+
+  it("does not thin a wall below the floor", () => {
+    const p = projectLvh({ ivsMm: 9, pwMm: 9, lvidMm: 46, bsaM2: 2.4 }, "losartan", 5, "fast");
+    expect(Math.min(p.ivsMm, p.pwMm)).toBeGreaterThanOrEqual(MIN_WALL_MM - 1e-9);
+  });
+
+  it("renders projected walls through the ordinary thickness rule", () => {
+    const syn3 = norm(samplePatients().find((p) => p.patientId === "SYN-003")!);
+    expect(readLvhBaseline(syn3)).toMatchObject({ ivsMm: 15, pwMm: 14, lvidMm: 44, bsaM2: null });
+    const p = projectLvh(SYN3, "losartan", 5, "mean");
+    const today = map(withProjectedWalls(syn3, 15, 14, "::t0", "today"));
+    const later = map(withProjectedWalls(syn3, p.ivsMm, p.pwMm, "::t5", "+5 y"));
+    const thick = (v: ReturnType<typeof map>) => v.changes.filter((c) => c.property.toLowerCase().includes("thick")).length;
+    expect(thick(today)).toBeGreaterThan(0);
+    expect(JSON.stringify(later.segments)).not.toBe(JSON.stringify(today.segments));
   });
 });

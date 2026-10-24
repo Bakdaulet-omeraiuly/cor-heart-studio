@@ -22,6 +22,16 @@ export const SOURCES: Record<string, Source> = {
     journal: "Neurology 70:1836–41", doi: "10.1212/01.wnl.0000311446.61861.e3", design: "Serial MRI, 65 AD patients, mean age 70" },
   otto1997: { id: "otto1997", cite: "Otto 1997", title: "Prospective study of asymptomatic valvular aortic stenosis",
     journal: "Circulation 95:2262–70", doi: "10.1161/01.cir.95.9.2262", design: "Prospective echo cohort, 123 adults, 2.5 ± 1.4 years" },
+  devereux2004: { id: "devereux2004", cite: "LIFE · Devereux 2004", title: "Regression of hypertensive left ventricular hypertrophy by losartan compared with atenolol: the LIFE trial",
+    journal: "Circulation 110:1456–62", doi: "10.1161/01.CIR.0000141573.44737.5A", design: "Randomised double-blind trial, echo substudy, 457 losartan / 459 atenolol, yearly echo for 5 years" },
+  gerdts2009: { id: "gerdts2009", cite: "Gerdts 2009", title: "Pulse pressure, left ventricular function and cardiovascular events during antihypertensive treatment (the LIFE study)",
+    journal: "Blood Press 18:180–6", doi: "10.1080/08037050903047202", design: "LIFE echo substudy, 883 patients, 4.8 years of treatment" },
+  klingbeil2003: { id: "klingbeil2003", cite: "Klingbeil 2003", title: "A meta-analysis of the effects of treatment on left ventricular mass in essential hypertension",
+    journal: "Am J Med 115:41–6", doi: "10.1016/s0002-9343(03)00158-x", design: "Meta-analysis, 80 double-blind RCTs, 3767 treated / 346 placebo" },
+  devereux1986: { id: "devereux1986", cite: "Devereux 1986", title: "Echocardiographic assessment of left ventricular hypertrophy: comparison to necropsy findings",
+    journal: "Am J Cardiol 57:450–8", doi: "10.1016/0002-9149(86)90771-x", design: "Echo vs necropsy LV mass, 55 patients" },
+  lang2015: { id: "lang2015", cite: "ASE/EACVI 2015", title: "Recommendations for cardiac chamber quantification by echocardiography in adults",
+    journal: "J Am Soc Echocardiogr 28:1–39", doi: "10.1016/j.echo.2014.10.003", design: "Chamber quantification guideline" },
   acc2020: { id: "acc2020", cite: "ACC/AHA 2020", title: "2020 ACC/AHA Guideline for the Management of Patients With Valvular Heart Disease",
     journal: "Circulation 143:e72–e227", doi: "10.1161/CIR.0000000000000923", design: "Clinical practice guideline" },
 };
@@ -98,3 +108,28 @@ export const AS_EVENT_FREE_2Y = [
   { maxVelocity: 4, label: "3.0–4.0 m/s", percent: 66, pm: 13 },
   { maxVelocity: Infinity, label: "> 4.0 m/s", percent: 21, pm: 18 },
 ] as const;
+
+// ---------------------------------------------------------------- hypertensive LVH on treatment
+
+export type LvhArm = "losartan" | "atenolol";
+
+/** LIFE echo substudy: change in LV mass index from baseline to the last study (mean ± SD between patients). */
+export const LVH_TREATMENT: Record<LvhArm, { label: string; lvmiChange: number; sd: number; source: string }> = {
+  losartan: { label: "Losartan-based", lvmiChange: -21.7, sd: 21.8, source: "devereux2004" },
+  atenolol: { label: "Atenolol-based", lvmiChange: -17.7, sd: 19.6, source: "devereux2004" },
+};
+
+/** Mean treatment time in the LIFE echo substudy (Gerdts 2009), the time base for the LIFE changes. */
+export const LVH_FOLLOW_UP_YEARS = 4.8;
+
+/** Klingbeil 2003: LV mass index change by drug class, adjusted for treatment duration and diastolic pressure change. */
+export const LVH_CLASS_EFFECT = [
+  { label: "Angiotensin II receptor blockers", percent: -13, ci: [-8, -18] },
+  { label: "Calcium antagonists", percent: -11, ci: [-9, -13] },
+  { label: "ACE inhibitors", percent: -10, ci: [-8, -12] },
+  { label: "Diuretics", percent: -8, ci: [-5, -10] },
+  { label: "Beta-blockers", percent: -6, ci: [-3, -8] },
+] as const;
+
+/** ASE/EACVI 2015 upper normal LV mass index (linear method). */
+export const LVMI_UPPER_NORMAL = { men: 115, women: 95 } as const;

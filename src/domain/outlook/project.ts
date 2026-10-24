@@ -1,7 +1,7 @@
 // Pure projection of today's measurements forward in time with the published rates in ./evidence.
 // Deterministic, no React. Same inputs => same output.
 import type { Severity } from "../schema/record";
-import { AS_EVENT_FREE_2Y, AS_PROGRESSION, BRAIN_SCENARIOS, type BrainScenarioId, type BrainTarget, type Rate } from "./evidence";
+import { AS_EVENT_FREE_2Y, AS_PROGRESSION, BRAIN_SCENARIOS, LVH_FOLLOW_UP_YEARS, LVH_TREATMENT, type BrainScenarioId, type BrainTarget, type LvhArm, type Rate } from "./evidence";
 
 export type Pace = "slow" | "mean" | "fast";
 
@@ -103,4 +103,67 @@ export function projectAorticStenosis(ava0: number, vmax0: number, years: number
   const gradeVelocity = gradeByVelocity(vmax);
   const eventFree2y = AS_EVENT_FREE_2Y.find((b) => vmax < b.maxVelocity || b.maxVelocity === Infinity)!;
   return { years, ava, vmax, avaRange, vmaxRange, gradeArea, gradeVelocity, grade: worse(gradeArea, gradeVelocity), eventFree2y };
+}
+
+// ---------------------------------------------------------------- hypertensive LVH on treatment
+
+/**
+ * LV mass (g) from end-diastolic linear dimensions (mm): ASE cube formula with the Devereux 1986 necropsy correction,
+ * LVM = 0.8 · 1.04 · [(IVSd + LVIDd + PWd)³ − LVIDd³] + 0.6, dimensions in cm.
+ */
+export function lvMassAse(ivsMm: number, lvidMm: number, pwMm: number): number {
+  const [s, d, p] = [ivsMm / 10, lvidMm / 10, pwMm / 10];
+  return 0.8 * 1.04 * ((s + d + p) ** 3 - d ** 3) + 0.6;
+}
+
+/** Thinnest wall the projection may reach (mm): below the normal range, so it never clamps a plausible result. */
+export const MIN_WALL_MM = 6;
+
+/** Septal and posterior walls scaled by one factor so the ASE mass equals `targetG`, cavity diameter held. */
+export function wallsForMass(ivsMm: number, lvidMm: number, pwMm: number, targetG: number): { ivsMm: number; pwMm: number } {
+  const d = lvidMm / 10;
+  const outer = Math.cbrt(Math.max(0, (targetG - 0.6) / 0.832) + d ** 3); // IVS + LVID + PW in cm
+  // never thinner than MIN_WALL_MM, and never thicken a wall that is already below it
+  const k = Math.max(((outer - d) * 10) / (ivsMm + pwMm), Math.min(1, MIN_WALL_MM / Math.min(ivsMm, pwMm)));
+  return { ivsMm: ivsMm * k, pwMm: pwMm * k };
+}
+
+export interface LvhInputs { ivsMm: number; pwMm: number; lvidMm: number; bsaM2: number }
+
+export interface LvhProjection {
+  years: number;
+  ivsMm: number;
+  pwMm: number;
+  lvmG: number;
+  lvmiGm2: number;
+  /** LVMI change applied (g/m²) and its range over ±1 SD (slower end clamped at no regression). */
+  lvmiChange: number;
+  lvmiRange: [number, number];
+  /** Share of the LIFE follow-up reached (1 at and beyond 4.8 years). */
+  fractionOfFollowUp: number;
+}
+
+/**
+ * LIFE reports the change from baseline to the last study (mean 4.8 years). Between today and then the change is
+ * interpolated linearly (an assumption); after that it is held, because LIFE has no data beyond its follow-up.
+ */
+export function projectLvh(inp: LvhInputs, arm: LvhArm, years: number, pace: Pace): LvhProjection {
+  const t = LVH_TREATMENT[arm];
+  const f = Math.min(1, years / LVH_FOLLOW_UP_YEARS);
+  const k = pace === "mean" ? 0 : pace === "slow" ? -1 : 1;
+  const at = (kk: number) => Math.min(0, t.lvmiChange - kk * t.sd) * f;
+  const lvm0 = lvMassAse(inp.ivsMm, inp.lvidMm, inp.pwMm);
+  const solve = (dLvmi: number) => {
+    const w = wallsForMass(inp.ivsMm, inp.lvidMm, inp.pwMm, lvm0 + dLvmi * inp.bsaM2);
+    const lvm = lvMassAse(w.ivsMm, inp.lvidMm, w.pwMm);
+    return { ...w, lvm };
+  };
+  const mid = solve(at(k));
+  const lo = solve(at(1)), hi = solve(at(-1));
+  return {
+    years, ivsMm: mid.ivsMm, pwMm: mid.pwMm, lvmG: mid.lvm, lvmiGm2: mid.lvm / inp.bsaM2,
+    lvmiChange: (mid.lvm - lvm0) / inp.bsaM2,
+    lvmiRange: [(lo.lvm - lvm0) / inp.bsaM2, (hi.lvm - lvm0) / inp.bsaM2],
+    fractionOfFollowUp: f,
+  };
 }

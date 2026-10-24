@@ -57,10 +57,30 @@ Code: `src/domain/outlook/` (evidence table, pure projection, heart record copy)
 * **Individual variation.** For valve area the between-patient SD is larger than the mean. The range shown is the
   cohort spread, not a prediction interval for a person.
 
+## Hypertensive LVH on treatment (heart)
+
+| Quantity | Value | Source |
+|---|---|---|
+| LVMI change, losartan-based | −21.7 ± 21.8 g/m² (baseline → last study) | LIFE echo substudy, Devereux 2004, RCT 457 / 459, [doi](https://doi.org/10.1161/01.CIR.0000141573.44737.5A) |
+| LVMI change, atenolol-based | −17.7 ± 19.6 g/m² | 〃 |
+| Time base | 4.8 years of treatment | Gerdts 2009 (same substudy), [doi](https://doi.org/10.1080/08037050903047202) |
+| LV mass | `0.8 · 1.04 · [(IVSd + LVIDd + PWd)³ − LVIDd³] + 0.6` g (cm) | Devereux 1986, [doi](https://doi.org/10.1016/0002-9149(86)90771-x) |
+| Upper normal LVMI | 115 g/m² men, 95 g/m² women | ASE/EACVI 2015, [doi](https://doi.org/10.1016/j.echo.2014.10.003) |
+| Class effects (context only) | ARB −13, CCB −11, ACEi −10, diuretic −8, β-blocker −6 % | Klingbeil 2003, [doi](https://doi.org/10.1016/s0002-9343(03)00158-x) |
+
+* The projected mass is `LVM0 + ΔLVMI · BSA · min(1, t / 4.8)`. Between today and 4.8 years the change is
+  **interpolated linearly**. This is an assumption: the abstract reports baseline and the last study only. After 4.8
+  years the change is held, because the trial has no data beyond that point.
+* The walls come from inverting the mass formula. IVSd and LVPWd are scaled by one common factor with LVIDd held,
+  because LIFE attributes the regression mainly to reduced concentricity. No wall is thinned below 6 mm.
+* The slow pace (mean + 1 SD) is clamped at no regression. The fast pace is mean − 1 SD.
+* BSA comes from the record's height and weight (Mosteller). When the record has neither, an example value of 1.9 m²
+  is used, and the field is labelled as an example.
+* Under each heart the mid-ventricular short axis is drawn to scale (septum on the left, posterior wall on the right).
+  The 3D short-axis cutaway is not offered here because clipping does not apply in the side-by-side views (an existing
+  limitation of `CompareCanvas`).
+* There is no untreated arm. No verified per-year rate of progression in untreated hypertension was found.
+
 ## Next candidates (not built)
 
-* Hypertensive LV hypertrophy under treatment: LV mass index −6 to −13 % by drug class (Klingbeil 2003
-  meta-analysis, [doi](https://doi.org/10.1016/s0002-9343(03)00158-x)). This needs a rule for turning a mass change
-  into a wall-thickness change, and a time base. The meta-analysis is adjusted for trial duration, so it has no
-  per-year rate.
 * Age-matched normative centiles (Brain Charts for the Human Lifespan, Bethlehem 2022) in place of fixed rates.
