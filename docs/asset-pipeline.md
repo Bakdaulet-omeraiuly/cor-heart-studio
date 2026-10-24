@@ -98,5 +98,4 @@ implemented**; imaging attachments are listed as unsupported.
 ## License
 
 The asset is generated entirely by this repository's code and contains no third-party data. It is
-covered by whatever license the repository owner chooses for the source code; **no license file has
-been chosen yet** (see README).
+covered by the repository's MIT license (`LICENSE`).

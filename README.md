@@ -50,4 +50,4 @@ npx tsx scripts/generate-data-dictionary.ts
 
 Tier A only: a procedural anatomical heart adapted to measurements. Shape beyond measured dimensions,
 motion waveform, valve geometry and flow particles are illustrative. No DICOM, segmentation, CFD or
-clinical thresholds. Tools used: code only (no Blender/Figma/Meshy/Tripo). License: not chosen yet.
+clinical thresholds. Tools used: code only (no Blender/Figma/Meshy/Tripo). License: MIT (see `LICENSE`).
