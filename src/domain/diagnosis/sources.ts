@@ -20,6 +20,7 @@ export const SRC = {
   BARNES09: "Barnes 2009 meta-analysis of hippocampal atrophy rates (Neurobiol Aging 30:1711–23), doi:10.1016/j.neurobiolaging.2008.01.010",
   DELEON89: "de Leon 1989 longitudinal CT ventricular change in AD (AJR 152:1257–62), doi:10.2214/ajr.152.6.1257",
   NIAAA18: "NIA-AA 2018 research framework for Alzheimer's disease (Jack, Alzheimers Dement 14:535–62), doi:10.1016/j.jalz.2018.02.018",
+  CCD23: "AHA/ACC 2023 chronic coronary disease guideline (Virani, Circulation 148:e9–e119), doi:10.1161/CIR.0000000000001168",
   MOSTELLER: "Body surface area, Mosteller formula (N Engl J Med 1987;317:1098), doi:10.1056/NEJM198710223171717",
 } as const;
 export type SourceKey = keyof typeof SRC;
