@@ -62,7 +62,8 @@ def surface_metrics(mesh: trimesh.Trimesh, vertex_ids: np.ndarray, label_pts: np
         return None
     selected = np.zeros(len(mesh.vertices), dtype=bool)
     selected[vertex_ids] = True
-    faces = np.flatnonzero(selected[mesh.faces].all(axis=1))
+    # a triangle on the border between two regions belongs to both (any vertex in the region)
+    faces = np.flatnonzero(selected[mesh.faces].any(axis=1))
     if len(faces) < 10:
         return None
     sub = mesh.submesh([faces], append=True)
@@ -76,6 +77,9 @@ def surface_metrics(mesh: trimesh.Trimesh, vertex_ids: np.ndarray, label_pts: np
         "meanMm": round(float(both.mean()), 2),
         "hd95Mm": round(float(max(np.percentile(d_mesh, 95), np.percentile(d_label, 95))), 2),
         "maxMm": round(float(max(d_mesh.max(), d_label.max())), 2),
+        # per direction: how much of the mesh sits on the labels / how much of the labels is covered
+        "meshToLabelPercent": round(float(100 * np.mean(d_mesh <= tol_mm)), 1),
+        "labelToMeshPercent": round(float(100 * np.mean(d_label <= tol_mm)), 1),
         "points": int(len(both)),
     }
 

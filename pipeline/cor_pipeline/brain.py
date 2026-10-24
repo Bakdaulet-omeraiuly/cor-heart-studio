@@ -150,7 +150,12 @@ def nearest_region(points_mm: np.ndarray, region_index: np.ndarray, affine: np.n
     return region
 
 
-def build(subject_dir: Path, lods=(("high", (220_000, 25_000)), ("low", (90_000, 8_000)))):
+# Published LOD only. Cortex is not decimated: decimation removed thin gyri and dropped surface
+# agreement on inferior medial regions to ~83 % (parahippocampal at 90k faces vs 100 % undecimated).
+LODS = (("low", (None, 8_000)),)
+
+
+def build(subject_dir: Path, lods=LODS):
     lab_img = nib.load(subject_dir / "labels.DKT31.manual+aseg.nii.gz")
     labels = np.asarray(lab_img.dataobj).astype(np.int32)
     affine = lab_img.affine
@@ -227,6 +232,7 @@ def build(subject_dir: Path, lods=(("high", (220_000, 25_000)), ("low", (90_000,
             "source": "MMRR-21 (Multi-Modal MRI Reproducibility Resource, Landman et al. 2011), via Mindboggle-101",
         },
         "files": {lod: {"url": f"brain-{lod}.glb", "bytes": len(glbs[lod])} for lod in glbs},
+        "normals": "not stored; computed in the browser (computeVertexNormals) to keep the full-resolution cortex small",
         "volume": {
             "mri": "mri.u8.gz", "labels": "labels.u8.gz",
             "dims": [int(v) for v in mri_u8.shape],  # i, j, k (x fastest in the raw file: C order reversed below)
@@ -301,12 +307,10 @@ def bbox(mask, pad):
 
 
 def gl_mesh(name, mesh: trimesh.Trimesh, frame: Frame, region: np.ndarray, extras: dict) -> dict:
-    normals = np.asarray(mesh.vertex_normals) @ RAS_TO_APP.T * 10
     return {
         "name": name,
         "attributes": {
             "POSITION": frame.point(mesh.vertices).astype(np.float32),
-            "NORMAL": normals.astype(np.float32),
             "_REGION": np.repeat(np.asarray(region, dtype=np.uint8)[:, None], 1, axis=1),
         },
         "indices": mesh.faces,

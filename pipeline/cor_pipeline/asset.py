@@ -28,6 +28,7 @@ WALL_MM = {"rv": 3.0, "la": 2.0, "ra": 2.0, "aorta": 2.0, "pulmonary_artery": 1.
 MARGIN_MM = WALL_MM["rv"] + 4 * FINE_MM
 ISO_OFFSET_MM = 0.013
 MIN_PIECE_MM3 = 500.0
+LV_MIN_WALL_MM = 1.2  # below one CT voxel (1.5 mm), so it stays within the fidelity tolerance
 VALVE_MIN_DEPTH_MM = 6.0
 # Soft-max membership, as in scripts/heart-asset/build.ts (tau 0.28 model units ~ 3.2 mm there).
 WEIGHT_TAU_MM = 3.0
@@ -108,13 +109,15 @@ class FineGrid:
 def build_fields(masks: dict[str, np.ndarray], grid: FineGrid) -> dict[str, np.ndarray]:
     fine = {role: grid.upsample(m) for role, m in masks.items()}
     lv_solid = fine["lv_cavity"] | fine["lv_myocardium"]
-    f = {
-        "lv_outer": grid.sdf(lv_solid),
-        "lv_cavity": grid.sdf(fine["lv_cavity"]),
-    }
+    f = {"lv_cavity": grid.sdf(fine["lv_cavity"])}
+    # Where the LV cavity label has no myocardium around it (mostly the valve plane), a minimal wall
+    # keeps the LV closed instead of relying on neighbouring synthetic walls to cover it.
+    f["lv_outer"] = np.minimum(grid.sdf(lv_solid), f["lv_cavity"] - LV_MIN_WALL_MM)
     for role in ("rv", "la", "ra", "aorta", "pulmonary_artery"):
         f[role] = grid.sdf(fine[role])
-        f[f"{role}_outer"] = f[role] - WALL_MM[role]
+        # Fixed-thickness wall, but only where this blood pool is nearer than the LV epicardium
+        # (Voronoi split): the synthetic wall can never cover the imaged LV outer surface.
+        f[f"{role}_outer"] = np.maximum(f[role] - WALL_MM[role], f[role] - f["lv_outer"])
     f["outer"] = np.minimum.reduce([f["lv_outer"]] + [f[f"{r}_outer"] for r in WALL_MM])
     f["cavity"] = np.minimum.reduce([f["lv_cavity"]] + [f[r] for r in WALL_MM])
     f["solid"] = np.maximum(f["outer"], -f["cavity"])

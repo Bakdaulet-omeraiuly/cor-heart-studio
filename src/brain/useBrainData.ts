@@ -35,7 +35,10 @@ export function loadBrain(base: string): Promise<BrainData> {
       const meshes: BrainData["meshes"] = [];
       gltf.scene.traverse((o) => {
         const m = o as THREE.Mesh;
-        if (m.isMesh) meshes.push({ name: m.name, geometry: m.geometry, group: (m.userData?.group as string) ?? "" });
+        if (!m.isMesh) return;
+        // the full-resolution cortex ships without normals (smaller file): compute them here
+        if (!m.geometry.getAttribute("normal")) m.geometry.computeVertexNormals();
+        meshes.push({ name: m.name, geometry: m.geometry, group: (m.userData?.group as string) ?? "" });
       });
       const { dims, spacingMm, voxelToApp } = manifest.volume;
       return { manifest, meshes, mri, labels, vol: { dims, spacingMm, voxelToApp, image: mri, labels, structures: manifest.structures } };

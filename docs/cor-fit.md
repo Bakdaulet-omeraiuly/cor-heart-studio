@@ -38,20 +38,32 @@ that model follows the scan's segmentation. Code: `pipeline/cor_pipeline/corfit.
 
 ## Results of the shipped models
 
-| Model | Tolerance (1 voxel) | Surface within tolerance | Mean distance | Worst HD95 | Volume error |
+| Model | Tolerance (1 voxel) | Surface within tolerance | Mean distance | Worst HD95 | Volume / notes |
 |---|---|---|---|---|---|
-| Heart CT s0270 (high / low LOD) | 1.5 mm | 98.3% / 97.9% | 0.46 mm | 2.6 mm | LV cavity -1.22% |
-| Heart CT s0338 (high / low LOD) | 1.5 mm | 98.3% / 98.0% | 0.46 mm | 2.37 mm | LV cavity -1.22% |
-| Brain MRI MMRR-21-5, all 84 structures | 1.2 mm | 96.4% | 0.35 mm | 5.56 mm | deep structures ≤ 1.6% |
-| — cortex (62 manual regions) | 1.2 mm | 95.2% | 0.39 mm | 5.56 mm | — |
+| Heart CT s0270 (high / low LOD) | 1.5 mm | 99.7% / 99.8% | 0.38 mm | 0.86 mm | LV cavity -1.21% · LV epicardium 99.7% |
+| Heart CT s0338 (high / low LOD) | 1.5 mm | 99.8% / 99.8% | 0.38 mm | 1.07 mm | LV cavity -1.2% · LV epicardium 99.5% |
+| Brain MRI MMRR-21-5, all 84 structures | 1.2 mm | 99.6% | 0.26 mm | 1.64 mm | deep structures ≤ 1.6% |
+| — cortex (62 manual regions) | 1.2 mm | 99.5% | 0.27 mm | 1.64 mm | — |
 | — deep structures (22) | 1.2 mm | 100.0% | 0.24 mm | 0.63 mm | |
 
-Before constrained smoothing (blur + closing + plain Taubin) the brain scored 67.6 % overall and
-59.8 % on the cortex: smoothing had filled sulci and shrunk deep structures by up to 8 %. The report
-is what exposed it.
+How the numbers got here (each step measured by this report):
+
+| Step | Brain overall | Brain cortex | Heart LV epicardium | Kind of change |
+|---|---|---|---|---|
+| Blur + closing + plain Taubin, 90k-face cortex | 67.6 % | 59.8 % | 93.4 % | — |
+| Constrained smoothing (±0.5 voxel) | 96.3 % | 95.0 % | — | geometry |
+| Medial non-cortical surface no longer painted as cortex | 96.4 % | 95.2 % | — | geometry (region labels) |
+| Border triangles count for both regions | 98.9 % | 98.5 % | — | **measurement** correction |
+| Cortex published undecimated (normals computed in browser) | 99.6 % | 99.5 % | — | geometry |
+| Synthetic walls Voronoi-clipped against the LV; 1.2 mm minimal LV wall where the label has no myocardium | — | — | 99.5–99.7 % | geometry |
 
 ## Known weak spots (visible in the report)
 
-- Heart LV epicardium ≈ 93 %: near the septum the fixed-thickness RV wall covers the LV outer surface.
-- Brain medial cortex (cingulate, parahippocampal) 79–89 %: region borders on the medial wall.
-- Small label fragments below 0.5 mL (heart) are dropped from the mesh and count as misses.
+- Brain: worst structure Parahippocampal (right) 94.2 % (inferior medial surface next to
+  the cerebellum); the label→mesh direction is the weaker one.
+- Heart: the RV, atrial and vessel *outer* walls are a fixed thickness (not imaged) and are not scored;
+  where they meet the LV they are clipped at the midline between the two (Voronoi split), which leaves
+  a shallow groove along the interventricular sulci.
+- Where the LV cavity label has no myocardium around it (≈ 6 % of its boundary, mostly the valve
+  plane) a 1.2 mm minimal wall is added, below the 1.5 mm tolerance.
+- The cortex GLB is ~13 MB because it is not decimated.

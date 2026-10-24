@@ -71,7 +71,7 @@ Every CT/MRI-derived model is built and verified by COR-Fit (`docs/cor-fit.md`):
 surface reconstruction (voxel-constrained smoothing for the brain) plus a per-structure report of
 how closely the 3D surface follows the scan's segmentation (NSD within one voxel, mean distance,
 HD95, volume error), with a publication gate (≥ 95 % within one voxel, volume error ≤ 5 %). Shipped
-models: hearts 98 % within 1.5 mm (mean 0.46 mm); brain 96 % within 1.2 mm (mean 0.35 mm). This is
+models: hearts 99.7–99.8 % within 1.5 mm (mean 0.38 mm); brain 99.6 % within 1.2 mm (mean 0.26 mm). This is
 fidelity to the segmentation, not clinical accuracy.
 
 ## Brain module

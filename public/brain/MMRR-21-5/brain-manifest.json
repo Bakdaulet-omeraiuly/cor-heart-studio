@@ -10,14 +10,14 @@
   },
   "bounds": {
     "min": [
-      -7.036,
+      -7.037,
       -6.975,
       -8.708
     ],
     "max": [
-      7.037,
+      7.041,
       7.015,
-      8.732
+      8.734
     ]
   },
   "provenance": {
@@ -34,9 +34,10 @@
   "files": {
     "low": {
       "url": "brain-low.glb",
-      "bytes": 7323544
+      "bytes": 12723564
     }
   },
+  "normals": "not stored; computed in the browser (computeVertexNormals) to keep the full-resolution cortex small",
   "volume": {
     "mri": "mri.u8.gz",
     "labels": "labels.u8.gz",
@@ -1614,560 +1615,684 @@
       {
         "index": 1,
         "group": "cortex",
-        "nsdPercent": 94.4,
-        "meanMm": 0.4,
-        "hd95Mm": 1.28,
-        "maxMm": 3.61,
-        "points": 22481
+        "nsdPercent": 99.6,
+        "meanMm": 0.27,
+        "hd95Mm": 0.67,
+        "maxMm": 1.83,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.5,
+        "points": 24038
       },
       {
         "index": 2,
         "group": "cortex",
-        "nsdPercent": 98.4,
-        "meanMm": 0.29,
-        "hd95Mm": 0.68,
-        "maxMm": 2.94,
-        "points": 41357
+        "nsdPercent": 100.0,
+        "meanMm": 0.24,
+        "hd95Mm": 0.56,
+        "maxMm": 1.65,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
+        "points": 44809
       },
       {
         "index": 3,
         "group": "cortex",
-        "nsdPercent": 93.7,
-        "meanMm": 0.42,
-        "hd95Mm": 1.36,
-        "maxMm": 4.06,
-        "points": 27698
+        "nsdPercent": 99.2,
+        "meanMm": 0.29,
+        "hd95Mm": 0.68,
+        "maxMm": 3.17,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.1,
+        "points": 29493
       },
       {
         "index": 4,
         "group": "cortex",
-        "nsdPercent": 91.6,
-        "meanMm": 0.47,
-        "hd95Mm": 1.62,
-        "maxMm": 5.1,
-        "points": 6371
+        "nsdPercent": 99.5,
+        "meanMm": 0.27,
+        "hd95Mm": 0.68,
+        "maxMm": 1.52,
+        "meshToLabelPercent": 99.6,
+        "labelToMeshPercent": 99.5,
+        "points": 6911
       },
       {
         "index": 5,
         "group": "cortex",
-        "nsdPercent": 93.4,
-        "meanMm": 0.46,
-        "hd95Mm": 1.61,
-        "maxMm": 5.47,
-        "points": 25144
+        "nsdPercent": 99.5,
+        "meanMm": 0.31,
+        "hd95Mm": 0.69,
+        "maxMm": 3.21,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.4,
+        "points": 27179
       },
       {
         "index": 6,
         "group": "cortex",
-        "nsdPercent": 97.6,
-        "meanMm": 0.31,
-        "hd95Mm": 0.79,
-        "maxMm": 4.41,
-        "points": 42237
+        "nsdPercent": 99.7,
+        "meanMm": 0.26,
+        "hd95Mm": 0.6,
+        "maxMm": 3.52,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.6,
+        "points": 47020
       },
       {
         "index": 7,
         "group": "cortex",
-        "nsdPercent": 97.5,
-        "meanMm": 0.33,
-        "hd95Mm": 0.75,
-        "maxMm": 4.98,
-        "points": 41810
+        "nsdPercent": 99.9,
+        "meanMm": 0.27,
+        "hd95Mm": 0.63,
+        "maxMm": 2.64,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.9,
+        "points": 46410
       },
       {
         "index": 8,
         "group": "cortex",
-        "nsdPercent": 88.5,
-        "meanMm": 0.6,
-        "hd95Mm": 2.15,
-        "maxMm": 5.19,
-        "points": 14402
+        "nsdPercent": 99.0,
+        "meanMm": 0.33,
+        "hd95Mm": 0.74,
+        "maxMm": 3.77,
+        "meshToLabelPercent": 99.5,
+        "labelToMeshPercent": 99.0,
+        "points": 15391
       },
       {
         "index": 9,
         "group": "cortex",
-        "nsdPercent": 95.8,
-        "meanMm": 0.37,
-        "hd95Mm": 1.07,
-        "maxMm": 5.24,
-        "points": 42412
+        "nsdPercent": 99.8,
+        "meanMm": 0.27,
+        "hd95Mm": 0.64,
+        "maxMm": 2.26,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.8,
+        "points": 47454
       },
       {
         "index": 10,
         "group": "cortex",
-        "nsdPercent": 97.2,
-        "meanMm": 0.34,
-        "hd95Mm": 0.84,
-        "maxMm": 4.84,
-        "points": 38697
+        "nsdPercent": 99.9,
+        "meanMm": 0.27,
+        "hd95Mm": 0.63,
+        "maxMm": 2.3,
+        "meshToLabelPercent": 99.9,
+        "labelToMeshPercent": 99.9,
+        "points": 41734
       },
       {
         "index": 11,
         "group": "cortex",
-        "nsdPercent": 91.3,
-        "meanMm": 0.57,
-        "hd95Mm": 2.01,
-        "maxMm": 12.34,
-        "points": 35394
+        "nsdPercent": 98.4,
+        "meanMm": 0.34,
+        "hd95Mm": 0.72,
+        "maxMm": 6.29,
+        "meshToLabelPercent": 99.5,
+        "labelToMeshPercent": 98.2,
+        "points": 37984
       },
       {
         "index": 12,
         "group": "cortex",
-        "nsdPercent": 89.7,
-        "meanMm": 0.59,
-        "hd95Mm": 2.48,
-        "maxMm": 7.92,
-        "points": 23950
+        "nsdPercent": 97.8,
+        "meanMm": 0.32,
+        "hd95Mm": 0.72,
+        "maxMm": 5.41,
+        "meshToLabelPercent": 99.9,
+        "labelToMeshPercent": 97.6,
+        "points": 25615
       },
       {
         "index": 13,
         "group": "cortex",
-        "nsdPercent": 93.7,
-        "meanMm": 0.44,
-        "hd95Mm": 1.58,
-        "maxMm": 6.58,
-        "points": 41974
+        "nsdPercent": 98.8,
+        "meanMm": 0.29,
+        "hd95Mm": 0.67,
+        "maxMm": 4.64,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 98.6,
+        "points": 46991
       },
       {
         "index": 14,
         "group": "cortex",
-        "nsdPercent": 86.5,
-        "meanMm": 0.63,
-        "hd95Mm": 2.76,
-        "maxMm": 6.54,
-        "points": 10362
+        "nsdPercent": 95.7,
+        "meanMm": 0.38,
+        "hd95Mm": 1.07,
+        "maxMm": 4.49,
+        "meshToLabelPercent": 99.2,
+        "labelToMeshPercent": 95.3,
+        "points": 11156
       },
       {
         "index": 15,
         "group": "cortex",
-        "nsdPercent": 96.1,
-        "meanMm": 0.35,
-        "hd95Mm": 1.03,
-        "maxMm": 4.78,
-        "points": 19672
+        "nsdPercent": 99.4,
+        "meanMm": 0.26,
+        "hd95Mm": 0.61,
+        "maxMm": 2.89,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.3,
+        "points": 21189
       },
       {
         "index": 16,
         "group": "cortex",
-        "nsdPercent": 95.1,
-        "meanMm": 0.39,
-        "hd95Mm": 1.2,
-        "maxMm": 4.46,
-        "points": 22530
+        "nsdPercent": 99.2,
+        "meanMm": 0.27,
+        "hd95Mm": 0.63,
+        "maxMm": 3.82,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.1,
+        "points": 24201
       },
       {
         "index": 17,
         "group": "cortex",
-        "nsdPercent": 95.0,
-        "meanMm": 0.39,
-        "hd95Mm": 1.22,
-        "maxMm": 4.6,
-        "points": 11779
+        "nsdPercent": 99.7,
+        "meanMm": 0.27,
+        "hd95Mm": 0.64,
+        "maxMm": 2.87,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.7,
+        "points": 12639
       },
       {
         "index": 18,
         "group": "cortex",
-        "nsdPercent": 93.0,
-        "meanMm": 0.43,
-        "hd95Mm": 1.5,
-        "maxMm": 5.48,
-        "points": 10246
+        "nsdPercent": 99.8,
+        "meanMm": 0.25,
+        "hd95Mm": 0.61,
+        "maxMm": 1.65,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.7,
+        "points": 11024
       },
       {
         "index": 19,
         "group": "cortex",
-        "nsdPercent": 95.1,
-        "meanMm": 0.43,
-        "hd95Mm": 1.22,
-        "maxMm": 4.46,
-        "points": 12735
+        "nsdPercent": 99.6,
+        "meanMm": 0.3,
+        "hd95Mm": 0.69,
+        "maxMm": 2.57,
+        "meshToLabelPercent": 99.7,
+        "labelToMeshPercent": 99.6,
+        "points": 13546
       },
       {
         "index": 20,
         "group": "cortex",
-        "nsdPercent": 96.6,
-        "meanMm": 0.33,
-        "hd95Mm": 0.97,
-        "maxMm": 3.77,
-        "points": 41795
+        "nsdPercent": 99.8,
+        "meanMm": 0.24,
+        "hd95Mm": 0.58,
+        "maxMm": 2.63,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.8,
+        "points": 46514
       },
       {
         "index": 21,
         "group": "cortex",
-        "nsdPercent": 91.6,
-        "meanMm": 0.51,
-        "hd95Mm": 1.51,
-        "maxMm": 4.77,
-        "points": 27226
+        "nsdPercent": 99.9,
+        "meanMm": 0.3,
+        "hd95Mm": 0.69,
+        "maxMm": 2.22,
+        "meshToLabelPercent": 99.9,
+        "labelToMeshPercent": 99.9,
+        "points": 28892
       },
       {
         "index": 22,
         "group": "cortex",
-        "nsdPercent": 97.9,
-        "meanMm": 0.3,
-        "hd95Mm": 0.78,
-        "maxMm": 3.92,
-        "points": 42017
+        "nsdPercent": 99.8,
+        "meanMm": 0.24,
+        "hd95Mm": 0.57,
+        "maxMm": 2.82,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.8,
+        "points": 47439
       },
       {
         "index": 23,
         "group": "cortex",
-        "nsdPercent": 93.2,
-        "meanMm": 0.45,
-        "hd95Mm": 1.43,
-        "maxMm": 5.73,
-        "points": 41781
+        "nsdPercent": 99.1,
+        "meanMm": 0.29,
+        "hd95Mm": 0.69,
+        "maxMm": 4.03,
+        "meshToLabelPercent": 99.9,
+        "labelToMeshPercent": 99.0,
+        "points": 45019
       },
       {
         "index": 24,
         "group": "cortex",
-        "nsdPercent": 92.4,
-        "meanMm": 0.47,
-        "hd95Mm": 1.47,
-        "maxMm": 3.6,
-        "points": 23856
+        "nsdPercent": 99.2,
+        "meanMm": 0.28,
+        "hd95Mm": 0.7,
+        "maxMm": 3.07,
+        "meshToLabelPercent": 99.8,
+        "labelToMeshPercent": 99.1,
+        "points": 25360
       },
       {
         "index": 25,
         "group": "cortex",
-        "nsdPercent": 99.3,
-        "meanMm": 0.28,
-        "hd95Mm": 0.64,
-        "maxMm": 2.96,
-        "points": 42053
+        "nsdPercent": 100.0,
+        "meanMm": 0.24,
+        "hd95Mm": 0.57,
+        "maxMm": 1.49,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
+        "points": 46668
       },
       {
         "index": 26,
         "group": "cortex",
-        "nsdPercent": 98.9,
-        "meanMm": 0.27,
-        "hd95Mm": 0.63,
-        "maxMm": 7.31,
-        "points": 44296
+        "nsdPercent": 100.0,
+        "meanMm": 0.23,
+        "hd95Mm": 0.56,
+        "maxMm": 3.53,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.9,
+        "points": 54942
       },
       {
         "index": 27,
         "group": "cortex",
-        "nsdPercent": 98.3,
-        "meanMm": 0.28,
-        "hd95Mm": 0.67,
-        "maxMm": 3.81,
-        "points": 41966
+        "nsdPercent": 100.0,
+        "meanMm": 0.23,
+        "hd95Mm": 0.56,
+        "maxMm": 1.72,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
+        "points": 46671
       },
       {
         "index": 28,
         "group": "cortex",
-        "nsdPercent": 95.1,
-        "meanMm": 0.39,
-        "hd95Mm": 1.23,
-        "maxMm": 6.94,
-        "points": 42284
+        "nsdPercent": 99.3,
+        "meanMm": 0.27,
+        "hd95Mm": 0.64,
+        "maxMm": 3.53,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.2,
+        "points": 48027
       },
       {
         "index": 29,
         "group": "cortex",
-        "nsdPercent": 97.0,
-        "meanMm": 0.32,
-        "hd95Mm": 0.87,
-        "maxMm": 4.93,
-        "points": 41832
+        "nsdPercent": 99.8,
+        "meanMm": 0.24,
+        "hd95Mm": 0.59,
+        "maxMm": 3.13,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.8,
+        "points": 46856
       },
       {
         "index": 30,
         "group": "cortex",
-        "nsdPercent": 89.9,
-        "meanMm": 0.53,
-        "hd95Mm": 1.76,
-        "maxMm": 5.14,
-        "points": 6485
+        "nsdPercent": 99.3,
+        "meanMm": 0.28,
+        "hd95Mm": 0.65,
+        "maxMm": 4.34,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.3,
+        "points": 6937
       },
       {
         "index": 31,
         "group": "cortex",
-        "nsdPercent": 94.0,
-        "meanMm": 0.44,
-        "hd95Mm": 1.34,
-        "maxMm": 4.8,
-        "points": 24582
+        "nsdPercent": 99.3,
+        "meanMm": 0.29,
+        "hd95Mm": 0.67,
+        "maxMm": 3.02,
+        "meshToLabelPercent": 99.7,
+        "labelToMeshPercent": 99.3,
+        "points": 26299
       },
       {
         "index": 32,
         "group": "cortex",
-        "nsdPercent": 94.2,
-        "meanMm": 0.43,
-        "hd95Mm": 1.34,
-        "maxMm": 6.36,
-        "points": 9187
+        "nsdPercent": 99.9,
+        "meanMm": 0.27,
+        "hd95Mm": 0.66,
+        "maxMm": 1.6,
+        "meshToLabelPercent": 99.6,
+        "labelToMeshPercent": 100.0,
+        "points": 9978
       },
       {
         "index": 33,
         "group": "cortex",
-        "nsdPercent": 98.3,
-        "meanMm": 0.29,
-        "hd95Mm": 0.71,
-        "maxMm": 2.69,
-        "points": 33703
+        "nsdPercent": 100.0,
+        "meanMm": 0.24,
+        "hd95Mm": 0.55,
+        "maxMm": 1.29,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
+        "points": 36235
       },
       {
         "index": 34,
         "group": "cortex",
-        "nsdPercent": 92.7,
-        "meanMm": 0.43,
-        "hd95Mm": 1.5,
-        "maxMm": 5.88,
-        "points": 30622
+        "nsdPercent": 99.1,
+        "meanMm": 0.28,
+        "hd95Mm": 0.65,
+        "maxMm": 4.02,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.1,
+        "points": 32755
       },
       {
         "index": 35,
         "group": "cortex",
-        "nsdPercent": 97.3,
-        "meanMm": 0.34,
-        "hd95Mm": 0.86,
-        "maxMm": 4.34,
-        "points": 10914
+        "nsdPercent": 99.6,
+        "meanMm": 0.27,
+        "hd95Mm": 0.62,
+        "maxMm": 2.27,
+        "meshToLabelPercent": 99.8,
+        "labelToMeshPercent": 99.6,
+        "points": 11787
       },
       {
         "index": 36,
         "group": "cortex",
-        "nsdPercent": 93.0,
-        "meanMm": 0.47,
-        "hd95Mm": 1.81,
-        "maxMm": 6.06,
-        "points": 26387
+        "nsdPercent": 99.5,
+        "meanMm": 0.31,
+        "hd95Mm": 0.7,
+        "maxMm": 2.86,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.4,
+        "points": 28568
       },
       {
         "index": 37,
         "group": "cortex",
-        "nsdPercent": 98.0,
-        "meanMm": 0.31,
-        "hd95Mm": 0.75,
-        "maxMm": 3.23,
-        "points": 42140
+        "nsdPercent": 99.8,
+        "meanMm": 0.25,
+        "hd95Mm": 0.6,
+        "maxMm": 2.78,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.8,
+        "points": 46417
       },
       {
         "index": 38,
         "group": "cortex",
-        "nsdPercent": 95.4,
-        "meanMm": 0.38,
-        "hd95Mm": 1.16,
-        "maxMm": 4.5,
-        "points": 41624
+        "nsdPercent": 99.6,
+        "meanMm": 0.28,
+        "hd95Mm": 0.65,
+        "maxMm": 3.25,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.6,
+        "points": 45017
       },
       {
         "index": 39,
         "group": "cortex",
-        "nsdPercent": 79.3,
-        "meanMm": 0.76,
-        "hd95Mm": 2.7,
-        "maxMm": 5.51,
-        "points": 15856
+        "nsdPercent": 98.3,
+        "meanMm": 0.34,
+        "hd95Mm": 0.76,
+        "maxMm": 4.83,
+        "meshToLabelPercent": 99.2,
+        "labelToMeshPercent": 98.3,
+        "points": 16878
       },
       {
         "index": 40,
         "group": "cortex",
-        "nsdPercent": 95.9,
-        "meanMm": 0.37,
-        "hd95Mm": 1.06,
-        "maxMm": 5.11,
-        "points": 42266
+        "nsdPercent": 99.7,
+        "meanMm": 0.27,
+        "hd95Mm": 0.65,
+        "maxMm": 3.04,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.6,
+        "points": 47163
       },
       {
         "index": 41,
         "group": "cortex",
-        "nsdPercent": 98.5,
-        "meanMm": 0.29,
-        "hd95Mm": 0.7,
-        "maxMm": 2.79,
-        "points": 38732
+        "nsdPercent": 99.9,
+        "meanMm": 0.25,
+        "hd95Mm": 0.6,
+        "maxMm": 2.11,
+        "meshToLabelPercent": 99.8,
+        "labelToMeshPercent": 99.9,
+        "points": 41720
       },
       {
         "index": 42,
         "group": "cortex",
-        "nsdPercent": 88.7,
-        "meanMm": 0.65,
-        "hd95Mm": 2.35,
-        "maxMm": 10.99,
-        "points": 32868
+        "nsdPercent": 98.0,
+        "meanMm": 0.36,
+        "hd95Mm": 0.76,
+        "maxMm": 6.56,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 97.7,
+        "points": 35259
       },
       {
         "index": 43,
         "group": "cortex",
-        "nsdPercent": 89.4,
-        "meanMm": 0.54,
-        "hd95Mm": 1.78,
-        "maxMm": 6.03,
-        "points": 17970
+        "nsdPercent": 99.5,
+        "meanMm": 0.27,
+        "hd95Mm": 0.65,
+        "maxMm": 3.15,
+        "meshToLabelPercent": 99.7,
+        "labelToMeshPercent": 99.5,
+        "points": 19248
       },
       {
         "index": 44,
         "group": "cortex",
-        "nsdPercent": 94.5,
-        "meanMm": 0.41,
-        "hd95Mm": 1.38,
-        "maxMm": 6.64,
-        "points": 42337
+        "nsdPercent": 98.9,
+        "meanMm": 0.29,
+        "hd95Mm": 0.66,
+        "maxMm": 5.06,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 98.7,
+        "points": 47124
       },
       {
         "index": 45,
         "group": "cortex",
-        "nsdPercent": 81.5,
-        "meanMm": 1.01,
-        "hd95Mm": 5.56,
-        "maxMm": 10.8,
-        "points": 9646
+        "nsdPercent": 94.2,
+        "meanMm": 0.45,
+        "hd95Mm": 1.64,
+        "maxMm": 6.0,
+        "meshToLabelPercent": 98.9,
+        "labelToMeshPercent": 93.7,
+        "points": 10376
       },
       {
         "index": 46,
         "group": "cortex",
-        "nsdPercent": 94.8,
-        "meanMm": 0.37,
-        "hd95Mm": 1.24,
-        "maxMm": 4.59,
-        "points": 20510
+        "nsdPercent": 99.6,
+        "meanMm": 0.25,
+        "hd95Mm": 0.61,
+        "maxMm": 2.14,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.6,
+        "points": 22144
       },
       {
         "index": 47,
         "group": "cortex",
-        "nsdPercent": 96.3,
-        "meanMm": 0.35,
-        "hd95Mm": 1.06,
-        "maxMm": 2.93,
-        "points": 25173
+        "nsdPercent": 99.7,
+        "meanMm": 0.26,
+        "hd95Mm": 0.62,
+        "maxMm": 2.3,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.6,
+        "points": 26898
       },
       {
         "index": 48,
         "group": "cortex",
-        "nsdPercent": 96.9,
-        "meanMm": 0.35,
-        "hd95Mm": 0.95,
-        "maxMm": 2.82,
-        "points": 9165
+        "nsdPercent": 99.8,
+        "meanMm": 0.26,
+        "hd95Mm": 0.64,
+        "maxMm": 2.2,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.8,
+        "points": 9814
       },
       {
         "index": 49,
         "group": "cortex",
-        "nsdPercent": 97.4,
-        "meanMm": 0.32,
-        "hd95Mm": 0.87,
-        "maxMm": 4.49,
-        "points": 31189
+        "nsdPercent": 99.8,
+        "meanMm": 0.25,
+        "hd95Mm": 0.6,
+        "maxMm": 2.56,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.8,
+        "points": 33470
       },
       {
         "index": 50,
         "group": "cortex",
-        "nsdPercent": 92.5,
-        "meanMm": 0.47,
-        "hd95Mm": 1.64,
-        "maxMm": 4.45,
-        "points": 13954
+        "nsdPercent": 99.0,
+        "meanMm": 0.32,
+        "hd95Mm": 0.71,
+        "maxMm": 2.61,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 98.9,
+        "points": 14823
       },
       {
         "index": 51,
         "group": "cortex",
-        "nsdPercent": 96.2,
-        "meanMm": 0.35,
-        "hd95Mm": 1.05,
-        "maxMm": 4.91,
-        "points": 42044
+        "nsdPercent": 99.9,
+        "meanMm": 0.25,
+        "hd95Mm": 0.59,
+        "maxMm": 2.53,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.9,
+        "points": 46737
       },
       {
         "index": 52,
         "group": "cortex",
-        "nsdPercent": 89.2,
-        "meanMm": 0.56,
-        "hd95Mm": 1.67,
-        "maxMm": 5.1,
-        "points": 17716
+        "nsdPercent": 99.3,
+        "meanMm": 0.32,
+        "hd95Mm": 0.73,
+        "maxMm": 3.6,
+        "meshToLabelPercent": 99.6,
+        "labelToMeshPercent": 99.3,
+        "points": 18928
       },
       {
         "index": 53,
         "group": "cortex",
-        "nsdPercent": 97.5,
-        "meanMm": 0.32,
-        "hd95Mm": 0.81,
-        "maxMm": 6.27,
-        "points": 42139
+        "nsdPercent": 99.7,
+        "meanMm": 0.25,
+        "hd95Mm": 0.59,
+        "maxMm": 4.96,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.6,
+        "points": 47012
       },
       {
         "index": 54,
         "group": "cortex",
-        "nsdPercent": 94.3,
-        "meanMm": 0.4,
-        "hd95Mm": 1.31,
-        "maxMm": 3.99,
-        "points": 42099
+        "nsdPercent": 99.6,
+        "meanMm": 0.27,
+        "hd95Mm": 0.64,
+        "maxMm": 3.38,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.5,
+        "points": 46295
       },
       {
         "index": 55,
         "group": "cortex",
-        "nsdPercent": 83.0,
-        "meanMm": 0.72,
-        "hd95Mm": 2.41,
-        "maxMm": 5.89,
-        "points": 11331
+        "nsdPercent": 97.5,
+        "meanMm": 0.34,
+        "hd95Mm": 0.8,
+        "maxMm": 4.46,
+        "meshToLabelPercent": 99.0,
+        "labelToMeshPercent": 97.4,
+        "points": 12078
       },
       {
         "index": 56,
         "group": "cortex",
-        "nsdPercent": 98.2,
-        "meanMm": 0.29,
-        "hd95Mm": 0.69,
-        "maxMm": 4.82,
-        "points": 42204
+        "nsdPercent": 99.9,
+        "meanMm": 0.24,
+        "hd95Mm": 0.57,
+        "maxMm": 2.13,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.9,
+        "points": 47082
       },
       {
         "index": 57,
         "group": "cortex",
-        "nsdPercent": 97.5,
-        "meanMm": 0.31,
-        "hd95Mm": 0.81,
-        "maxMm": 5.8,
-        "points": 44489
+        "nsdPercent": 99.9,
+        "meanMm": 0.24,
+        "hd95Mm": 0.58,
+        "maxMm": 3.02,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.9,
+        "points": 56022
       },
       {
         "index": 58,
         "group": "cortex",
-        "nsdPercent": 98.1,
-        "meanMm": 0.3,
-        "hd95Mm": 0.71,
-        "maxMm": 3.83,
-        "points": 42322
+        "nsdPercent": 100.0,
+        "meanMm": 0.24,
+        "hd95Mm": 0.57,
+        "maxMm": 1.59,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
+        "points": 47837
       },
       {
         "index": 59,
         "group": "cortex",
-        "nsdPercent": 94.3,
-        "meanMm": 0.39,
-        "hd95Mm": 1.33,
-        "maxMm": 6.28,
-        "points": 42068
+        "nsdPercent": 99.2,
+        "meanMm": 0.27,
+        "hd95Mm": 0.64,
+        "maxMm": 4.34,
+        "meshToLabelPercent": 99.9,
+        "labelToMeshPercent": 99.1,
+        "points": 46614
       },
       {
         "index": 60,
         "group": "cortex",
-        "nsdPercent": 95.9,
-        "meanMm": 0.36,
-        "hd95Mm": 1.1,
-        "maxMm": 4.18,
-        "points": 41784
+        "nsdPercent": 99.8,
+        "meanMm": 0.26,
+        "hd95Mm": 0.61,
+        "maxMm": 2.29,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.8,
+        "points": 45227
       },
       {
         "index": 61,
         "group": "cortex",
-        "nsdPercent": 91.4,
-        "meanMm": 0.48,
-        "hd95Mm": 1.58,
-        "maxMm": 3.67,
-        "points": 6889
+        "nsdPercent": 99.1,
+        "meanMm": 0.28,
+        "hd95Mm": 0.71,
+        "maxMm": 2.75,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.0,
+        "points": 7392
       },
       {
         "index": 62,
         "group": "cortex",
-        "nsdPercent": 95.0,
-        "meanMm": 0.4,
-        "hd95Mm": 1.23,
-        "maxMm": 4.22,
-        "points": 22415
+        "nsdPercent": 99.8,
+        "meanMm": 0.29,
+        "hd95Mm": 0.67,
+        "maxMm": 5.89,
+        "meshToLabelPercent": 99.8,
+        "labelToMeshPercent": 99.8,
+        "points": 24048
       },
       {
         "index": 63,
@@ -2176,6 +2301,8 @@
         "meanMm": 0.24,
         "hd95Mm": 0.6,
         "maxMm": 0.96,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
         "points": 33741,
         "volumeErrorPercent": 0.12
       },
@@ -2186,6 +2313,8 @@
         "meanMm": 0.25,
         "hd95Mm": 0.61,
         "maxMm": 1.09,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
         "points": 31080,
         "volumeErrorPercent": 0.24
       },
@@ -2196,6 +2325,8 @@
         "meanMm": 0.24,
         "hd95Mm": 0.6,
         "maxMm": 1.04,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
         "points": 30668,
         "volumeErrorPercent": -0.91
       },
@@ -2206,6 +2337,8 @@
         "meanMm": 0.25,
         "hd95Mm": 0.6,
         "maxMm": 1.04,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
         "points": 32427,
         "volumeErrorPercent": -0.59
       },
@@ -2216,6 +2349,8 @@
         "meanMm": 0.26,
         "hd95Mm": 0.62,
         "maxMm": 1.05,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
         "points": 41694,
         "volumeErrorPercent": -0.08
       },
@@ -2226,6 +2361,8 @@
         "meanMm": 0.26,
         "hd95Mm": 0.61,
         "maxMm": 1.03,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
         "points": 37044,
         "volumeErrorPercent": -0.24
       },
@@ -2236,6 +2373,8 @@
         "meanMm": 0.25,
         "hd95Mm": 0.62,
         "maxMm": 1.07,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
         "points": 12840,
         "volumeErrorPercent": 0.18
       },
@@ -2246,6 +2385,8 @@
         "meanMm": 0.25,
         "hd95Mm": 0.61,
         "maxMm": 0.99,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
         "points": 11680,
         "volumeErrorPercent": 0.41
       },
@@ -2256,6 +2397,8 @@
         "meanMm": 0.25,
         "hd95Mm": 0.59,
         "maxMm": 0.98,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
         "points": 33128,
         "volumeErrorPercent": -0.45
       },
@@ -2266,6 +2409,8 @@
         "meanMm": 0.25,
         "hd95Mm": 0.6,
         "maxMm": 1.05,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
         "points": 33433,
         "volumeErrorPercent": -0.41
       },
@@ -2276,6 +2421,8 @@
         "meanMm": 0.26,
         "hd95Mm": 0.61,
         "maxMm": 1.0,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
         "points": 14160,
         "volumeErrorPercent": -0.05
       },
@@ -2286,6 +2433,8 @@
         "meanMm": 0.26,
         "hd95Mm": 0.62,
         "maxMm": 1.0,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
         "points": 14663,
         "volumeErrorPercent": 0.02
       },
@@ -2296,6 +2445,8 @@
         "meanMm": 0.26,
         "hd95Mm": 0.61,
         "maxMm": 1.02,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
         "points": 8282,
         "volumeErrorPercent": -0.47
       },
@@ -2306,6 +2457,8 @@
         "meanMm": 0.26,
         "hd95Mm": 0.63,
         "maxMm": 1.02,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
         "points": 8524,
         "volumeErrorPercent": -1.34
       },
@@ -2316,6 +2469,8 @@
         "meanMm": 0.24,
         "hd95Mm": 0.56,
         "maxMm": 1.06,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
         "points": 43962,
         "volumeErrorPercent": -0.58
       },
@@ -2326,6 +2481,8 @@
         "meanMm": 0.24,
         "hd95Mm": 0.56,
         "maxMm": 1.05,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
         "points": 43972,
         "volumeErrorPercent": -0.23
       },
@@ -2336,6 +2493,8 @@
         "meanMm": 0.26,
         "hd95Mm": 0.63,
         "maxMm": 6.06,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.9,
         "points": 43968,
         "volumeErrorPercent": 0.03
       },
@@ -2346,6 +2505,8 @@
         "meanMm": 0.26,
         "hd95Mm": 0.63,
         "maxMm": 4.07,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 99.7,
         "points": 43945,
         "volumeErrorPercent": 0.15
       },
@@ -2356,6 +2517,8 @@
         "meanMm": 0.24,
         "hd95Mm": 0.57,
         "maxMm": 1.02,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
         "points": 43998,
         "volumeErrorPercent": 0.05
       },
@@ -2366,6 +2529,8 @@
         "meanMm": 0.2,
         "hd95Mm": 0.53,
         "maxMm": 0.86,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
         "points": 9480,
         "volumeErrorPercent": -0.68
       },
@@ -2376,6 +2541,8 @@
         "meanMm": 0.24,
         "hd95Mm": 0.57,
         "maxMm": 1.02,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
         "points": 21122,
         "volumeErrorPercent": -1.57
       },
@@ -2386,21 +2553,23 @@
         "meanMm": 0.16,
         "hd95Mm": 0.49,
         "maxMm": 0.94,
+        "meshToLabelPercent": 100.0,
+        "labelToMeshPercent": 100.0,
         "points": 29001,
         "volumeErrorPercent": 1.29
       }
     ],
     "overall": {
-      "nsdPercent": 96.4,
-      "meanMm": 0.35,
-      "hd95MmWorst": 5.56,
+      "nsdPercent": 99.6,
+      "meanMm": 0.26,
+      "hd95MmWorst": 1.64,
       "toleranceMm": 1.2,
       "structures": 84
     },
     "cortex": {
-      "nsdPercent": 95.2,
-      "meanMm": 0.39,
-      "hd95MmWorst": 5.56,
+      "nsdPercent": 99.5,
+      "meanMm": 0.27,
+      "hd95MmWorst": 1.64,
       "toleranceMm": 1.2,
       "structures": 62
     },
