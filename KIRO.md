@@ -189,6 +189,20 @@ sample). The run was severe AS, mildly reduced LVEF, prolonged QTc, an injection
 This is the case for "code computes, the LLM explains". The full evaluation (all cases, both models, 3 runs) is in
 `docs/research/assistant-chat.md` §7.
 
+## In progress: guideline management options (PR #3)
+
+The next feature follows the same spec-first path. It is Requirement 13 (EARS), a catalogue table in the design, and
+tasks 14.x, on branch `engine/management-options`:
+- for each finding it lists the cited guideline recommendation with that guideline's own COR/LOE;
+- it never gives doses, chooses a drug or ranks options beyond COR;
+- an option is shown only when both COR and LOE were confirmed from the guideline table.
+
+One option is live so far (ARNi in HFrEF with NYHA II–III, COR 1 / LOE A). The other 11 are coded and tested and wait
+for LOE verification.
+
+The interface change in `types.ts` is non-breaking and open for @kerimku1's agreement. After his latest guard changes
+(red-flag `[R#]` ids, stricter citations), the contract test still passes on all 102 cases.
+
 ## Results (diagnosis engine)
 
 | Criterion from the task brief | Result |
