@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { Database, Loader2 } from "lucide-react";
 import { PanelHeader, Segmented, Switch } from "@/components/ui/primitives";
+import { fmtMm, fmtPct } from "@/imaging/fidelity";
 import { useWebgl } from "@/components/workspace/HeartViewport";
 import { useBrain } from "./brainStore";
 import { SliceView } from "@/imaging/SliceView";
@@ -79,6 +80,7 @@ function Selection({ data }: { data: BrainData }) {
   if (!st) return <div className="pointer-events-none absolute left-3 top-3 rounded-lg border border-line bg-panel/85 px-2.5 py-1.5 text-[11px] text-muted backdrop-blur">Click a structure in 3D, in a slice or in the list</div>;
   const twin = st.hemisphere === "midline" ? undefined : data.manifest.structures.find((x) => x.key === st.key.replace(/_(l|r)h(?=_|$)/, (_, h) => `_${h === "l" ? "r" : "l"}h`));
   const asym = twin ? (200 * (st.volumeMl - twin.volumeMl)) / (st.volumeMl + twin.volumeMl) : null;
+  const fit = data.manifest.fidelity?.structures.find((r) => r.index === st.index);
   return (
     <div className="absolute left-3 top-3 w-[260px] rounded-lg border border-line bg-panel/90 p-2.5 text-[12px] shadow-[var(--shadow)] backdrop-blur" data-testid="brain-selection">
       <p className="font-medium text-ink">{st.name}</p>
@@ -88,6 +90,11 @@ function Selection({ data }: { data: BrainData }) {
         {asym !== null && <><dt className="text-faint" title="(this − other) / mean, derived from the two volumes">Asymmetry</dt><dd className="num">{asym >= 0 ? "+" : ""}{asym.toFixed(1)} %</dd></>}
         <dt className="text-faint">Labelled</dt><dd>{st.method === "manual" ? "Manually (DKT31)" : "Automatically (FreeSurfer)"}</dd>
         <dt className="text-faint">Labels</dt><dd className="num">{st.labels.join(", ")}</dd>
+        {fit && fit.nsdPercent != null && <>
+          <dt className="text-faint" title="COR-Fit: share of this structure's 3D surface within one voxel of its labels (both directions)">COR-Fit ≤1 vox</dt><dd className="num text-ink">{fmtPct(fit.nsdPercent)}</dd>
+          <dt className="text-faint">Mean / HD95</dt><dd className="num">{fmtMm(fit.meanMm)} / {fmtMm(fit.hd95Mm)}</dd>
+          {fit.volumeErrorPercent != null && <><dt className="text-faint">3D vs label volume</dt><dd className="num">{fit.volumeErrorPercent >= 0 ? "+" : ""}{fit.volumeErrorPercent.toFixed(1)} %</dd></>}
+        </>}
       </dl>
       {!selected && <p className="mt-1 text-[10px] text-faint">Hover preview — click to select</p>}
     </div>
@@ -101,18 +108,20 @@ function Summary({ data }: { data: BrainData }) {
   const hip = m.structures.filter((s) => s.key.startsWith("hippocampus")).reduce((a, b) => a + b.volumeMl, 0);
   const metric = (label: string, value: string, hint: string) => (
     <div className="min-w-0 px-3 py-2" title={hint}>
-      <p className="num text-[18px] font-medium leading-tight text-ink">{value}</p>
+      <p className="num whitespace-nowrap text-[17px] font-medium leading-tight text-ink">{value}</p>
       <p className="truncate text-[11px] text-faint">{label}</p>
     </div>
   );
   return (
     <div className="shrink-0 border-t border-line bg-panel">
-      <div className="grid grid-cols-2 divide-x divide-line md:grid-cols-5">
+      <div className="grid grid-cols-2 divide-x divide-line md:grid-cols-6">
         {metric("Labelled brain volume", `${m.totals.brainMl.toFixed(0)} mL`, "All labelled voxels (skull and CSF outside the labels excluded)")}
         {metric("Cortex L / R", `${m.totals.cortexLeftMl.toFixed(0)} / ${m.totals.cortexRightMl.toFixed(0)} mL`, "Sum of manual cortical labels per hemisphere")}
         {metric("Cortical asymmetry", `${asym >= 0 ? "+" : ""}${asym.toFixed(1)} %`, "(left − right) / mean, derived")}
         {metric("Hippocampi", `${hip.toFixed(2)} mL`, "Left + right, FreeSurfer automatic labels")}
         {metric("Ventricles", `${ventricles.toFixed(1)} mL`, "Lateral, third and fourth ventricles, FreeSurfer automatic labels")}
+        {m.fidelity && metric(`COR-Fit ≤ ${m.fidelity.toleranceMm} mm`, fmtPct(m.fidelity.overall.nsdPercent),
+          `Share of the 3D surface within one MRI voxel of the segmentation (both directions); mean ${m.fidelity.overall.meanMm} mm. Cortex ${m.fidelity.cortex.nsdPercent}%, deep structures ${m.fidelity.deep.nsdPercent}%. Fidelity to the labels, not clinical accuracy.`)}
       </div>
       <p className="flex items-start gap-1.5 border-t border-line px-3 py-1.5 text-[10px] leading-snug text-faint" data-testid="brain-provenance">
         <Database className="mt-0.5 h-3 w-3 shrink-0" />

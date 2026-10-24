@@ -104,3 +104,12 @@ describe("slice rendering", () => {
     expect(off[o + 1]).toBe(off[o + 2]);
   });
 });
+
+describe("COR-Fit fidelity of the published brain", () => {
+  it("passes the publication gate and scores every structure", () => {
+    const f = manifest.fidelity;
+    expect(f.overall.nsdPercent).toBeGreaterThanOrEqual(95);
+    expect(f.structures.length).toBe(manifest.structures.length);
+    for (const r of f.structures.filter((x) => x.volumeErrorPercent !== undefined)) expect(Math.abs(r.volumeErrorPercent!)).toBeLessThanOrEqual(5);
+  });
+});

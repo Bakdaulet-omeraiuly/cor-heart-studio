@@ -1,6 +1,7 @@
 // Shape of a heart asset manifest (docs/asset-pipeline.md) — the fields the app reads. Written by
 // scripts/heart-asset/build.ts (Tier A, procedural) and pipeline/cor_pipeline/asset.py (Tier B, CT).
 import type { ValveId } from "@/domain/schema/record";
+import type { FidelityOverall, FidelityRow } from "@/imaging/fidelity";
 
 type V3 = number[];
 interface Pap { base: V3; tip: V3 }
@@ -51,4 +52,10 @@ export interface HeartManifest {
     structures: { index: number; key: string; name: string; colour: number[]; volumeMl: number }[];
   };
   knownLimitations: string[];
+  /** Tier B: COR-Fit agreement of the rendered mesh with its source labels, per LOD. */
+  fidelity?: {
+    method: string;
+    lods: Partial<Record<"high" | "low", { toleranceMm: number; overall: FidelityOverall; structures: (FidelityRow & { key: string; name: string; source: string })[] }>>;
+    volume: { lvCavityMeshMl: number; lvCavityLabelMl: number; errorPercent: number };
+  };
 }

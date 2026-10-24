@@ -19,6 +19,7 @@ from scipy import ndimage
 from scipy.spatial import cKDTree
 from skimage import measure
 
+from .fidelity import boundary_points, summarise, surface_metrics
 from .labels import LABEL_MAPS
 from .mesh import RAS_TO_APP
 
@@ -394,6 +395,46 @@ def ct_volumes(ct: np.ndarray, masks: dict[str, np.ndarray], affine: np.ndarray,
     return meta, image, index
 
 
+FIDELITY_POOLS = [
+    ("lv_cavity", "LV cavity (endocardium)"),
+    ("rv", "RV blood pool"),
+    ("la", "Left atrium"),
+    ("ra", "Right atrium"),
+    ("aorta", "Aorta lumen"),
+    ("pulmonary_artery", "Pulmonary artery lumen"),
+]
+
+
+def heart_fidelity(mesh: trimesh.Trimesh, fields, grid: "FineGrid", masks, affine) -> dict:
+    """COR-Fit report for the rendered tissue mesh (RAS mm), against the labels it was built from.
+
+    A vertex lies on the cavity side where |cavity| < |outer| (the solid is max(outer, -cavity) = 0);
+    the structure is the field component that is smallest there. Only imaging-derived surfaces are
+    measured: every blood pool and the LV epicardium. Other outer walls are a fixed offset (not from
+    imaging) and are listed as such.
+    """
+    v = np.asarray(mesh.vertices)
+    tol = float(np.linalg.norm(affine[:3, :3], axis=0).max())  # one voxel
+    pools = [k for k, _ in FIDELITY_POOLS]
+    pool_vals = np.stack([grid.sample(fields[k], v) for k in pools], axis=1)
+    outer_keys = ["lv_outer"] + [f"{k}_outer" for k in pools[1:]]
+    outer_vals = np.stack([grid.sample(fields[k], v) for k in outer_keys], axis=1)
+    endo = np.abs(grid.sample(fields["cavity"], v)) < np.abs(grid.sample(fields["outer"], v))
+    pool_id, outer_id = pool_vals.argmin(axis=1), outer_vals.argmin(axis=1)
+
+    rows = []
+    for i, (key, name) in enumerate(FIDELITY_POOLS):
+        others = np.logical_or.reduce([masks[k] for k in pools if k != key])
+        m = surface_metrics(mesh, np.flatnonzero(endo & (pool_id == i)), boundary_points(masks[key], affine, exclude=others), tol)
+        rows.append({"key": key, "name": name, "source": "CT label boundary", **(m or {"nsdPercent": None})})
+    lv = masks["lv_cavity"] | masks["lv_myocardium"]
+    others = np.logical_or.reduce([masks[k] for k in pools[1:]])
+    m = surface_metrics(mesh, np.flatnonzero(~endo & (outer_id == 0)), boundary_points(lv, affine, exclude=others), tol)
+    rows.append({"key": "lv_epicardium", "name": "LV epicardium (myocardium outer)", "source": "CT label boundary", **(m or {"nsdPercent": None})})
+    rows.append({"key": "other_walls", "name": "RV, atrial and vessel outer walls", "source": "fixed thickness, not from imaging", "nsdPercent": None})
+    return {"toleranceMm": round(tol, 2), "structures": rows, "overall": summarise(rows, round(tol, 2))}
+
+
 def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None, lods=(("high", 300_000), ("low", 120_000)), ct=None):
     """Returns ({lod: glb bytes}, manifest dict, lv cavity proxy dict, qa list, volumes or None).
 
@@ -495,6 +536,17 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
         lv_cav_mesh.invert()
     lv_cav_mesh = lv_cav_mesh.simplify_quadric_decimation(face_count=8000)
 
+    # COR-Fit: measured agreement of every rendered imaging-derived surface with its source labels
+    fidelity = {
+        "method": "COR-Fit v1: symmetric surface distance between the rendered mesh and the voxel boundary of its source label (docs/cor-fit.md)",
+        "lods": {lod: heart_fidelity(mesh, fields, grid, masks, affine) for lod, mesh in meshes.items()},
+        "volume": {
+            "lvCavityMeshMl": round(float(lv_cav_mesh.volume), 1),
+            "lvCavityLabelMl": round(ml("lv_cavity"), 1),
+            "errorPercent": round(float(100 * (lv_cav_mesh.volume - ml("lv_cavity")) / ml("lv_cavity")), 2),
+        },
+    }
+
     limitations = [
         "Shape from a CT segmentation, not reviewed by a clinician",
         "Single phase, cardiac phase unknown: motion is the template's illustrative motion",
@@ -578,6 +630,7 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
         "cutaway": "Clip plane with back-face section shading; closed solid mesh so wall thickness reads in section",
         "animationChannels": ["ventricular volume", "longitudinal shortening", "torsion", "atrial volume", "valve opening"],
         "knownLimitations": limitations,
+        "fidelity": fidelity,
     }
     proxy = {
         "note": f"LV cavity of CT case {case_id} (segmentation, phase unknown), centimetres, app frame.",

@@ -22,6 +22,8 @@ import trimesh
 from scipy import ndimage
 from skimage import measure
 
+from .corfit import constrained_surface
+from .fidelity import boundary_points, gate, summarise, surface_metrics
 from .glb import write_glb
 from .mesh import RAS_TO_APP, main_components
 
@@ -133,15 +135,19 @@ def surface(mask: np.ndarray, affine: np.ndarray, sigma: float, smooth: int, fac
     return mesh
 
 
-def nearest_region(points_mm: np.ndarray, region_index: np.ndarray, affine: np.ndarray) -> np.ndarray:
-    """Cortical region index of the nearest cortical voxel for each surface point."""
-    _, nearest = ndimage.distance_transform_edt(region_index == 0, return_indices=True)
+def nearest_region(points_mm: np.ndarray, region_index: np.ndarray, affine: np.ndarray, max_voxels: float = 1.5) -> np.ndarray:
+    """Cortical region index of the nearest cortical voxel for each surface point; 0 where no
+    cortical voxel is within `max_voxels` (e.g. the medial wall facing the third ventricle, which is
+    white matter or deep grey matter, not cortex)."""
+    dist, nearest = ndimage.distance_transform_edt(region_index == 0, return_indices=True)
     inv = np.linalg.inv(affine)
     idx = np.round(points_mm @ inv[:3, :3].T + inv[:3, 3]).astype(int)
     for a in range(3):
         idx[:, a] = np.clip(idx[:, a], 0, region_index.shape[a] - 1)
     src = tuple(nearest[a][idx[:, 0], idx[:, 1], idx[:, 2]] for a in range(3))
-    return region_index[src]
+    region = region_index[src].copy()
+    region[dist[idx[:, 0], idx[:, 1], idx[:, 2]] > max_voxels] = 0
+    return region
 
 
 def build(subject_dir: Path, lods=(("high", (220_000, 25_000)), ("low", (90_000, 8_000)))):
@@ -167,21 +173,24 @@ def build(subject_dir: Path, lods=(("high", (220_000, 25_000)), ("low", (90_000,
         "left": np.isin(labels, list(LEFT_NONCORTICAL - CEREBELLUM)) | ((labels >= 1000) & (labels < 2000)),
         "right": np.isin(labels, list(RIGHT_NONCORTICAL - CEREBELLUM)) | (labels >= 2000),
     }
-    meshes_by_lod = {}
+    meshes_by_lod, ras_by_lod = {}, {}
     for lod, (cortex_faces, sub_faces) in lods:
-        meshes = []
+        meshes, ras = [], []
         for hemi, mask in hemis.items():
-            mask, _, _ = main_components(ndimage.binary_closing(mask, iterations=1))
-            m = surface(mask, affine, sigma=0.8, smooth=10, faces=cortex_faces)
+            mask, _, _ = main_components(mask)
+            m = constrained_surface(mask, affine, faces=cortex_faces)
             region = nearest_region(m.vertices, cortex_index, affine)
             meshes.append(gl_mesh(f"cortex_{hemi[0]}h", m, frame, region, {"group": "cortex", "hemisphere": hemi}))
+            ras.append(("cortex", hemi, m, region))
         for s in table:
             if s["group"] == "cortex":
                 continue
-            mask, _, _ = main_components(np.isin(labels, s["labels"]), 0.1)
-            m = surface(mask, affine, sigma=0.7, smooth=12, faces=sub_faces)
+            mask, _, _ = main_components(np.isin(labels, s["labels"]), 0.02)
+            m = constrained_surface(mask, affine, faces=sub_faces)
             meshes.append(gl_mesh(s["key"], m, frame, np.full(len(m.vertices), s["index"]), {"group": s["group"], "structure": s["key"]}))
-        meshes_by_lod[lod] = meshes
+            ras.append(("structure", s["key"], m, None))
+        meshes_by_lod[lod], ras_by_lod[lod] = meshes, ras
+    fidelity = brain_fidelity(ras_by_lod["low"], table, labels, affine, hemis, voxel_ml)
 
     glbs = {lod: write_glb(ms, {"assetId": "cor-brain-mindboggle", "version": "1.0.0"}) for lod, ms in meshes_by_lod.items()}
 
@@ -232,6 +241,7 @@ def build(subject_dir: Path, lods=(("high", (220_000, 25_000)), ("low", (90_000,
             "cortexLeftMl": round(sum(s["volumeMl"] for s in table if s["group"] == "cortex" and s["hemisphere"] == "left"), 1),
             "cortexRightMl": round(sum(s["volumeMl"] for s in table if s["group"] == "cortex" and s["hemisphere"] == "right"), 1),
         },
+        "fidelity": fidelity,
         "knownLimitations": [
             "Healthy adult volunteer from an open research dataset; not a patient, no diagnosis.",
             "Cortical regions are manual labels on one MRI; deep structures are automatic (FreeSurfer) and not manually reviewed.",
@@ -241,6 +251,41 @@ def build(subject_dir: Path, lods=(("high", (220_000, 25_000)), ("low", (90_000,
         ],
     }
     return glbs, manifest, mri_u8, ic
+
+
+def brain_fidelity(ras_meshes, table, labels, affine, hemis, voxel_ml) -> dict:
+    """COR-Fit report for the published (low) LOD: every structure's rendered surface vs its labels.
+
+    Cortical regions are compared on the outer (pial-side) boundary only: label faces that border the
+    same hemisphere's own tissue are inside the brain and not rendered. Deep structures are closed
+    surfaces, so their volume is compared too.
+    """
+    tol = float(np.linalg.norm(affine[:3, :3], axis=0).max())  # one voxel
+    by_key = {s["key"]: s for s in table}
+    rows = []
+    for kind, key, mesh, region in ras_meshes:
+        if kind == "cortex":
+            inside = hemis[key]
+            for s in (x for x in table if x["group"] == "cortex" and x["hemisphere"] == key):
+                m = surface_metrics(mesh, np.flatnonzero(region == s["index"]),
+                                    boundary_points(np.isin(labels, s["labels"]), affine, exclude=inside & ~np.isin(labels, s["labels"])), tol)
+                rows.append({"index": s["index"], "group": "cortex", **(m or {"nsdPercent": None})})
+        else:
+            s = by_key[key]
+            mask = np.isin(labels, s["labels"])
+            m = surface_metrics(mesh, np.arange(len(mesh.vertices)), boundary_points(mask, affine), tol)
+            label_ml = float(mask.sum()) * voxel_ml
+            rows.append({"index": s["index"], "group": s["group"], **(m or {"nsdPercent": None}),
+                         "volumeErrorPercent": round(100 * (abs(mesh.volume) / 1000 - label_ml) / label_ml, 2)})
+    return {
+        "method": "COR-Fit v1: symmetric surface distance between the rendered mesh and the voxel boundary of its source label (docs/cor-fit.md)",
+        "lod": "low",
+        "toleranceMm": round(tol, 2),
+        "structures": rows,
+        "overall": summarise(rows, round(tol, 2)),
+        "cortex": summarise([r for r in rows if r["group"] == "cortex"], round(tol, 2)),
+        "deep": summarise([r for r in rows if r["group"] != "cortex"], round(tol, 2)),
+    }
 
 
 def voxel_centre(mask, affine):
@@ -274,19 +319,27 @@ def main() -> None:
     parser.add_argument("subject_dir")
     parser.add_argument("out_dir")
     parser.add_argument("--app", action="store_true", help="also publish (low LOD + volumes) to public/brain/<subject>/")
+    parser.add_argument("--force", action="store_true", help="publish even if the COR-Fit gate fails")
     args = parser.parse_args()
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)
     glbs, manifest, mri, index = build(Path(args.subject_dir))
     for lod, data in glbs.items():
         (out / f"brain-{lod}.glb").write_bytes(data)
-    (out / "mri.u8.gz").write_bytes(gzip.compress(mri.tobytes(order="C"), 9))
-    (out / "labels.u8.gz").write_bytes(gzip.compress(index.tobytes(order="C"), 9))
+    (out / "mri.u8.gz").write_bytes(gzip.compress(mri.tobytes(order="C"), 9, mtime=0))
+    (out / "labels.u8.gz").write_bytes(gzip.compress(index.tobytes(order="C"), 9, mtime=0))
     (out / "brain-manifest.json").write_text(json.dumps(manifest, indent=2))
     print(f"{manifest['subject']}: {len(manifest['structures'])} structures, brain {manifest['totals']['brainMl']} mL")
     print("  " + ", ".join(f"{k} {len(v) / 1e6:.1f} MB" for k, v in glbs.items()))
     for f in ("mri.u8.gz", "labels.u8.gz"):
         print(f"  {f} {(out / f).stat().st_size / 1e6:.2f} MB, dims {manifest['volume']['dims']}")
+    f = manifest["fidelity"]
+    print(f"  COR-Fit: {f['overall']['nsdPercent']}% of surface within {f['toleranceMm']} mm, mean {f['overall']['meanMm']} mm")
+    problems = gate(f["overall"], [r["volumeErrorPercent"] for r in f["structures"] if "volumeErrorPercent" in r])
+    if problems:
+        print("  COR-Fit gate: " + "; ".join(problems))
+    if args.app and problems and not args.force:
+        raise SystemExit("not published: COR-Fit gate failed (use --force to override)")
     if args.app:
         app = Path(__file__).resolve().parents[2] / "public/brain" / manifest["subject"]
         app.mkdir(parents=True, exist_ok=True)

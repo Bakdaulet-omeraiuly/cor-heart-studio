@@ -65,6 +65,15 @@ HU −300…700); no CFD or clinical thresholds.
 
 Tools used: code only (no Blender/Figma/Meshy/Tripo). License: MIT (see `LICENSE`).
 
+## COR-Fit: measured model accuracy
+
+Every CT/MRI-derived model is built and verified by COR-Fit (`docs/cor-fit.md`): label-faithful
+surface reconstruction (voxel-constrained smoothing for the brain) plus a per-structure report of
+how closely the 3D surface follows the scan's segmentation (NSD within one voxel, mean distance,
+HD95, volume error), with a publication gate (≥ 95 % within one voxel, volume error ≤ 5 %). Shipped
+models: hearts 98 % within 1.5 mm (mean 0.46 mm); brain 96 % within 1.2 mm (mean 0.35 mm). This is
+fidelity to the segmentation, not clinical accuracy.
+
 ## Brain module
 
 "Brain" in the header opens a second organ module: one healthy adult brain (Mindboggle-101 subject

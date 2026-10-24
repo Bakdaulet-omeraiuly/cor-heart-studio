@@ -150,8 +150,8 @@ def main() -> None:
             import gzip
 
             meta, image, index = volumes
-            (asset_dir / meta["image"]).write_bytes(gzip.compress(image.tobytes(order="C"), 9))
-            (asset_dir / meta["labels"]).write_bytes(gzip.compress(index.tobytes(order="C"), 9))
+            (asset_dir / meta["image"]).write_bytes(gzip.compress(image.tobytes(order="C"), 9, mtime=0))
+            (asset_dir / meta["labels"]).write_bytes(gzip.compress(index.tobytes(order="C"), 9, mtime=0))
             print(f"  CT slices {meta['dims']} -> {(asset_dir / meta['image']).stat().st_size / 1e6:.2f} MB")
         print(f"  asset -> {asset_dir} ({', '.join(f'{k} {len(v) / 1e6:.1f} MB' for k, v in glbs.items())})")
         for issue in qa:

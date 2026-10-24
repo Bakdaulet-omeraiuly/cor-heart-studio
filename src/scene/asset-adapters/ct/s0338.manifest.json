@@ -422,6 +422,192 @@
     "Labels are 1.5 mm resampled; scans are mostly not ECG-gated, so the cardiac phase is unknown.",
     "RV volume is consistently ~1.5x LV in sampled cases: the RV/atrial labels may include their walls (only LV myocardium is a separate label). Unverified - do not report RV volume as RVEDV."
   ],
+  "fidelity": {
+    "method": "COR-Fit v1: symmetric surface distance between the rendered mesh and the voxel boundary of its source label (docs/cor-fit.md)",
+    "lods": {
+      "high": {
+        "toleranceMm": 1.5,
+        "structures": [
+          {
+            "key": "lv_cavity",
+            "name": "LV cavity (endocardium)",
+            "source": "CT label boundary",
+            "nsdPercent": 96.2,
+            "meanMm": 0.51,
+            "hd95Mm": 1.44,
+            "maxMm": 8.98,
+            "points": 52339
+          },
+          {
+            "key": "rv",
+            "name": "RV blood pool",
+            "source": "CT label boundary",
+            "nsdPercent": 99.8,
+            "meanMm": 0.36,
+            "hd95Mm": 0.8,
+            "maxMm": 5.13,
+            "points": 61017
+          },
+          {
+            "key": "la",
+            "name": "Left atrium",
+            "source": "CT label boundary",
+            "nsdPercent": 100.0,
+            "meanMm": 0.37,
+            "hd95Mm": 0.82,
+            "maxMm": 4.79,
+            "points": 48543
+          },
+          {
+            "key": "ra",
+            "name": "Right atrium",
+            "source": "CT label boundary",
+            "nsdPercent": 99.9,
+            "meanMm": 0.37,
+            "hd95Mm": 0.81,
+            "maxMm": 5.29,
+            "points": 50443
+          },
+          {
+            "key": "aorta",
+            "name": "Aorta lumen",
+            "source": "CT label boundary",
+            "nsdPercent": 100.0,
+            "meanMm": 0.38,
+            "hd95Mm": 0.83,
+            "maxMm": 1.57,
+            "points": 59024
+          },
+          {
+            "key": "pulmonary_artery",
+            "name": "Pulmonary artery lumen",
+            "source": "CT label boundary",
+            "nsdPercent": 99.4,
+            "meanMm": 0.48,
+            "hd95Mm": 1.07,
+            "maxMm": 6.8,
+            "points": 22946
+          },
+          {
+            "key": "lv_epicardium",
+            "name": "LV epicardium (myocardium outer)",
+            "source": "CT label boundary",
+            "nsdPercent": 93.6,
+            "meanMm": 0.76,
+            "hd95Mm": 2.37,
+            "maxMm": 34.46,
+            "points": 54893
+          },
+          {
+            "key": "other_walls",
+            "name": "RV, atrial and vessel outer walls",
+            "source": "fixed thickness, not from imaging",
+            "nsdPercent": null
+          }
+        ],
+        "overall": {
+          "nsdPercent": 98.3,
+          "meanMm": 0.46,
+          "hd95MmWorst": 2.37,
+          "toleranceMm": 1.5,
+          "structures": 7
+        }
+      },
+      "low": {
+        "toleranceMm": 1.5,
+        "structures": [
+          {
+            "key": "lv_cavity",
+            "name": "LV cavity (endocardium)",
+            "source": "CT label boundary",
+            "nsdPercent": 94.9,
+            "meanMm": 0.58,
+            "hd95Mm": 1.73,
+            "maxMm": 9.52,
+            "points": 44792
+          },
+          {
+            "key": "rv",
+            "name": "RV blood pool",
+            "source": "CT label boundary",
+            "nsdPercent": 99.7,
+            "meanMm": 0.37,
+            "hd95Mm": 0.81,
+            "maxMm": 6.22,
+            "points": 48681
+          },
+          {
+            "key": "la",
+            "name": "Left atrium",
+            "source": "CT label boundary",
+            "nsdPercent": 100.0,
+            "meanMm": 0.37,
+            "hd95Mm": 0.82,
+            "maxMm": 4.79,
+            "points": 43301
+          },
+          {
+            "key": "ra",
+            "name": "Right atrium",
+            "source": "CT label boundary",
+            "nsdPercent": 99.9,
+            "meanMm": 0.37,
+            "hd95Mm": 0.82,
+            "maxMm": 5.29,
+            "points": 44385
+          },
+          {
+            "key": "aorta",
+            "name": "Aorta lumen",
+            "source": "CT label boundary",
+            "nsdPercent": 100.0,
+            "meanMm": 0.39,
+            "hd95Mm": 0.83,
+            "maxMm": 1.6,
+            "points": 47363
+          },
+          {
+            "key": "pulmonary_artery",
+            "name": "Pulmonary artery lumen",
+            "source": "CT label boundary",
+            "nsdPercent": 99.3,
+            "meanMm": 0.49,
+            "hd95Mm": 1.08,
+            "maxMm": 6.81,
+            "points": 20170
+          },
+          {
+            "key": "lv_epicardium",
+            "name": "LV epicardium (myocardium outer)",
+            "source": "CT label boundary",
+            "nsdPercent": 92.9,
+            "meanMm": 0.77,
+            "hd95Mm": 2.51,
+            "maxMm": 34.07,
+            "points": 45904
+          },
+          {
+            "key": "other_walls",
+            "name": "RV, atrial and vessel outer walls",
+            "source": "fixed thickness, not from imaging",
+            "nsdPercent": null
+          }
+        ],
+        "overall": {
+          "nsdPercent": 98.0,
+          "meanMm": 0.48,
+          "hd95MmWorst": 2.51,
+          "toleranceMm": 1.5,
+          "structures": 7
+        }
+      }
+    },
+    "volume": {
+      "lvCavityMeshMl": 130.5,
+      "lvCavityLabelMl": 132.2,
+      "errorPercent": -1.22
+    }
+  },
   "imaging": {
     "modality": "CT (contrast-enhanced, single phase)",
     "image": "/models/ct/s0338/ct.u8.gz",

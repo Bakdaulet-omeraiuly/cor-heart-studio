@@ -1,3 +1,5 @@
+import type { FidelityOverall, FidelityRow } from "@/imaging/fidelity";
+
 // Brain asset manifest written by pipeline/cor_pipeline/brain.py (public/brain/<subject>/brain-manifest.json).
 
 export type Hemisphere = "left" | "right" | "midline";
@@ -40,6 +42,16 @@ export interface BrainManifest {
   };
   structures: BrainStructure[];
   totals: { brainMl: number; cortexLeftMl: number; cortexRightMl: number };
+  /** COR-Fit agreement of each rendered surface with its labels (published LOD). */
+  fidelity: {
+    method: string;
+    lod: string;
+    toleranceMm: number;
+    structures: (FidelityRow & { index: number; group: string })[];
+    overall: FidelityOverall;
+    cortex: FidelityOverall;
+    deep: FidelityOverall;
+  };
   knownLimitations: string[];
 }
 

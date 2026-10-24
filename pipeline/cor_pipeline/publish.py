@@ -15,7 +15,10 @@ import argparse
 import csv
 import json
 import shutil
+import sys
 from pathlib import Path
+
+from .fidelity import gate
 
 REPO = Path(__file__).resolve().parents[2]
 SAMPLES = REPO / "public/samples/open-ct-patients.json"
@@ -68,12 +71,18 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("case_out", help="data/out/<case> (built with --asset)")
     parser.add_argument("--meta", help="TotalSegmentator meta.csv for age/sex")
+    parser.add_argument("--force", action="store_true", help="publish even if the COR-Fit gate fails")
     args = parser.parse_args()
 
     case_out = Path(args.case_out)
     case_id = case_out.name
     manifest = json.loads((case_out / "asset/manifest.json").read_text())
     report = json.loads((case_out / "report.json").read_text())
+    fid = manifest.get("fidelity")
+    problems = ["no COR-Fit fidelity report (rebuild with --asset)"] if not fid else [
+        f"{lod}: {p}" for lod, f in fid["lods"].items() for p in gate(f["overall"], [fid["volume"]["errorPercent"]])]
+    if problems and not args.force:
+        sys.exit(f"{case_id}: COR-Fit gate failed — " + "; ".join(problems))
 
     models = REPO / "public/models/ct" / case_id
     models.mkdir(parents=True, exist_ok=True)

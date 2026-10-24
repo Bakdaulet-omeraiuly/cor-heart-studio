@@ -1,12 +1,14 @@
 "use client";
 // Right-hand evidence panel for Tier B hearts: the source CT in three planes with the segmentation the
 // 3D shape was built from. Same slice views as the brain module.
+import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { PanelHeader, Segmented } from "../ui/primitives";
 import { SliceView } from "@/imaging/SliceView";
 import type { SliceVolume } from "@/imaging/types";
 import { useCtSlices, useCtVolume } from "@/scene/ctSlices";
 import type { HeartAssetSpec } from "@/scene/asset-adapters/registry";
+import { HeartFidelity } from "./HeartFidelity";
 
 const rgb = (c: number[]) => `rgb(${c.map((v) => Math.round(v * 255)).join(" ")})`;
 
@@ -25,6 +27,7 @@ function presets(vol: SliceVolume) {
 export function CtEvidencePanel({ spec }: { spec: HeartAssetSpec }) {
   const { vol, error } = useCtVolume(spec);
   const s = useCtSlices();
+  const [tab, setTab] = useState<"volumes" | "fidelity">("volumes");
   const im = spec.manifest.imaging!;
   const p = vol ? presets(vol) : null;
   const active = p && (Object.keys(p) as (keyof typeof p)[]).find((k) => p[k].windowCenter === s.windowCenter && p[k].windowWidth === s.windowWidth);
@@ -53,6 +56,11 @@ export function CtEvidencePanel({ spec }: { spec: HeartAssetSpec }) {
                   className={`rounded border px-1.5 py-0.5 ${active === k ? "border-accent text-ink" : "border-line text-muted hover:text-ink"}`}>{p[k].label}</button>
               ))}
             </div>
+            <div className="mt-2">
+              <Segmented<"volumes" | "fidelity"> label="Panel details" value={tab} onChange={setTab}
+                options={[{ value: "volumes", label: "Volumes" }, { value: "fidelity", label: "COR-Fit accuracy" }]} />
+            </div>
+            {tab === "fidelity" ? <div className="mt-2"><HeartFidelity spec={spec} /></div> : <>
             <ul className="mt-2 grid grid-cols-1 gap-x-3 gap-y-0.5 2xl:grid-cols-2">
               {vol.structures.map((st) => (
                 <li key={st.index}>
@@ -66,6 +74,7 @@ export function CtEvidencePanel({ spec }: { spec: HeartAssetSpec }) {
               ))}
             </ul>
             <p className="mt-1.5 text-[10px] leading-snug text-faint">Click / drag: crosshair (also marks the 3D model) · wheel: slice · shift-drag: window. The 3D shape is these labels, meshed.</p>
+            </>}
           </div>
         </>
       )}

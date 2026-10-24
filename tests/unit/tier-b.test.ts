@@ -100,3 +100,19 @@ describe("deformation on CT LV cavities", () => {
     });
   }
 });
+
+describe("COR-Fit fidelity of the published CT hearts", () => {
+  it("every Tier B model carries a report that passes the publication gate", () => {
+    for (const s of ctSpecs) {
+      const f = s.manifest.fidelity;
+      expect(f, s.id).toBeDefined();
+      for (const lod of Object.values(f!.lods)) {
+        expect(lod!.overall.nsdPercent).toBeGreaterThanOrEqual(95);
+        expect(lod!.overall.meanMm).toBeLessThan(lod!.toleranceMm);
+        // surfaces that are not from imaging are reported as such, not scored
+        expect(lod!.structures.find((r) => r.key === "other_walls")?.nsdPercent).toBeNull();
+      }
+      expect(Math.abs(f!.volume.errorPercent)).toBeLessThanOrEqual(5);
+    }
+  });
+});

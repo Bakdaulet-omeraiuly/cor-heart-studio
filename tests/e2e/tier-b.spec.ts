@@ -38,6 +38,9 @@ test("a CT-derived heart (Tier B) renders with its provenance", async ({ page })
   await expect(page.getByTestId("heart-metrics")).toContainText("126.5");
   await expect(page.getByTestId("heart-metrics")).toContainText("CT segmentation");
 
+  // COR-Fit accuracy: headline on the badge, full table in the CT panel
+  await expect(page.getByTestId("corfit-line")).toContainText(/COR-Fit: 9\d\.\d% of the surface within 1\.5 mm/);
+
   // source CT evidence: three planes, crosshair shared between them
   await expect(page.getByTestId("ct-evidence")).toBeVisible();
   for (const v of ["axial", "coronal", "sagittal"]) await expect(page.getByTestId(`slice-${v}`)).toBeVisible();
@@ -48,6 +51,10 @@ test("a CT-derived heart (Tier B) renders with its provenance", async ({ page })
   const box = (await axial.boundingBox())!;
   await axial.click({ position: { x: box.width * 0.55, y: box.height * 0.45 } });
   await expect(coronal).not.toHaveAttribute("data-crosshair", before!);
+  await page.getByRole("radio", { name: "COR-Fit accuracy" }).click();
+  await expect(page.getByTestId("heart-fidelity")).toContainText("LV cavity (endocardium)");
+  await expect(page.getByTestId("heart-fidelity")).toContainText("fixed thickness, not from imaging");
+  await page.getByRole("radio", { name: "Volumes" }).click();
   await page.getByRole("button", { name: "Soft tissue" }).click();
   await page.waitForTimeout(800);
   await page.getByRole("main").screenshot({ path: `${shots}/e2e-tier-b-s0270-ct-evidence.png` });
