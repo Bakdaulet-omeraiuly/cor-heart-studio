@@ -1,0 +1,112 @@
+"""Great vessels at full length: atlas continuations joined to the measured (CT) vessel ends, with provenance.
+
+The label volume is padded so vessels can continue past the scan / source-mesh edge. Every atlas part is warped into
+this heart, voxelised, and written only into empty voxels: CT voxels are never replaced. A continuation that does
+not touch its CT vessel is shifted onto it (the gap is reported), then the seam is closed. `prov` records where
+each voxel came from (PROV codes, also written per vertex as `_PROV`).
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import nibabel as nib
+import numpy as np
+import subprocess
+from scipy import ndimage
+
+from .labels import LABEL_MAPS
+from .centreline import _closed
+
+PROV = {"ct": 0, "ai": 1, "dataset": 2, "atlas": 3, "illustrative": 4}
+PROV_NONE = 255
+ROLE_OF_PART = {
+    "ascending_aorta": "aorta", "aortic_arch": "aorta", "descending_thoracic_aorta": "aorta", "brachiocephalic_trunk": "aorta",
+    "left_common_carotid": "aorta", "left_subclavian": "aorta",
+    "pulmonary_trunk": "pulmonary_artery", "right_pulmonary_artery": "pulmonary_artery", "left_pulmonary_artery": "pulmonary_artery",
+    "svc": "vena_cava", "ivc": "vena_cava",
+    "lspv": "pulmonary_veins", "lipv": "pulmonary_veins", "rspv": "pulmonary_veins", "ripv": "pulmonary_veins",
+}
+# TotalSegmentator `total` classes used for Tier B great vessels (no licence key needed)
+TOTAL_CLASSES = ["aorta", "pulmonary_vein", "brachiocephalic_trunk", "subclavian_artery_left",
+                 "common_carotid_artery_left", "superior_vena_cava", "inferior_vena_cava"]
+
+
+def role_value(source: str, role: str) -> int:
+    for value, s in LABEL_MAPS[source].items():
+        if s.region == role and s.kind != "wall":
+            return value
+    raise KeyError(f"{source} has no label for {role}")
+
+
+def _voxelise(mesh, affine: np.ndarray, shape) -> np.ndarray:
+    pitch = float(np.linalg.norm(affine[:3, :3], axis=0).min())
+    inv = np.linalg.inv(affine)
+    out = np.zeros(shape, bool)
+    for body in mesh.split(only_watertight=False) or [mesh]:
+        if len(body.faces) < 4:
+            continue
+        pts = _closed(body).voxelized(pitch * 0.7).fill().points
+        idx = np.rint(pts @ inv[:3, :3].T + inv[:3, 3]).astype(int)
+        ok = np.all((idx >= 0) & (idx < shape), axis=1)
+        out[tuple(idx[ok].T)] = True
+    return ndimage.binary_closing(out, iterations=1)
+
+
+def extend_vessels(labels: np.ndarray, affine: np.ndarray, parts: dict, warp, source: str, pad_mm: float = 60.0):
+    """(labels, affine, prov, report): padded labels with atlas continuations of every great vessel in `parts`."""
+    spacing = np.linalg.norm(affine[:3, :3], axis=0)
+    pad = np.ceil(pad_mm / spacing).astype(int)
+    out = np.pad(labels, [(p, p) for p in pad])
+    shift = np.eye(4)
+    shift[:3, 3] = -pad
+    out_aff = affine @ shift
+    prov = np.where(out > 0, PROV["ct"], PROV_NONE).astype(np.uint8)
+    report = {"joinGapMm": {}, "shiftMm": {}}
+    by_role: dict[str, np.ndarray] = {}
+    for key, mesh in parts.items():
+        role = ROLE_OF_PART.get(key)
+        if role is None:
+            continue
+        m = mesh.copy()
+        m.vertices = warp(np.asarray(m.vertices, float))
+        by_role[role] = by_role.get(role, np.zeros(out.shape, bool)) | _voxelise(m, out_aff, out.shape)
+    for role, atlas in by_role.items():
+        value = role_value(source, role)
+        ct = out == value
+        atlas &= out == 0
+        gap = 0.0
+        if ct.any() and atlas.any() and not (ndimage.binary_dilation(ct) & atlas).any():
+            d_ct = ndimage.distance_transform_edt(~ct, sampling=spacing)
+            a_idx = np.argwhere(atlas)
+            near = a_idx[np.argmin(d_ct[tuple(a_idx.T)])]
+            _, ind = ndimage.distance_transform_edt(~ct, return_indices=True)
+            target = ind[:, near[0], near[1], near[2]]
+            move = target - near
+            atlas = ndimage.shift(atlas.astype(np.uint8), move, order=0).astype(bool) & (out == 0)
+            report["shiftMm"][role] = round(float(np.linalg.norm(move * spacing)), 1)
+        if ct.any() and atlas.any():
+            touching = ndimage.binary_dilation(ct, iterations=1) & atlas
+            gap = 0.0 if touching.any() else float(ndimage.distance_transform_edt(~ct, sampling=spacing)[atlas].min())
+            # close the seam between the two pieces (only into empty voxels)
+            both = ct | atlas
+            seam = ndimage.binary_closing(both, structure=ndimage.generate_binary_structure(3, 2), iterations=2) & ~both & (out == 0)
+            near_seam = ndimage.binary_dilation(ct, iterations=3) & ndimage.binary_dilation(atlas, iterations=3)
+            atlas |= seam & near_seam
+        out[atlas] = value
+        prov[atlas] = PROV["atlas"]
+        report["joinGapMm"][role] = round(gap, 2)
+    return out, out_aff, prov, report
+
+
+def segment_great_vessels(ct: Path, work: Path) -> dict[str, np.ndarray]:
+    """TotalSegmentator `total` great-vessel masks on the CT grid (Tier B; no licence key; usage stats off)."""
+    seg_python = Path(__file__).resolve().parents[1] / ".venv-seg/bin/python"
+    seg_dir = Path(work) / "total"
+    cmd = [seg_python, seg_python.parent / "TotalSegmentator", "-i", ct, "-o", seg_dir, "-ta", "total", "-d", "mps",
+           "--roi_subset", *TOTAL_CLASSES]
+    done = subprocess.run([str(c) for c in cmd], capture_output=True, text=True, timeout=30 * 60)
+    if done.returncode != 0:
+        raise RuntimeError("TotalSegmentator failed: " + " ".join((done.stderr or done.stdout or "").strip().splitlines()[-3:]))
+    return {name: np.asarray(nib.load(seg_dir / f"{name}.nii.gz").dataobj) > 0 for name in TOTAL_CLASSES
+            if (seg_dir / f"{name}.nii.gz").exists()}

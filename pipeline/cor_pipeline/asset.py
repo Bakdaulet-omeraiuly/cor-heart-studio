@@ -24,7 +24,7 @@ from .labels import LABEL_MAPS
 from .mesh import RAS_TO_APP
 
 FINE_MM = 0.75
-WALL_MM = {"rv": 3.0, "la": 2.0, "ra": 2.0, "aorta": 2.0, "pulmonary_artery": 1.5}
+WALL_MM = {"rv": 3.0, "la": 2.0, "ra": 2.0, "aorta": 2.0, "pulmonary_artery": 1.5, "vena_cava": 1.5, "pulmonary_veins": 1.5}
 MARGIN_MM = WALL_MM["rv"] + 4 * FINE_MM
 ISO_OFFSET_MM = 0.013
 MIN_PIECE_MM3 = 500.0
@@ -32,8 +32,9 @@ LV_MIN_WALL_MM = 1.2  # below one CT voxel (1.5 mm), so it stays within the fide
 VALVE_MIN_DEPTH_MM = 6.0
 # Soft-max membership, as in scripts/heart-asset/build.ts (tau 0.28 model units ~ 3.2 mm there).
 WEIGHT_TAU_MM = 3.0
-KIND_MYOCARDIUM, KIND_GREAT_ARTERY = 0, 1
-REGION = {"lv": 0, "rv": 1, "la": 2, "ra": 3, "aorta": 4, "pulmonary_artery": 5}
+KIND_MYOCARDIUM, KIND_GREAT_ARTERY, KIND_GREAT_VEIN = 0, 1, 2
+REGION = {"lv": 0, "rv": 1, "la": 2, "ra": 3, "aorta": 4, "pulmonary_artery": 5, "vena_cava": 6, "pulmonary_veins": 7}
+VESSEL_ROLES = ("aorta", "pulmonary_artery", "vena_cava", "pulmonary_veins")
 VALVES = {  # upstream -> downstream (normal points along the flow), default radius cm if not found
     "mitral_valve": ("la", "lv_cavity", 1.5),
     "aortic_valve": ("lv_cavity", "aorta", 1.2),
@@ -114,7 +115,9 @@ def build_fields(masks: dict[str, np.ndarray], grid: FineGrid) -> dict[str, np.n
     # Where the LV cavity label has no myocardium around it (mostly the valve plane), a minimal wall
     # keeps the LV closed instead of relying on neighbouring synthetic walls to cover it.
     f["lv_outer"] = np.minimum(grid.sdf(lv_solid), f["lv_cavity"] - LV_MIN_WALL_MM)
-    for role in ("rv", "la", "ra", "aorta", "pulmonary_artery"):
+    for role in WALL_MM:
+        if role not in fine:
+            fine[role] = np.zeros(grid.shape, bool)
         f[role] = grid.sdf(fine[role])
         # Measured wall when the source has one (Rodero meshes); otherwise a fixed-thickness wall. Either way only
         # where this blood pool is nearer than the LV epicardium (Voronoi split), so it never covers the LV outer surface.
@@ -161,10 +164,11 @@ def open_edge_count(mesh: trimesh.Trimesh) -> int:
 def vertex_attributes(points_mm: np.ndarray, fields: dict[str, np.ndarray], grid: FineGrid):
     """(weights uint8 n x 4, tissue uint8 n x 4) following build.ts vertexAttributes()."""
     s = {k: grid.sample(fields[k], points_mm) for k in (
-        "lv_outer", "rv_outer", "la_outer", "ra_outer", "aorta_outer", "pulmonary_artery_outer",
-        "outer", "cavity", "lv_cavity", "rv", "la", "ra", "aorta", "pulmonary_artery",
+        "lv_outer", "rv_outer", "la_outer", "ra_outer", *(f"{r}_outer" for r in VESSEL_ROLES),
+        "outer", "cavity", "lv_cavity", "rv", "la", "ra", *VESSEL_ROLES,
     )}
-    vessel_outer = np.minimum(s["aorta_outer"], s["pulmonary_artery_outer"])
+    vessel_outers = np.stack([s[f"{r}_outer"] for r in VESSEL_ROLES], axis=1)
+    vessel_outer = vessel_outers.min(axis=1)
     membership = np.stack([
         s["lv_outer"] - 1.2,
         np.maximum(s["rv_outer"], -s["lv_outer"]),  # RV only outside the LV (septum belongs to the LV)
@@ -179,17 +183,19 @@ def vertex_attributes(points_mm: np.ndarray, fields: dict[str, np.ndarray], grid
     depth = np.clip(-d_out / (-d_out + np.maximum(d_cav, 1e-4)), 0, 1)
     depth[d_out > 0] = 0
 
-    lumens = np.stack([s["lv_cavity"], s["rv"], s["la"], s["ra"], s["aorta"], s["pulmonary_artery"]], axis=1)
-    nearest_lumen = lumens.argmin(axis=1)  # region ids 0..5 line up with REGION
+    lumens = np.stack([s["lv_cavity"], s["rv"], s["la"], s["ra"], *(s[r] for r in VESSEL_ROLES)], axis=1)
+    nearest_lumen = lumens.argmin(axis=1)  # region ids 0..7 line up with REGION
     chamber_outer = np.stack([s["lv_outer"], s["rv_outer"], s["la_outer"], s["ra_outer"]], axis=1)
     vessel_dominant = vessel_outer < chamber_outer.min(axis=1) - 0.5
-    vessel_region = np.where(s["aorta_outer"] <= s["pulmonary_artery_outer"], REGION["aorta"], REGION["pulmonary_artery"])
+    nearest_vessel = vessel_outers.argmin(axis=1)
+    vessel_region = REGION["aorta"] + nearest_vessel
 
     endo = depth > 0.5
     region = np.where(endo, nearest_lumen, np.where(vessel_dominant, vessel_region, w[:, :4].argmax(axis=1)))
     # As in build.ts: off the endocardium the kind is the nearest vessel's (all arteries here); the shader
     # blends its colour by the anchored weight, so chamber walls stay myocardium-coloured.
-    kind = np.where(endo & (nearest_lumen < 4), KIND_MYOCARDIUM, KIND_GREAT_ARTERY)
+    vein = np.where(endo, nearest_lumen >= REGION["vena_cava"], nearest_vessel >= 2)
+    kind = np.where(endo & (nearest_lumen < 4), KIND_MYOCARDIUM, np.where(vein, KIND_GREAT_VEIN, KIND_GREAT_ARTERY))
 
     weights = np.round(w[:, :4] * 255).astype(np.uint8)
     tissue = np.stack([
@@ -475,8 +481,28 @@ def _atlas_coronaries(hi, samples, grid, fields, valves, lv, to_ras_pt, aortic_r
     return lines, radii, sources, report
 
 
+def _prov_sampler(prov: np.ndarray | None, affine: np.ndarray):
+    """Per-vertex provenance code from the labels-grid provenance volume (nearest labelled voxel); all CT without one."""
+    from .vessels import PROV, PROV_NONE
+    if prov is None:
+        return lambda pts: np.full(len(pts), PROV["ct"], np.uint8)
+    _, ind = ndimage.distance_transform_edt(prov == PROV_NONE, return_indices=True)
+    inv = np.linalg.inv(affine)
+
+    def sample(pts):
+        ijk = np.rint(np.asarray(pts) @ inv[:3, :3].T + inv[:3, 3]).astype(int)
+        ijk = np.clip(ijk, 0, np.array(prov.shape) - 1)
+        near = ind[:, ijk[:, 0], ijk[:, 1], ijk[:, 2]]
+        return prov[near[0], near[1], near[2]].astype(np.uint8)
+    return sample
+
+
+def _prov4(codes: np.ndarray) -> np.ndarray:
+    return np.stack([codes, np.zeros_like(codes), np.zeros_like(codes), np.zeros_like(codes)], axis=1).astype(np.uint8)
+
+
 def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None, lods=(("high", 300_000), ("low", 120_000)), ct=None, with_coronaries: bool = False,
-                coronaries: str = "routed"):
+                coronaries: str = "routed", prov: np.ndarray | None = None):
     """Returns ({lod: glb bytes}, manifest dict, lv cavity proxy dict, qa list, volumes or None).
 
     With `ct` (the CT on the labels' grid), volumes = (meta, image u8, label-index u8) for the slice views.
@@ -570,6 +596,8 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
 
     glbs, tissue_by_lod, points_by_lod = {}, {}, {}
     from .glb import write_glb
+    from .vessels import PROV
+    prov_at = _prov_sampler(prov, affine)
 
     for lod, mesh in meshes.items():
         weights, tissue = vertex_attributes(mesh.vertices, fields, grid)
@@ -577,7 +605,8 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
         normals = (np.asarray(mesh.vertex_normals) @ RAS_TO_APP.T * 10).astype(np.float32)
         parts = [{
             "name": "heart_tissue",
-            "attributes": {"POSITION": points, "NORMAL": normals, "_WEIGHTS": weights, "_TISSUE": tissue},
+            "attributes": {"POSITION": points, "NORMAL": normals, "_WEIGHTS": weights, "_TISSUE": tissue,
+                           "_PROV": _prov4(prov_at(mesh.vertices))},
             "indices": mesh.faces,
             "extras": {"structure": "myocardium", "layers": ["outer", "chambers", "vessels"]},
         }]
@@ -588,7 +617,8 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
             fat = np.clip(1 - (d - 3) / 6, 0, 1) * epi
             tissue[:, 1] = np.round(fat * 255).astype(np.uint8)
             near_all = cKDTree(mesh.vertices).query(coronary["pos"])[1]
-            from .coronary import VESSEL_KIND
+            from .coronary import VESSEL_KIND, VESSELS as _V
+            VESSELS_BY_ID = {i: v[0] for i, v in _V.items()}
             kind_of = np.vectorize(lambda i: VESSEL_KIND.get(int(i), 3))(coronary["vid"]) if len(coronary["vid"]) else np.zeros(0)
             for mesh_name, kind in (("coronary_arteries", 3), ("cardiac_veins", 4)):
                 keep = kind_of == kind
@@ -605,6 +635,7 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
                         "NORMAL": (coronary["nrm"][keep] @ RAS_TO_APP.T * 10).astype(np.float32),
                         "_WEIGHTS": weights[near_all[keep]],
                         "_TISSUE": np.tile(np.array([0, 0, kind, 8], np.uint8), (n, 1)),
+                        "_PROV": _prov4(np.vectorize(lambda i: PROV["atlas"] if coronary["sources"].get(VESSELS_BY_ID.get(int(i), ""), "routed") == "atlas" else PROV["illustrative"])(coronary["vid"][keep]).astype(np.uint8)),
                         "_CORO": np.stack([coronary["vid"][keep], np.round(coronary["t"][keep] * 255),
                                            np.clip(np.round(coronary["r"][keep] / 0.05), 0, 255), np.zeros(n)], axis=1).astype(np.uint8),
                     },
@@ -710,6 +741,7 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
         "attributes": {
             "_weights": "uint8 normalized vec4: deformation membership (lv, rv, la, ra); remainder = anchored vessels",
             "_tissue": "uint8 normalized vec4: x wall depth (0 epicardium .. 1 endocardium), y epicardial fat (always 0), z tissue kind byte, w region byte",
+            "_prov": "uint8 vec4: x provenance code (0 measured from CT, 1 AI segmentation, 2 dataset label, 3 atlas fitted to this heart, 4 illustrative)",
             "tissueKinds": {"myocardium": 0, "greatArtery": 1, "greatVein": 2, "coronaryArtery": 3, "coronaryVein": 4},
             "regions": ["lv", "rv", "la", "ra", "aorta", "pulmonary_artery", "vena_cava", "pulmonary_veins", "coronary_vessels"],
         },

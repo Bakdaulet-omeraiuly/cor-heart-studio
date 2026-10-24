@@ -41,6 +41,11 @@ Rebuild: `npm run build:asset` (≈ 2.5 min on an Apple M2). `--quick` makes a c
 | `_WEIGHTS` | uint8 normalized vec4 | deformation membership (LV, RV, LA, RA); the remainder anchors vessels |
 | `_TISSUE` | uint8 normalized vec4 | x: wall depth 0 epicardium … 1 endocardium; y: epicardial fat; z: tissue kind byte (0 myocardium, 1 great artery, 2 great vein, 3 coronary artery, 4 coronary vein); w: region byte (0 lv, 1 rv, 2 la, 3 ra, 4 aorta, 5 pulmonary_artery, 6 vena_cava, 7 pulmonary_veins, 8 coronary_vessels) |
 
+| `_PROV` | uint8 vec4 | x: provenance code — 0 measured from CT, 1 AI segmentation of this CT, 2 dataset label, 3 atlas fitted to this heart (BodyParts3D, CC BY-SA), 4 illustrative. Optional; absent = measured. (docs/atlas-heart.md) |
+
+Regions 6 (vena_cava) and 7 (pulmonary_veins) carry tissue kind 2 (great vein) when the asset has them: the atlas
+continuations of `cor_pipeline/vessels.py`, or AI segmentation for Tier B.
+
 Weights are a soft-max over chamber membership fields, so they vary continuously: deformation can't
 tear the surface at region borders. Wall depth lets endocardium and epicardium move differently.
 

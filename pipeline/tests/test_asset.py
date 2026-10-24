@@ -114,3 +114,26 @@ def test_ct_slices_share_the_mesh_frame(asset):
     assert np.linalg.norm(centroid_slices - centroid_mesh) < 0.2  # cm
     # 8-bit window: -100 HU -> 51, 300 HU -> 153 with the -300..700 HU range
     assert set(np.unique(image)) <= {51, 153}
+
+
+def test_prov_attribute_and_great_veins():
+    """A vena cava label becomes region 6 / kind great vein; _PROV carries each vertex's source (CT vs atlas)."""
+    from cor_pipeline.vessels import PROV
+    labels, affine = make_volume()
+    spacing = np.linalg.norm(affine[:3, :3], axis=0)
+    idx = np.argwhere(labels == 550)                          # MM-WHS right atrium
+    top = idx[np.argmax(idx[:, 2])]
+    x, y = top[0], top[1]
+    labels[x - 5:x + 6, y - 5:y + 6, top[2]:min(top[2] + int(30 / spacing[2]), labels.shape[2])][
+        labels[x - 5:x + 6, y - 5:y + 6, top[2]:min(top[2] + int(30 / spacing[2]), labels.shape[2])] == 0] = 20  # "SVC"
+    prov = np.where(labels == 20, PROV["atlas"], np.where(labels > 0, PROV["ct"], 255)).astype(np.uint8)
+    glbs, manifest, *_ = build_asset(labels, affine, "mmwhs", "synthetic", None, lods=(("low", 15_000),), prov=prov)
+    mesh = trimesh.load(io.BytesIO(glbs["low"]), file_type="glb").geometry["heart_tissue"]
+    t = np.asarray(mesh.vertex_attributes["_TISSUE"])
+    p = np.asarray(mesh.vertex_attributes["_PROV"])
+    assert p.dtype == np.uint8 and p.shape[1] == 4
+    svc = t[:, 3] == 6
+    assert svc.any() and (t[svc, 2] == 2).mean() > 0.8           # great vein
+    assert (p[svc, 0] == PROV["atlas"]).mean() > 0.8
+    assert (p[t[:, 3] == 0, 0] == PROV["ct"]).mean() > 0.95      # LV: measured
+    assert manifest["attributes"]["_prov"]
