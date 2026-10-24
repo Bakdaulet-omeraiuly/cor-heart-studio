@@ -5,13 +5,13 @@ import { Brain, HeartPulse, Moon, PanelRightClose, PanelRightOpen, ShieldCheck, 
 import { useApp, type Module } from "@/state/store";
 import { loadSamples } from "@/lib/session";
 import { PatientLibrary } from "../patient/PatientLibrary";
-import { Inspector } from "../inspector/Inspector";
 import { ImportDialog } from "../import/ImportDialog";
 import { PatientEditor } from "../patient/PatientEditor";
 import { CompareWorkspace } from "../comparison/CompareWorkspace";
 import { IconButton } from "../ui/primitives";
 import { HeartViewport } from "./HeartViewport";
 import { ContextBar } from "./ContextBar";
+import { InspectorColumn } from "./InspectorColumn";
 
 const BrainWorkspace = dynamic(() => import("@/brain/BrainWorkspace").then((m) => m.BrainWorkspace), { ssr: false });
 
@@ -27,6 +27,7 @@ export default function Workspace() {
   const set = useApp((s) => s.set);
   const organ = useApp((s) => s.module);
   const inspectorOpen = useApp((s) => s.inspectorOpen);
+  const inspectorWidth = useApp((s) => s.inspectorWidth);
 
   useEffect(() => { document.documentElement.dataset.theme = theme; }, [theme]);
   useEffect(() => {
@@ -73,12 +74,15 @@ export default function Workspace() {
         </div>
       </header>
       {organ === "brain" ? <main className="min-h-0 flex-1" aria-label="Brain workspace"><BrainWorkspace /></main> : (
-      <div className={`grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(420px,68dvh)_auto_auto] overflow-y-auto lg:grid-rows-1 lg:overflow-hidden ${inspectorOpen ? "lg:grid-cols-[260px_minmax(0,1fr)_360px]" : "lg:grid-cols-[260px_minmax(0,1fr)]"}`}>
+      <div
+        className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(420px,68dvh)_auto_auto] overflow-y-auto lg:grid-cols-[260px_minmax(0,1fr)_var(--inspector-w)] lg:grid-rows-1 lg:overflow-hidden"
+        style={{ "--inspector-w": inspectorOpen ? `${inspectorWidth}px` : "32px" } as React.CSSProperties}
+      >
         <div className="order-2 min-h-0 border-line bg-panel lg:order-1 lg:border-r"><PatientLibrary /></div>
         <main className="order-1 min-h-0 lg:order-2" aria-label="3D heart workspace">
           {workspace === "compare" ? <CompareWorkspace /> : <HeartViewport />}
         </main>
-        {inspectorOpen && <div className="order-3 min-h-0 border-line bg-panel lg:border-l"><Inspector /></div>}
+        <InspectorColumn />
       </div>
       )}
       {dialog?.kind === "import" && <ImportDialog />}

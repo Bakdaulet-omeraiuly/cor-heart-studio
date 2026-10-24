@@ -97,6 +97,24 @@ test("the inspector can be collapsed to widen the 3D view", async ({ page }) => 
   await expect.poll(async () => (await frames(page)) - start, { timeout: 30_000 }).toBeGreaterThan(30);
   await page.waitForTimeout(1200);
   await page.getByRole("main").screenshot({ path: `${shots}/e2e-tier-b-wide.png` });
-  await page.getByRole("button", { name: "Show inspector" }).click();
+  // reopen from the slim rail, close with the panel's own ✕
+  await page.getByRole("button", { name: "Open inspector" }).click();
   await expect(page.getByRole("complementary", { name: "Inspector" })).toBeVisible();
+  await page.getByRole("button", { name: "Close inspector" }).click();
+  await expect(page.getByRole("complementary", { name: "Inspector" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Show inspector" }).click();
+
+  // resize from its left edge (keyboard here; pointer drag uses the same handler)
+  const inspector = page.getByRole("complementary", { name: "Inspector" });
+  const w0 = (await inspector.boundingBox())!.width;
+  const handle = page.getByRole("separator", { name: "Resize inspector" });
+  await handle.focus();
+  for (let i = 0; i < 3; i++) await page.keyboard.press("ArrowRight");
+  await expect.poll(async () => (await inspector.boundingBox())!.width).toBeLessThan(w0 - 60);
+  const box = (await handle.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + 200);
+  await page.mouse.down();
+  await page.mouse.move(box.x - 150, box.y + 200, { steps: 5 });
+  await page.mouse.up();
+  await expect.poll(async () => (await inspector.boundingBox())!.width).toBeGreaterThan(w0 + 40);
 });

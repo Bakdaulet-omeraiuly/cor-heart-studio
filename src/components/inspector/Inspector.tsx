@@ -63,9 +63,14 @@ function Header({ entry }: { entry: PatientEntry }) {
           <h2 className="truncate text-[13px] font-semibold">{patientTitle(p)}</h2>
           <p className="num truncate text-[11px] text-faint" title={`patientId ${p.patientId} · studyId ${p.studyId}`}>{p.patientId} · {p.studyId}{p.studyDate ? ` · ${p.studyDate}` : ""}</p>
         </div>
-        <IconButton label="Download normalized JSON" onClick={() => download(`${p.patientId}_${p.studyId}.normalized.json`, JSON.stringify({ original: p.original, normalized: { observations: p.observations, derived: p.derived, valveFindings: p.valveFindings, wallMotion: p.wallMotion, wallThickness: p.wallThickness, issues: p.issues }, visual: entry.visual }, null, 2))}>
-          <Download className="h-4 w-4" />
-        </IconButton>
+        <div className="flex shrink-0 items-center">
+          <IconButton label="Download normalized JSON" onClick={() => download(`${p.patientId}_${p.studyId}.normalized.json`, JSON.stringify({ original: p.original, normalized: { observations: p.observations, derived: p.derived, valveFindings: p.valveFindings, wallMotion: p.wallMotion, wallThickness: p.wallThickness, issues: p.issues }, visual: entry.visual }, null, 2))}>
+            <Download className="h-4 w-4" />
+          </IconButton>
+          <IconButton label="Close inspector" onClick={() => useApp.getState().set({ inspectorOpen: false })}>
+            <X className="h-4 w-4" />
+          </IconButton>
+        </div>
       </div>
       {p.synthetic && <p className="mt-1 text-[11px] text-info">Synthetic demonstration record.</p>}
       <details className="mt-2 text-[12px] text-muted">
