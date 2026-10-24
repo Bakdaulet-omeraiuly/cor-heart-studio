@@ -15,7 +15,7 @@ import numpy as np
 import subprocess
 from scipy import ndimage
 
-from .labels import LABEL_MAPS
+from .labels import GREAT_VEINS, LABEL_MAPS
 from .centreline import _closed
 
 PROV = {"ct": 0, "ai": 1, "dataset": 2, "atlas": 3, "illustrative": 4}
@@ -33,7 +33,7 @@ TOTAL_CLASSES = ["aorta", "pulmonary_vein", "brachiocephalic_trunk", "subclavian
 
 
 def role_value(source: str, role: str) -> int:
-    for value, s in LABEL_MAPS[source].items():
+    for value, s in {**LABEL_MAPS[source], **GREAT_VEINS}.items():
         if s.region == role and s.kind != "wall":
             return value
     raise KeyError(f"{source} has no label for {role}")

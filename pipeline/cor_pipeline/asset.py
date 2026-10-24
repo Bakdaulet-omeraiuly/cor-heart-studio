@@ -20,7 +20,7 @@ from scipy.spatial import cKDTree
 from skimage import measure
 
 from .fidelity import boundary_points, summarise, surface_metrics
-from .labels import LABEL_MAPS
+from .labels import GREAT_VEINS, LABEL_MAPS
 from .mesh import RAS_TO_APP
 
 FINE_MM = 0.75
@@ -55,7 +55,7 @@ def _unit(v):
 def structure_masks(labels: np.ndarray, source: str) -> dict[str, np.ndarray]:
     """Boolean masks keyed by role: lv_cavity, lv_myocardium, rv, la, ra, aorta, pulmonary_artery (+ <region>_wall when measured)."""
     masks = {}
-    for value, structure in LABEL_MAPS[source].items():
+    for value, structure in {**LABEL_MAPS[source], **GREAT_VEINS}.items():
         # LV keeps cavity / myocardium keys; other regions: blood pool under the region name, measured wall as <region>_wall
         role = structure.key if structure.region == "lv" else (f"{structure.region}_wall" if structure.kind == "wall" else structure.region)
         masks[role] = masks.get(role, False) | (labels == value)

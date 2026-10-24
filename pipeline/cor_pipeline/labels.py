@@ -61,12 +61,11 @@ RODERO2021 = {
     12: Structure("pulmonary_artery_wall", "pulmonary_artery", "wall"),
 }
 
-# Great veins: no source labels them today; atlas continuations (vessels.py) and Tier B AI segmentation write these.
+# Great veins: no source labels them; atlas continuations (vessels.py) and Tier B AI segmentation write these values
+# into the label volume, on top of any source's own map.
 GREAT_VEINS = {
     20: Structure("vena_cava", "vena_cava", "vessel"),
     21: Structure("pulmonary_veins", "pulmonary_veins", "vessel"),
 }
-for _m in (MMWHS, TOTALSEG_V1, RODERO2021):
-    _m.update(GREAT_VEINS)
 
 LABEL_MAPS = {"mmwhs": MMWHS, "totalseg_v1": TOTALSEG_V1, "rodero2021": RODERO2021}
