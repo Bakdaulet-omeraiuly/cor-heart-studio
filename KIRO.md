@@ -148,7 +148,7 @@ Kiro's built-in spec PBT runs in the IDE. We worked in Kiro Web, so we wrote the
 section as a dependency-free property suite, `tests/unit/diagnosis/properties.test.ts`:
 - a seeded PRNG generates 1000 schema-valid random records per property, covering every module, units and missing
   values;
-- 13 properties are mapped to requirements (P1–P12 in the design);
+- 14 properties are mapped to requirements (P1–P12 in the design);
 - a failure prints the seed and the full counterexample record;
 - `PBT_SEED=<n>` replays it.
 
@@ -158,6 +158,12 @@ generated low-gradient aortic-stenosis records with reduced and preserved EF, a 
 The labels said "…(stage D2)" and "…(stage D3)": the "2" and "3" were on screen but in no `Evidence` item. The chat's
 checker would have rejected every reply that repeated those labels. The fix moved the ACC/AHA stage into
 `derived.accAhaStage` evidence. Afterwards the suite ran clean across 40 seeds × 1000 records × 13 properties.
+
+**A second property caught a cross-team bug.** We added "the chat's fallback text always passes the chat's own number
+guard", run on random records and on all 94 cases. It failed on 12 cases: the guard didn't understand the CAD-RADS grade
+"4A", signed rates such as "-4.8 %/year", or `cm²/m²`. Every chat reply about those records would have been rejected in
+production. The guard fix is in `src/app/api/assistant/guard.ts`, and the contract is now a test both sides run
+(`tests/unit/diagnosis/chat-contract.test.ts`).
 
 **Requirements we enabled PBT for:**
 - determinism (Req 1);

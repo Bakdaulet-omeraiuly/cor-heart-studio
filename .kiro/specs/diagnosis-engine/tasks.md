@@ -83,3 +83,12 @@ production. The engine is not imported by the UI yet, so these tasks cannot chan
   - [x] 12.2 Fix found by PBT: the D2/D3 stage names in low-gradient AS labels put digits on screen that no Evidence
         backed (Requirement 2.4). The stage now lives in `derived.accAhaStage` evidence.
   - _Requirements: 1.2, 2.1–2.5, 3.1–3.6, 5.1–5.3, 7.1, 8.2–8.3, 9.3, 11.1_
+
+- [x] 13. Engine ↔ chat contract
+  - [x] 13.1 `tests/unit/diagnosis/chat-contract.test.ts` runs every case through `assess` → `withIds` → `fallbackText`
+        → `guard` (the assistant's own modules) and requires the guard to pass. A matching property in `properties.test.ts`
+        does the same on random records.
+  - [x] 13.2 The first run failed on 12 of 94 cases: the guard rejected the CAD-RADS category digit ("4A"), signed rates
+        ("-4.8 %/year") and the `cm²/m²` unit. Fixed in `src/app/api/assistant/guard.ts` (agreed change to a shared file,
+        see the commit message); the assistant's own guard, fallback, ids and prompt tests still pass.
+  - _Requirements: 2.3, 2.4_

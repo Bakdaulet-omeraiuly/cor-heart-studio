@@ -316,7 +316,27 @@ someone with journal access can open them:
 
 Content was rephrased for compliance with licensing restrictions.
 
-## 8. Open items
+## 8. Engine ↔ chat contract check (2026-10-24)
+
+The chat replaces any reply its number guard rejects with `fallbackText(Assessment)`. That text is built only from
+engine output, so it must always pass the guard. `tests/unit/diagnosis/chat-contract.test.ts` checks this for all 94
+cases, and a property test checks it for random records. **The first run failed on 12 of 94 cases**:
+
+| What the engine wrote | Why the guard rejected it |
+|---|---|
+| "CAD-RADS 4A", "CAD-RADS 4B / 5" in labels and red flags | the grade is a string value ("4A"), so the digit was unaccounted for |
+| hippocampal "-4.8 %/year" | the minus sign was read as a range separator and `%/year` was not a known unit |
+| AVAi "0.35 cm²/m²" | `cm²/m²` was not a known unit (it matched `cm²`) |
+
+In production, every chat reply about a coronary, brain or low-flow AS record would have been rejected. Fix in
+`guard.ts`:
+- `%/year` and `cm²/m²` added as units;
+- a leading minus (after whitespace or at the start) read as a sign;
+- digits inside the engine's own string grades and values (CAD-RADS category, ACC/AHA stage) allowed.
+
+All 94 cases now pass, and so do the assistant's own guard (48), fallback (14), ids (14) and prompt (18) tests.
+
+## 9. Open items
 - **Clinician review:** 20 of the cases (suggested: `as-01`, `as-10`, `as-11`, `as-12`, `mr-04`, `ar-01`, `lv-04`, `lv-06`,
   `lv-13`, `lv-15`, `lv-17`, `lv-18`, `ch-03`, `ch-05`, `cad-04`, `cad-05`, `ecg-05`, `ecg-08`, `br-01`, `br-03`) should be
   checked by a physician. **Skipped for now** (team decision): every case has `"reviewedByClinician": false`.
