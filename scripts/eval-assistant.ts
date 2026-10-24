@@ -86,7 +86,7 @@ const MISSING_QUESTION = "What data are missing from this record, and why do the
 
 const ROOT = resolve(import.meta.dirname, "..");
 const CASES_DIR = resolve(ROOT, "tests/assistant/cases");
-const SAMPLES_FILE = resolve(ROOT, "public/samples/synthetic-patients.json");
+const SAMPLES_FILE = resolve(ROOT, "tests/fixtures/synthetic-patients.full.json");
 
 // --- Types ---------------------------------------------------------------------------------------------------
 

@@ -46,7 +46,7 @@ function patientFor(patientId: string): NormalizedPatient {
 
 /** The synthetic sample records shipped with the app (SYN-001 … ). */
 const SAMPLES = (
-  JSON.parse(readFileSync(resolve(process.cwd(), "public/samples/synthetic-patients.json"), "utf8")) as {
+  JSON.parse(readFileSync(resolve(process.cwd(), "tests/fixtures/synthetic-patients.full.json"), "utf8")) as {
     patients: unknown[];
   }
 ).patients;

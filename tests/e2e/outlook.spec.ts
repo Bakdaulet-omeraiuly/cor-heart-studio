@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { loadFullSamples } from "./support";
 import path from "node:path";
 
 const shots = path.resolve(__dirname, "../../docs/visual-review");
@@ -43,6 +44,7 @@ test("outlook: aortic stenosis today vs projected, from the record's own numbers
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/");
+  await loadFullSamples(page);
   await page.getByText("Synthetic 04 · Aortic valve stenosis").first().click();
   await page.getByTestId("outlook-toggle").click();
   const view = page.getByTestId("heart-outlook");
@@ -74,6 +76,7 @@ test("outlook: hypertensive LVH regresses on treatment, walls drawn through the 
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/");
+  await loadFullSamples(page);
   await page.getByText("Synthetic 03 · Concentric wall thickening").first().click();
   await page.getByTestId("outlook-toggle").click();
   const view = page.getByTestId("heart-outlook");

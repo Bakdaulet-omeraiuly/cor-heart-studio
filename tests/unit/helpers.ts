@@ -7,7 +7,7 @@ import type { NormalizedPatient } from "@/domain/types";
 
 export const ROOT = resolve(__dirname, "../..");
 export const readText = (p: string) => readFileSync(resolve(ROOT, p), "utf8");
-export const samplePatients = () => JSON.parse(readText("public/samples/synthetic-patients.json")).patients as Record<string, unknown>[];
+export const samplePatients = () => JSON.parse(readText("tests/fixtures/synthetic-patients.full.json")).patients as Record<string, unknown>[];
 
 export function norm(raw: unknown): NormalizedPatient {
   const r = normalizeRecord(raw);
