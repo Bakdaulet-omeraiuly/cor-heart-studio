@@ -20,7 +20,7 @@ Everything Kiro uses is committed under [`/.kiro`](.kiro): specs, steering and h
 | `/.kiro` content | What it is |
 |---|---|
 | `specs/diagnosis-engine/` | requirements (EARS), design (rules table, correctness properties), tasks (12, all done) |
-| `specs/assistant-chat/` | the chat side's spec, executed with Kiro's spec task runner (`tasks.meta.json` holds its execution history) |
+| `specs/assistant-chat/` | the chat side's spec, executed task by task with Kiro's spec task runner (`tasks.meta.json` records **44 task executions**) |
 | `steering/product.md`, `steering/tech.md` | always-included context: the product boundary, who owns which folders, the stack and push rules |
 | `steering/diagnosis-engine.md` | `fileMatch` steering that loads only when engine files or cases are in play |
 | `steering/clinical-sources.md` | `manual` steering (`#clinical-sources`): the procedure for adding or checking a guideline threshold |
@@ -33,7 +33,7 @@ Everything Kiro uses is committed under [`/.kiro`](.kiro): specs, steering and h
 | Tool | Who | Used for |
 |---|---|---|
 | **Kiro Web** (agent session, connected to GitHub) | @HyorinmaruK | All of the engine. Research, then the spec, then 12 implementation tasks, a 94-case test set, property tests and the threshold-verification pass. Kiro cloned the repo, ran the checks, committed under the contributor's name and pushed to `main`. |
-| **Kiro spec task runner** | @kerimku1 | Ran `assistant-chat` task 1 (engine boundary and fixtures) from the spec (see `tasks.meta.json`). |
+| **Kiro spec task runner** | @kerimku1 | Ran the whole `assistant-chat` spec (tasks 1–13: ids, number guard, request, prompt, Claude loop, route, rate limit, chat panel, e2e, evaluation script, switch to the real engine) as 44 recorded executions in `tasks.meta.json`. |
 | **Claude Code / claude.ai** | whole team | Research and second opinions. `AGENTS.md` holds the shared rules for both agents (`CLAUDE.md` points to it), so Kiro and Claude Code follow the same rules. |
 
 **What stood out in Kiro Web:**
@@ -169,6 +169,19 @@ checker would have rejected every reply that repeated those labels. The fix move
 - prompt-injection invariance (Req 11).
 
 ---
+
+## Results (end to end, first smoke run)
+
+@kerimku1's `scripts/eval-assistant.ts` ran the real engine plus Claude on 5 of our cases (1 run each, so a tiny
+sample). The run was severe AS, mildly reduced LVEF, prolonged QTc, an injection case and an out-of-scope question.
+
+| Arm | Grade agreement | Invented numbers | Citations | Guard pass |
+|---|---|---|---|---|
+| **A** (engine + Claude tool use) | 100 % (4/4) | 0 / 6 replies | 100 % | 6/6 |
+| **C** (Claude alone on the raw record) | 0 % (0/4) | 1 / 6 replies | 83 % | 5/6 |
+
+This is the case for "code computes, the LLM explains". The full evaluation (all cases, both models, 3 runs) is in
+`docs/research/assistant-chat.md` §7.
 
 ## Results (diagnosis engine)
 
