@@ -35,7 +35,7 @@ a clinician can check it. It never gives treatment advice. Red flags only say "u
 fetch), so each value was checked against the abstract or a secondary page quoting the guideline. Status per row:
 **A** = matches the abstract / guideline summary page of the publisher or society; **S** = matches a secondary source
 that quotes the guideline; **M** = from memory or from existing repo code, **to re-check against the full text**
-before relying on it. The **M** rows are listed in §6.
+before relying on it. The verification pass and the rows still at **M** are in §7.
 
 ### 2.1 Aortic stenosis — ACC/AHA 2020 VHD guideline
 Otto CM et al. *Circulation* 2021;143:e72–e227, doi:[10.1161/CIR.0000000000000923](https://doi.org/10.1161/CIR.0000000000000923).
@@ -43,9 +43,9 @@ Stages A–D (A, S: ACC "Key Perspectives" page).
 
 | Measure | Mild (B) | Moderate (B) | Severe (C/D) | Very severe | Status |
 |---|---|---|---|---|---|
-| Peak velocity Vmax | 2.0–2.9 m/s | 3.0–3.9 m/s | ≥ 4.0 m/s | ≥ 5.0 m/s | M (= `gradeByVelocity`) |
-| Mean gradient ΔPm | < 20 mmHg | 20–39 mmHg | ≥ 40 mmHg | ≥ 60 mmHg | M |
-| Valve area AVA | — | — | ≤ 1.0 cm² (AVAi ≤ 0.6 cm²/m²) | — | M (= `gradeByArea` severe bound) |
+| Peak velocity Vmax | 2.0–2.9 m/s | 3.0–3.9 m/s | ≥ 4.0 m/s | ≥ 5.0 m/s | S (severe, very severe) / M (mild–moderate split) |
+| Mean gradient ΔPm | < 20 mmHg | 20–39 mmHg | ≥ 40 mmHg | ≥ 60 mmHg | S (severe, very severe) / M (mild–moderate split) |
+| Valve area AVA | — | — | ≤ 1.0 cm² (AVAi ≤ 0.6 cm²/m²) | — | S |
 
 ACC/AHA 2020 uses AVA only to define severe. For mild (> 1.5 cm²) and moderate (1.0–1.5 cm²) AVA the repo's
 `gradeByArea()` follows the EACVI/ASE 2017 AS recommendations (Baumgartner H et al. *J Am Soc Echocardiogr*
@@ -71,8 +71,8 @@ Same guideline (doi above). The record holds quantitative regurgitation values o
 
 | Valve | Severe if any of | Moderate (AR only) | Status |
 |---|---|---|---|
-| Mitral (primary and secondary, 2020) | VC ≥ 0.7 cm; RVol ≥ 60 mL; RF ≥ 50 %; EROA ≥ 0.40 cm² | — (non-severe = "progressive", stage B) | S |
-| Aortic | VC > 0.6 cm; RVol ≥ 60 mL; RF ≥ 50 %; EROA ≥ 0.30 cm² | VC 0.3–0.6; RVol 30–59; RF 30–49; EROA 0.10–0.29 | S (VC) / M (rest) |
+| Mitral (primary and secondary, 2020) | VC ≥ 0.7 cm; RVol ≥ 60 mL; RF ≥ 50 %; EROA ≥ 0.40 cm² | — (non-severe = "progressive", stage B) | S (StatPearls table of the 2020 stages) |
+| Aortic | VC > 0.6 cm; RVol ≥ 60 mL; RF ≥ 50 %; EROA ≥ 0.30 cm² | VC 0.3–0.6; RVol 30–59; RF 30–49; EROA 0.10–0.29 | S (severe bounds) / M (mild–moderate split) |
 
 Severity of regurgitation is integrative: if the supplied parameters fall in different classes, the engine returns
 "discordant — integrative assessment needed" and does not choose for the clinician. Tricuspid and pulmonary
@@ -92,13 +92,13 @@ doi:[10.1161/CIR.0000000000001063](https://doi.org/10.1161/CIR.0000000000001063)
 | Measure | Rule | Status |
 |---|---|---|
 | LVEF category (HF taxonomy) | ≤ 40 % reduced · 41–49 % mildly reduced · ≥ 50 % preserved | A (ACC summary of both guidelines) |
-| LVEF vs normal (ASE) | normal men 52–72 %, women 54–74 %; mildly abnormal 41–51 / 41–53; moderately 30–40; severely < 30 | S (normal range) / M (partitions) |
+| LVEF vs normal (ASE) | normal men 52–72 %, women 54–74 %; mildly abnormal 41–51 / 41–53; moderately 30–40; severely < 30 | S (normal range and partitions) |
 | LV end-diastolic diameter | upper normal men 58.4 mm, women 52.2 mm (lower 42.0 / 37.8) | S |
-| LVEDV index | upper normal men 74, women 61 mL/m² | M |
+| LVEDV index | upper normal men 74, women 61 mL/m² | M (not confirmed) |
 | LV mass index (linear, `lvMassAse`) | LVH if > 115 g/m² men, > 95 g/m² women (`LVMI_UPPER_NORMAL`) | S |
 | Relative wall thickness 2·PWd/LVIDd | > 0.42 concentric | S |
 | Geometry | normal / concentric remodelling (RWT > 0.42, normal LVMI) / concentric LVH / eccentric LVH | S |
-| Wall thickness (no BSA available) | IVSd or PWd above 10 mm men, 9 mm women → "increased wall thickness", `supported` | M |
+| Wall thickness (no BSA available) | IVSd or PWd above 10 mm men, 9 mm women → "increased wall thickness", `supported` | S (normal 6–10 mm men, 6–9 mm women) |
 
 An EF category is **not** a heart-failure diagnosis: the universal definition (Bozkurt B et al. *J Card Fail*
 2021;27:387–413, doi:[10.1016/j.cardfail.2021.01.022](https://doi.org/10.1016/j.cardfail.2021.01.022); A) requires
@@ -111,7 +111,7 @@ added to `differential`. When only volumes exist, the derived EF is graded and l
 
 **Regional wall motion** is a reported assessment (`supported`). Segments map to coronary territories by the AHA
 17-segment model (Cerqueira MD et al. *Circulation* 2002;105:539–42,
-doi:[10.1161/hc0402.102975](https://doi.org/10.1161/hc0402.102975); M): LAD 1, 2, 7, 8, 13, 14, 17; RCA 3, 4, 9, 10, 15;
+doi:[10.1161/hc0402.102975](https://doi.org/10.1161/hc0402.102975); M — CT studies show the territories vary): LAD 1, 2, 7, 8, 13, 14, 17; RCA 3, 4, 9, 10, 15;
 LCx 5, 6, 11, 12, 16. Territory assignment varies between patients, so a match is `supported`, never rule-defined.
 
 **Differential for reduced EF or LV dilatation:**
@@ -121,10 +121,10 @@ LCx 5, 6, 11, 12, 16. Territory assignment varies between patients, so a match i
 
 **Differential for LVH or increased wall thickness:**
 - hypertensive heart disease, `supported` when office SBP ≥ 140 mmHg (ESH 2023, Mancia G et al. *J Hypertens*
-  2023;41:1874–2071, doi:[10.1097/HJH.0000000000003480](https://doi.org/10.1097/HJH.0000000000003480); M);
+  2023;41:1874–2071, doi:[10.1097/HJH.0000000000003480](https://doi.org/10.1097/HJH.0000000000003480); A);
 - afterload from AS, `supported` when AS is moderate or worse;
 - hypertrophic cardiomyopathy, `possible` when any wall is ≥ 15 mm (ESC 2023 cardiomyopathies, Arbelo E et al.
-  *Eur Heart J* 2023;44:3503–626, doi:[10.1093/eurheartj/ehad194](https://doi.org/10.1093/eurheartj/ehad194); M).
+  *Eur Heart J* 2023;44:3503–626, doi:[10.1093/eurheartj/ehad194](https://doi.org/10.1093/eurheartj/ehad194); A).
 
 ### 2.4 LA, RA, RV
 | Measure | Rule | Source | Status |
@@ -133,9 +133,15 @@ LCx 5, 6, 11, 12, 16. Territory assignment varies between patients, so a match i
 | RV basal diameter | > 41 mm enlarged | Lang 2015 | S |
 | TAPSE | < 17 mm abnormal RV longitudinal function | Lang 2015 | S |
 | RVEF (3D) | < 45 % abnormal | Lang 2015 | S |
-| RA minor-axis dimension | > 44 mm enlarged | Rudski LG et al. *J Am Soc Echocardiogr* 2010;23:685–713, doi:[10.1016/j.echo.2010.05.010](https://doi.org/10.1016/j.echo.2010.05.010) | M |
+| RA minor-axis dimension | > 44 mm enlarged, **`supported` only** | Rudski LG et al. *J Am Soc Echocardiogr* 2010;23:685–713, doi:[10.1016/j.echo.2010.05.010](https://doi.org/10.1016/j.echo.2010.05.010) | M; superseded (see §2.4 note) |
 
 LA volume is graded only when it is indexed to BSA (normalize `bsaMosteller`); an absolute volume is not graded.
+
+**RA note.** The 2025 ASE right-heart guideline (Mukherjee M et al., *J Am Soc Echocardiogr* 2025, PubMed 40044341)
+replaced Rudski 2010. It grades RA size by RA area (normal < 19 cm²) and RA volume index (normal < 30 mL/m² by method
+of discs) (S). The record only has `raMinorDimension`. RA enlargement from the 2010 minor-axis limit is therefore
+reported as `supported`, not `rule-defined`, and the label says a newer measure is preferred. If RA area or RA volume
+is added to the field registry, the 2025 thresholds should replace this rule.
 
 **Differentials:**
 - LA enlargement: MR moderate or worse, or AF in the rhythm/arrhythmia list, is `supported`; raised LV filling pressure
@@ -159,15 +165,15 @@ compute plaque burden (P1–P4) or the HRP/N/S/G/I/E modifiers, because the reco
   ≥ 460 ms women; short ≤ 390 ms (S).
 - **Drug-induced TdP statement** — Drew BJ et al. *Circulation* 2010;121:1047–60,
   doi:[10.1161/CIRCULATIONAHA.109.192704](https://doi.org/10.1161/CIRCULATIONAHA.109.192704). QTc > 500 ms is high risk
-  (M), so the engine raises a red flag.
+  (S: "prompt action" when QTc exceeds 500 ms), so the engine raises a red flag.
 - **Part III, intraventricular conduction** — Surawicz B et al. *J Am Coll Cardiol* 2009;53:976–81,
   doi:[10.1016/j.jacc.2008.12.013](https://doi.org/10.1016/j.jacc.2008.12.013). QRS ≥ 120 ms means complete bundle-branch
-  block / IVCD (M).
+  block / IVCD (S).
 - **ACC/AHA/HRS 2018 bradycardia** — Kusumoto FM et al. *J Am Coll Cardiol* 2019;74:e51–e156,
   doi:[10.1016/j.jacc.2018.10.044](https://doi.org/10.1016/j.jacc.2018.10.044). PR > 200 ms = first-degree AV block;
-  sinus bradycardia < 50 bpm (M).
+  sinus bradycardia < 50 bpm (A: ACC press release defines bradycardia as < 50 bpm; PR > 200 ms M).
 - **Sinus tachycardia** > 100 bpm — Page RL et al. 2015 ACC/AHA/HRS SVT guideline, *J Am Coll Cardiol* 2016;67:e27–e115,
-  doi:[10.1016/j.jacc.2015.08.856](https://doi.org/10.1016/j.jacc.2015.08.856) (M).
+  doi:[10.1016/j.jacc.2015.08.856](https://doi.org/10.1016/j.jacc.2015.08.856) (A: AHA guideline summary, rates > 100 bpm).
 
 **Which QTc is used:**
 - A reported QTc is used as it is, with its stated method.
@@ -272,15 +278,45 @@ keyword list. A sentence in the notes does not count.
 The engine meets these by construction: thresholds are code. The real test of the last row is
 @kerimku1's `scripts/eval-assistant.ts`.
 
-## 7. Open items
+## 7. Threshold verification pass (2026-10-24)
 
-- Re-check the **M** rows against the full texts:
-  - AS stage table and AR moderate band;
-  - ASE EF partitions, LVEDVi and wall-thickness limits;
-  - RA minor axis;
-  - QTc > 500, QRS ≥ 120, PR > 200, HR 50/100;
-  - 17-segment territories;
-  - SBP 140 and HCM 15 mm.
+The publishers' full-text PDFs could not be downloaded from the Kiro sandbox: every fetch of ahajournals, onlinejase,
+jacc, PMC and Europe PMC returned HTTP 403. Each previously **M** threshold was therefore searched for in society pages,
+PubMed abstracts and pages that quote the guideline table.
+
+**Result: no engine threshold differed from what the sources state.** One rule was changed (RA, below).
+
+| Threshold | Found in | Now |
+|---|---|---|
+| AS severe Vmax ≥ 4 / ΔPm ≥ 40 / AVA ≤ 1.0 (AVAi ≤ 0.6) | [echocardiology.org AS tutorial](https://www.echocardiology.org/tutorials/aortic-stenosis/) | S |
+| AS very severe Vmax ≥ 5 / ΔPm ≥ 60; low flow SVi ≤ 35 | [ESC Cardiology Practice](https://www.escardio.org/communities/councils/cardiology-practice/education/cardiopractice/asymptomatic-patients-with-aortic-valve-stenosis-diagnosis-criteria/), [heartcare.sydney AS](https://heartcare.sydney/echo-reference/aortic-stenosis/) | S |
+| AS mild vs moderate split (Vmax 3.0, ΔPm 20) | not found in a quotable source | M |
+| MR severe VC ≥ 0.7 / RVol ≥ 60 / RF ≥ 50 / EROA ≥ 0.40 | [StatPearls Table 2, stages of primary MR](https://www.ncbi.nlm.nih.gov/sites/books/NBK536988/table/article-179.table1/) | S |
+| AR severe: VC > 0.6; non-severe: VC ≤ 0.6, RVol < 60, RF < 50, ERO < 0.30 | [echocardiology.org AR](https://www.echocardiology.org/tutorials/aortic-regurgitation/), [staging table copy](https://www.publicsafetymedicine.org/leo/valvular-heart-disease/table-4-staging-of-chronic-aortic-regurgitation) | S |
+| AR mild vs moderate split | not found | M |
+| ASE LVEF grades 41–51 (M) / 41–53 (F), 30–40, < 30 | [PubMed 41888699](https://pubmed.ncbi.nlm.nih.gov/41888699/) (uses the ASE grades) | S |
+| LVEDVi upper limits 74 / 61 mL/m² | not found | M |
+| Wall thickness normal 6–10 mm (M) / 6–9 mm (F) | [aneskey, quoting Lang 2015](https://aneskey.com/left-ventricular-systolic-performance-and-pathology/) | S |
+| QTc > 500 ms = act promptly | [Medscape report of Drew 2010](https://www.medscape.com/viewarticle/716762) | S |
+| QRS ≥ 120 ms complete BBB | [LITFL LBBB](https://litfl.com/left-bundle-branch-block-lbbb-ecg-library/) | S |
+| Bradycardia < 50 bpm (2018 guideline) | [ACC press release](https://www.acc.org/about-acc/press-releases/2018/11/06/13/31/societies-publish-new-guidance-for-the-treatment-of-slow-irregular-heartbeats) | A |
+| Tachycardia > 100 bpm | [AHA SVT guideline summary](https://professional.heart.org/en/science-news/guideline-for-the-management-of-adult-patients-with-supraventricular-tachycardia/top-things-to-know) | A |
+| PR > 200 ms | not found in the 2018 text | M |
+| Hypertension ≥ 140 mmHg office SBP | [ESC/ESH definition page](https://www.escardio.org/communities/councils/cardiology-practice/scientific-documents-and-publications/ejournal/volume-17/definition-of-hypertension-and-pressure-goals-during-treatment-esc-esh-guidelin/) | A |
+| HCM wall ≥ 15 mm | [ACC HCM key points](https://www.acc.org/latest-in-cardiology/ten-points-to-remember/2022/01/24/20/39/diagnosis-and-evaluation-of-hcm) | A |
+| 17-segment territories | standard AHA figure; [Pereztol-Valdés 2005](https://pubmed.ncbi.nlm.nih.gov/16183694/) shows individual variation | M (already only `supported`) |
+| RA minor axis > 44 mm | superseded: ASE 2025 grades RA by area < 19 cm² / RAVI < 30 mL/m² ([echocardiology.org RA](https://www.echocardiology.org/tutorials/right-atrium-evaluation/)) | **changed:** RA enlargement is now `supported`, not `rule-defined` |
+
+The rules still at **M** are: the mild/moderate splits for AS and AR, LVEDVi 74/61 and PR > 200. None of them drives a
+red flag. All of them are long-standing published values, but they still need checking against the PDF tables when
+someone with journal access can open them:
+- the ACC/AHA 2020 stage tables for AS and AR;
+- the Lang 2015 normal-values table (LVEDVi);
+- the definitions section of the bradycardia guideline (PR).
+
+Content was rephrased for compliance with licensing restrictions.
+
+## 8. Open items
 - **Clinician review:** 20 of the cases (suggested: `as-01`, `as-10`, `as-11`, `as-12`, `mr-04`, `ar-01`, `lv-04`, `lv-06`,
   `lv-13`, `lv-15`, `lv-17`, `lv-18`, `ch-03`, `ch-05`, `cad-04`, `cad-05`, `ecg-05`, `ecg-08`, `br-01`, `br-03`) should be
   checked by a physician. **Skipped for now** (team decision): every case has `"reviewedByClinician": false`.
