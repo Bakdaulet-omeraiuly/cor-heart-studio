@@ -1,12 +1,13 @@
 "use client";
 // Renders one assistant reply (Requirements 10.3, 10.4, 10.8).
 //
-// - `ok`: the guarded model text, first stripped of stray `**` and leading `- ` bullets (`stripMarkdown`), with every `[F#]` / `[E#]` / `[M#]` citation turned into a small id button.
+// - `ok`: the guarded model text, first stripped of stray `**` and leading `- ` bullets (`stripMarkdown`), with every `[F#]` / `[E#]` / `[M#]` / `[R#]` citation turned into a small id button.
 //   Hover or keyboard focus shows the ref (label · field = value unit · rule · source; for an `M#` missing item:
-//   field · why); activating it calls `onActivate(ref)` (the panel highlights the ref and calls `focusTarget`,
-//   which moves the 3D view for `F#`/`E#` and does nothing for `M#`).
-// - `fallback`: the engine's Assessment as a plain list with the same id buttons, plus the "answer withheld"
-//   note. Rendered from the structured `assessment`, not by parsing the fallback prose.
+//   field · why; for an `R#` red flag: label · text); activating it calls `onActivate(ref)` (the panel highlights
+//   the ref and calls `focusTarget`, which moves the 3D view for `F#`/`E#` and does nothing for `M#`/`R#`).
+// - `fallback`: the engine's Assessment as a plain list with the same id buttons (each followed by a space before
+//   its label), plus the "answer withheld" note. Rendered from the structured `assessment`, not by parsing the
+//   fallback prose.
 import { useId } from "react";
 import type { Ref } from "@/app/api/assistant/ids";
 import type { Evidence } from "@/app/api/assistant/engine";
@@ -53,9 +54,11 @@ function FallbackList({ reply, activeId, onActivate }: ReplyTextProps) {
           <ul className="mt-0.5 space-y-1">
             {g.items.map((f) => (
               <li key={f.id}>
-                <div className="flex flex-wrap items-baseline gap-1">
-                  {btn(f.id)}
-                  <span className="text-ink">{f.label}</span>
+                {/* Inline flow with real spaces (not flex gaps), so id and label never run together in copied
+                    text or for screen readers. */}
+                <div>
+                  {btn(f.id)}{" "}
+                  <span className="text-ink">{f.label}</span>{" "}
                   <span className="text-faint">({f.basis})</span>
                 </div>
                 {f.evidence.length > 0 && (
@@ -65,10 +68,10 @@ function FallbackList({ reply, activeId, onActivate }: ReplyTextProps) {
                       const ref = reply.refs[e.id];
                       const value = ref ? refValue(ref) : typeof e.value === "number" ? `${e.value}${e.unit ? ` ${e.unit}` : ""}` : null;
                       return (
-                        <li key={e.id} className="flex flex-wrap items-baseline gap-1 text-muted">
-                          {btn(e.id)}
+                        <li key={e.id} className="text-muted">
+                          {btn(e.id)}{" "}
                           <span className="num">{e.field}</span>
-                          {value && <span className="num text-ink">= {value}</span>}
+                          {value && <>{" "}<span className="num text-ink">= {value}</span></>}
                         </li>
                       );
                     })}
@@ -85,9 +88,9 @@ function FallbackList({ reply, activeId, onActivate }: ReplyTextProps) {
           <h4 className="text-[11px] font-medium uppercase tracking-wider text-faint">Missing</h4>
           <ul className="mt-0.5 space-y-0.5">
             {a.missing.map((m) => (
-              <li key={m.id} className="flex flex-wrap items-baseline gap-1 text-muted">
-                {btn(m.id)}
-                <span className="num text-ink">{m.field}</span>
+              <li key={m.id} className="text-muted">
+                {btn(m.id)}{" "}
+                <span className="num text-ink">{m.field}</span>{" "}
                 <span>— {m.why}</span>
               </li>
             ))}
@@ -97,7 +100,14 @@ function FallbackList({ reply, activeId, onActivate }: ReplyTextProps) {
       {a.redFlags.length > 0 && (
         <section className="mt-1.5">
           <h4 className="text-[11px] font-medium uppercase tracking-wider text-error">Red flags</h4>
-          <ul className="mt-0.5 space-y-0.5">{a.redFlags.map((r, i) => <li key={i} className="text-error">{r}</li>)}</ul>
+          <ul className="mt-0.5 space-y-0.5">
+            {a.redFlags.map((r) => (
+              <li key={r.id} className="text-error">
+                {btn(r.id)}{" "}
+                <span>{r.text}</span>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
     </div>

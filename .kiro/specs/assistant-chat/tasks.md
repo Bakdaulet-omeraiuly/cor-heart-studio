@@ -124,18 +124,66 @@ Before the first task, read `node_modules/next/dist/docs/01-app/01-getting-start
     `docs/research/assistant-chat.md`, clearly labelled as a smoke run.
   - _Requirements: 3.1, 3.5, 13.2, 13.4_
 
+- [x] 14. Red-flag ids, out-of-scope rule, clinical terms
+  - Code changes stay in `src/app/api/assistant/` and `src/components/assistant/` (plus unit tests and the e2e canned
+  responses). Nothing in `src/domain/diagnosis/` changes.
+  - [x] 14.1 R ids end to end: `withIds` assigns `R1`, `R2`, … to `redFlags` in order (`IdedAssessment.redFlags`
+    becomes `Ided<{ text: string }>[]`); `refsFor` adds `kind: "redFlag"` refs (label "Red flag", `text`, no
+    target/organ); `assessmentForModel` sends each red flag as `{ id, text }`; the guard accepts known `R#` ids as
+    citations (unknown `R#` → `unknown_id`) and strips `[R#]` before number extraction; `fallbackText` cites each red
+    flag by its `R#` id; `replyParts.ts` / `ReplyText.tsx` render `R#` buttons with an InfoTip only; `focusTarget` is
+    a no-op for a red-flag ref; the fallback list puts a space between each id and its label. Unit tests (ids,
+    prompt, guard, fallback, replyParts, focusTarget); update the e2e canned responses for the new `redFlags` shape.
+    - _Requirements: 3.2, 6.3, 6.5, 6.7, 7.1, 10.3, 11.3, 12.1, 12.2_
+  - [x] 14.2 `SYSTEM_PROMPT`: rule 5 cites the red flag as `[R#]`; rule 6 declines without quoting record values or
+    numbers, says the topic is not assessed and lists what the assistant can help with. Update `prompt.test.ts`.
+    - _Requirements: 5.5, 5.6, 12.1_
+  - [x] 14.3 Guard clinical terms: add the clinical-term list to the "clinical" sentence test, with the refusal /
+    "what I can help with" exception. `guard.test.ts`: "Low oxygen saturation can strain the heart and lengthen the
+    QT interval." → rejected (uncited); "Oxygen saturation is not something I assess." → accepted; "Urgent
+    specialist referral is advised [R1]." → accepted for SYN-004 (real engine on the normalized SYN-004 sample
+    record — if SYN-004 has no red flag, report it; do not change the engine); plus a few term cases. Confirm
+    `fallbackText` still always passes `guard()`.
+    - _Requirements: 6.4, 6.5, 12.1_
+  - [x] 14.4 Full check: `npm run typecheck && npm run lint && npm test && npm run build && npm run test:e2e`; restore
+    `docs/visual-review/` screenshots if they were rewritten without an intended visual change.
+    - _Requirements: 12.3_
+
+- [x] 15. Scope-topic exception and referral rule
+  - Fixes the user report: a "what I can help with" sentence listing our own scope topics was blocked as uncited when
+    it contained "QTc", "CAD-RADS 2.0" or "graded by". Code changes stay in `src/app/api/assistant/` and
+    `tests/unit/assistant/`. Nothing in `src/domain/diagnosis/` changes.
+  - [x] 15.1 Scope topics: export `SCOPE_TOPICS` from `prompt.ts` and build rule 6's covered-topic list from it. In
+    `guard.ts`, the refusal / "what I can help with" exception accepts any list item equal to a scope topic
+    (case-insensitive), including "coronary stenosis graded by CAD-RADS 2.0": for both the citation check (its grade
+    word, number, clinical term or finding label/condition match does not make the sentence clinical) and the number
+    check (its "2.0" is not checked). Non-scope items fall back to the short-noun-phrase rule; any claim word still
+    blocks. The sentence split ends a sentence at a full stop right after a scope topic that ends in a digit. Unit
+    tests in `guard.test.ts` and `prompt.test.ts`: "I can help with aortic stenosis, LV function and QTc.", "I can
+    help with coronary stenosis graded by CAD-RADS 2.0." and "I can help with QTc." → accepted, against the inline
+    fixture and against real-engine Assessments whose finding label/condition overlaps a scope topic (SYN-004 aortic
+    stenosis, an ECG/QTc case); "Low oxygen saturation can lengthen the QT interval." → rejected; a non-scope list
+    item is still checked; rule 6 text contains every `SCOPE_TOPICS` entry.
+    - _Requirements: 5.6, 6.2, 6.4, 12.1_
+  - [x] 15.2 Referral terms clinical: add `refer`, `refers`, `referred`, `referral`, `referrals` (whole words) to the
+    clinical terms. Unit tests in `guard.test.ts`: "Urgent specialist referral is advised." uncited → rejected; with
+    `[R1]` → accepted (SYN-004, real engine); other `refer` forms uncited → rejected. Confirm `fallbackText` still
+    always passes `guard()` (`fallback.test.ts`).
+    - _Requirements: 5.5, 6.4, 6.5, 12.1_
+  - [x] 15.3 Check: `npm run typecheck && npm run lint && npm test`.
+    - _Requirements: 12.3_
+
 ## Task Dependency Graph
 
-Only incomplete leaf sub-tasks are listed. Task 13 runs before the re-run of 7.4; task 12 has no sub-tasks and
-waits for the real engine.
+Only incomplete leaf sub-tasks are listed. 15.1 and 15.2 both touch `guard.ts`, so they run one after the other;
+15.3 runs last.
 
 ```json
 {
   "waves": [
-    { "id": 0, "tasks": ["13.1"] },
-    { "id": 1, "tasks": ["13.2", "13.4"] },
-    { "id": 2, "tasks": ["13.3", "13.5"] },
-    { "id": 3, "tasks": ["7.4"] }
+    { "id": 0, "tasks": ["15.1"] },
+    { "id": 1, "tasks": ["15.2"] },
+    { "id": 2, "tasks": ["15.3"] }
   ]
 }
 ```

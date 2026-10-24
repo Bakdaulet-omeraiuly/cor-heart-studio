@@ -14,6 +14,8 @@
 
 import type { NormalizedPatient } from "@/domain/types";
 import type { IdedAssessment } from "./ids";
+// prompt.ts only imports types from ids.ts, so this adds no import cycle.
+import { SCOPE_TOPICS, SCOPE_TOPIC_ALIASES } from "./prompt";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -107,12 +109,12 @@ const NUMBER_TOKEN = new RegExp(
   "gu",
 );
 
-// Id tokens the engine uses for citations: findings `F#`, evidence `E#` and
-// missing items `M#`. We strip them BEFORE extracting numbers so the digits
-// inside `[F12]`, `[M2]` or a bare `E3` are never mistaken for a clinical number.
-// The bracketed form and the bare form are both covered; a word boundary keeps us
-// from eating the `E` in, say, "ECG".
-const ID_TOKEN = /\[(?:F|E|M)\d+\]|\b(?:F|E|M)\d+\b/g;
+// Id tokens the engine uses for citations: findings `F#`, evidence `E#`,
+// missing items `M#` and red flags `R#`. We strip them BEFORE extracting numbers
+// so the digits inside `[F12]`, `[M2]`, `[R1]` or a bare `E3` are never mistaken
+// for a clinical number. The bracketed form and the bare form are both covered; a
+// word boundary keeps us from eating the `E` in, say, "ECG".
+const ID_TOKEN = /\[(?:F|E|M|R)\d+\]|\b(?:F|E|M|R)\d+\b/g;
 
 // Leading list markers on each line: "1.", "2)", "- ", "* ", "• ". These are
 // document structure, not clinical numbers, so they are stripped per line before
@@ -461,21 +463,266 @@ const GRADE_WORD_RE = new RegExp(
   "iu",
 );
 
+// Clinical terms (Requirement 6.4, glossary "Clinical term"): cardiac and brain
+// measurement or structure terms. A sentence that names one of these is a
+// clinical statement, even without a number or grade word, so it must be cited
+// ("Low oxygen saturation can lengthen the QT interval." is a claim).
+//
+// Two groups, because short abbreviations are easy to hit by accident:
+//   - `CLINICAL_ABBREVIATIONS` are matched CASE-SENSITIVELY as whole tokens, so
+//     "PR" / "EF" / "QT" only match the upper-case abbreviation, never "pr" in
+//     "prior", "ef" in "effect" or a lower-case word that happens to be spelled
+//     the same.
+//   - `CLINICAL_TERMS` are ordinary words/phrases, matched CASE-INSENSITIVELY as
+//     whole words. Each entry is a regex fragment covering its sensible
+//     singular / plural / adjective forms; multi-word terms allow any run of
+//     whitespace between the words.
+//
+// "Whole" means no letter or digit directly before or after (a lookaround, not
+// `\b`, so the `c` in `QTc` and the `/` in `QT/QTc` behave as expected).
+const CLINICAL_ABBREVIATIONS = ["QTc", "QTC", "QT", "PR", "QRS", "LVEF", "EF"];
+
+export const CLINICAL_TERMS = [
+  String.raw`ejection\s+fractions?`,
+  String.raw`ventricles?`,
+  String.raw`ventricular`,
+  String.raw`atri(?:um|a)`,
+  String.raw`atrial`,
+  String.raw`valves?`,
+  String.raw`valvular`,
+  String.raw`stenos[ie]s`,
+  String.raw`stenotic`,
+  String.raw`regurgitations?`,
+  String.raw`regurgitant`,
+  String.raw`hypertroph(?:y|ies)`,
+  String.raw`hypertrophic`,
+  String.raw`coronary`,
+  String.raw`coronaries`,
+  String.raw`oxygen\s+saturations?`,
+  String.raw`blood\s+pressures?`,
+  String.raw`heart\s+rates?`,
+  String.raw`hippocamp(?:us|i|al)`,
+  String.raw`atroph(?:y|ies)`,
+  String.raw`atrophic`,
+  // Referral terms (task 15.2, Requirements 5.5, 6.4): a red-flag sentence such
+  // as "Urgent specialist referral is advised." is a clinical claim and must cite
+  // its `[R#]`. Whole words only: refer, refers, referred, referring, referral,
+  // referrals — the lookarounds keep "reference", "preference", "referee" out.
+  String.raw`refer(?:s|red|ring|rals?)?`,
+];
+
+const CLINICAL_ABBREVIATION_RE = new RegExp(
+  String.raw`(?<![A-Za-z0-9])(?:${CLINICAL_ABBREVIATIONS.join("|")})(?![A-Za-z0-9])`,
+  "u",
+);
+const CLINICAL_TERM_RE = new RegExp(
+  String.raw`(?<![A-Za-z0-9])(?:${CLINICAL_TERMS.join("|")})(?![A-Za-z0-9])`,
+  "iu",
+);
+
+/** Does the sentence name a clinical term (abbreviation or word)? */
+export function hasClinicalTerm(sentence: string): boolean {
+  return CLINICAL_ABBREVIATION_RE.test(sentence) || CLINICAL_TERM_RE.test(sentence);
+}
+
+// --- Refusal / "what I can help with" exception ----------------------------
+//
+// A refusal that only names a topic and says it is not assessed ("Oxygen
+// saturation is not something I assess.") and a sentence listing what the
+// assistant covers ("I can help with aortic stenosis, LV function and QTc.")
+// mention clinical terms without making a claim, so they do not trip the
+// clinical-term check. The exception is deliberately narrow: the WHOLE sentence
+// must fit one of the templates below, and the topic / list items must be short
+// noun phrases with no verb, modal or clause word. So "Low oxygen saturation can
+// strain the heart and lengthen the QT interval." (no template) and "Low oxygen
+// saturation lengthens QT, which is not something I assess." (clause word in the
+// topic) are still clinical. The exception never overrides a number, a grade
+// word or a finding label in an ordinary item: those keep a sentence clinical.
+//
+// Scope topics (task 15.1, Requirements 5.6, 6.2, 6.4): a list item that IS one
+// of our own scope topics (`SCOPE_TOPICS` or a `SCOPE_TOPIC_ALIASES` short form,
+// case-insensitive, whitespace collapsed) is accepted as is, even though
+// "coronary stenosis graded by CAD-RADS 2.0" holds a grade word and a number and
+// "QTc" / "aortic stenosis" may equal a finding's condition or label. Such items
+// are cut out of the sentence (`refusalOrHelpResidual`) before the number, grade
+// word and finding checks run, so they neither make the sentence clinical nor
+// have their "2.0" checked as a record number. Every other item still has to be
+// a short noun phrase, and whatever is left keeps all the usual checks.
+
+// Words that turn a would-be topic or list item into a claim: modals, auxiliaries,
+// common causal/effect verbs and clause words.
+const CLAIM_WORDS = new Set([
+  "is", "are", "was", "were", "be", "been", "being", "has", "have", "had",
+  "can", "could", "may", "might", "will", "would", "should", "must", "does", "do", "did",
+  "cause", "causes", "caused", "causing", "lead", "leads", "leading",
+  "lengthen", "lengthens", "lengthening", "shorten", "shortens", "shortening",
+  "prolong", "prolongs", "prolonging", "increase", "increases", "increasing",
+  "decrease", "decreases", "decreasing", "raise", "raises", "raising",
+  "lower", "lowers", "lowering", "strain", "strains", "straining",
+  "indicate", "indicates", "indicating", "suggest", "suggests", "suggesting",
+  "show", "shows", "showing", "mean", "means", "affect", "affects", "affecting",
+  "worsen", "worsens", "worsening", "improve", "improves", "improving",
+  "because", "which", "that", "who", "if", "when", "while", "so", "but", "since",
+]);
+
+// Up to this many words per topic / list item: enough for "left ventricular
+// function" or "questions about aortic stenosis", too few for a full claim.
+const MAX_TOPIC_WORDS = 6;
+
+/** Is `phrase` a short noun phrase (no claim word, at most MAX_TOPIC_WORDS words)? */
+function isTopicPhrase(phrase: string): boolean {
+  const words = phrase.trim().split(/\s+/u).filter((w) => w.length > 0);
+  if (words.length === 0 || words.length > MAX_TOPIC_WORDS) return false;
+  return words.every(
+    (w) => /^[\p{L}\p{N}'’/-]+$/u.test(w) && !CLAIM_WORDS.has(w.toLowerCase()),
+  );
+}
+
+/** Escape a literal for a RegExp; runs of whitespace match any whitespace run. */
+/**
+ * With `caseless`, each ASCII letter becomes a `[xX]` class, for use inside a
+ * regex that is itself case-sensitive.
+ */
+function phrasePattern(phrase: string, caseless = false): string {
+  return phrase
+    .trim()
+    .split(/\s+/u)
+    .map((word) => {
+      const escaped = word.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+      return caseless
+        ? escaped.replace(/[A-Za-z]/gu, (c) => `[${c.toLowerCase()}${c.toUpperCase()}]`)
+        : escaped;
+    })
+    .join(String.raw`\s+`);
+}
+
+// Every phrase that counts as a scope topic, longest first so the alternation
+// prefers "coronary stenosis graded by CAD-RADS 2.0" over "coronary stenosis".
+const SCOPE_PHRASES = [...new Set([...SCOPE_TOPICS, ...SCOPE_TOPIC_ALIASES])].sort(
+  (x, y) => y.length - x.length,
+);
+const SCOPE_ALT = SCOPE_PHRASES.map((t) => phrasePattern(t)).join("|");
+
+// Item separators in a topic list: ", ", ", and ", " and ", " or ".
+const ITEM_SEP = String.raw`\s*,\s*(?:(?:and|or)\s+)?|\s+(?:and|or)\s+`;
+
+// One list item at the current position: a whole scope topic (only when an
+// item boundary follows it, so "aortic stenosis severity" is an ordinary item),
+// otherwise the text up to the next separator. Sticky, so it is anchored at
+// `lastIndex`.
+const LIST_ITEM_RE = new RegExp(String.raw`(?:(${SCOPE_ALT})|(.+?))(?=${ITEM_SEP}|$)`, "iuy");
+const ITEM_SEP_RE = new RegExp(String.raw`(?:${ITEM_SEP})`, "iuy");
+
+/**
+ * Parse a comma / "and" / "or" separated topic list. Returns the items that are
+ * NOT scope topics, or null when the list is empty or one of those items is not
+ * a short noun phrase. Scope-topic items are accepted as is.
+ */
+function nonScopeItems(list: string): string[] | null {
+  const others: string[] = [];
+  let count = 0;
+  let at = 0;
+  while (at < list.length) {
+    LIST_ITEM_RE.lastIndex = at;
+    const item = LIST_ITEM_RE.exec(list);
+    if (!item) return null;
+    count += 1;
+    if (item[1] === undefined) {
+      if (!isTopicPhrase(item[2])) return null;
+      others.push(item[2].trim());
+    }
+    at = LIST_ITEM_RE.lastIndex;
+    ITEM_SEP_RE.lastIndex = at;
+    if (ITEM_SEP_RE.exec(list)) at = ITEM_SEP_RE.lastIndex;
+    else if (at < list.length) return null;
+  }
+  return count > 0 ? others : null;
+}
+
+const NEG = String.raw`(?:do\s+not|don['’]t|cannot|can['’]t|can\s+not|am\s+not\s+able\s+to|am\s+unable\s+to|won['’]t)`;
+const ASSESS_VERB = String.raw`(?:assess|evaluate|interpret|cover|grade|comment\s+on|answer\s+questions\s+(?:about|on))`;
+// Optional "here" / "in this app" / "from this record"-style tail.
+const TAIL = String.raw`(?:\s+(?:here|in\s+this\s+(?:app|tool|chat|assessment)|from\s+(?:this|the)\s+(?:record|data)|for\s+this\s+patient))?`;
+const LEAD = String.raw`(?:(?:sorry|unfortunately|however)\s*,?\s+)?`;
+
+// "<topic> is/are not something I (can) assess", "<topic> is not assessed",
+// "<topic> is not part of this assessment", "<topic> is outside what I assess", …
+const REFUSAL_TOPIC_FIRST = new RegExp(
+  String.raw`^${LEAD}(.+?)\s+(?:is|are)(?:\s+not|n['’]t)\s+(?:something|anything|a\s+topic|one)\s+(?:that\s+)?I\s+(?:can\s+)?${ASSESS_VERB}${TAIL}$`
+  + "|"
+  + String.raw`^${LEAD}(.+?)\s+(?:is|are)(?:\s+not|n['’]t)\s+(?:assessed|evaluated|covered|graded|part\s+of\s+(?:this|the|my)\s+assessment)${TAIL}$`
+  + "|"
+  + String.raw`^${LEAD}(.+?)\s+(?:is|are)\s+(?:outside|beyond)\s+(?:the\s+scope\s+of\s+)?(?:what\s+I\s+(?:can\s+)?${ASSESS_VERB}|this\s+assessment|my\s+scope)${TAIL}$`,
+  "iud",
+);
+
+// "I don't assess <topic>", "I cannot comment on <topic> here", …
+const REFUSAL_I_FIRST = new RegExp(
+  String.raw`^${LEAD}I\s+${NEG}\s+${ASSESS_VERB}\s+(.+?)${TAIL}$`,
+  "iud",
+);
+
+// "I can help with <list>", "What I can help with is <list>", "I can answer
+// questions about <list>", optionally introduced by "But"/"However,"/"Instead,".
+const HELP_WITH = new RegExp(
+  String.raw`^(?:(?:but|however|instead)\s*,?\s+)?(?:I\s+can\s+(?:help|assist)\s+(?:you\s+)?with|I\s+can\s+answer\s+questions\s+(?:about|on)|What\s+I\s+can\s+(?:help|assist)\s+with\s+(?:is|are|includes?)|I\s+cover)\s*:?\s+(.+)$`,
+  "iud",
+);
+
+/**
+ * If the sentence is a refusal that only names a topic, or a "what I can help
+ * with" list, return it with its scope-topic items cut out (the "residual");
+ * otherwise return null. Ids and the trailing full stop are ignored for the
+ * match. The residual keeps the template words and every non-scope item, so the
+ * number, grade-word and finding checks still see everything except our own
+ * scope topics.
+ */
+export function refusalOrHelpResidual(sentence: string): string | null {
+  const core = sentence
+    .replace(ID_TOKEN, " ")
+    .replace(/[.!?]+\s*$/u, "")
+    .replace(/\s+/gu, " ")
+    .trim();
+
+  for (const template of [REFUSAL_TOPIC_FIRST, REFUSAL_I_FIRST, HELP_WITH]) {
+    const match = template.exec(core);
+    if (!match) continue;
+    // The one capture group that took part holds the topic / list.
+    const group = match.findIndex((g, i) => i > 0 && g !== undefined);
+    const span = match.indices?.[group];
+    if (group < 1 || span === undefined) return null;
+    const others = nonScopeItems(match[group]);
+    if (others === null) return null;
+    return `${core.slice(0, span[0])}${others.join(", ")}${core.slice(span[1])}`;
+  }
+  return null;
+}
+
+/**
+ * Is the sentence a refusal that only names a topic, or a "what I can help
+ * with" list? Ids and the trailing full stop are ignored for the match.
+ */
+export function isRefusalOrHelpSentence(sentence: string): boolean {
+  return refusalOrHelpResidual(sentence) !== null;
+}
+
 // Id-token recognition, mirroring `ID_TOKEN` above but WITHOUT the global flag so
 // we can `.test()` / `.match()` per sentence without carrying `lastIndex` state
 // between calls. Captures the id itself (dropping the optional brackets) so we
-// can compare it against the known set. Covers both `[F2]`/`[E5]`/`[M1]` and bare
-// `F2`/`E5`/`M1`; the word boundary keeps the `E` in "ECG" from matching.
-const ID_TOKEN_CAPTURE = /\[((?:F|E|M)\d+)\]|\b((?:F|E|M)\d+)\b/gu;
+// can compare it against the known set. Covers both `[F2]`/`[E5]`/`[M1]`/`[R1]`
+// and bare `F2`/`E5`/`M1`/`R1`; the word boundary keeps the `E` in "ECG" from
+// matching.
+const ID_TOKEN_CAPTURE = /\[((?:F|E|M|R)\d+)\]|\b((?:F|E|M|R)\d+)\b/gu;
 
 /**
  * Collect the set of ids the Assessment actually produced.
  *
  * Every finding (and differential entry) carries an `F#` id, every evidence
- * item an `E#` id and every missing item an `M#` id (stamped by `withIds`). An
- * `[M#]` citation therefore satisfies a missing-data sentence. Any id token in the
- * reply that is not in this set (including an `M#` past the end of `missing[]`)
- * was invented by the model and is reported as unknown.
+ * item an `E#` id, every missing item an `M#` id and every red flag an `R#` id
+ * (stamped by `withIds`). An `[M#]` citation therefore satisfies a missing-data
+ * sentence and an `[R#]` citation a red-flag sentence. Any id token in the reply
+ * that is not in this set (including an `M#`/`R#` past the end of its list) was
+ * invented by the model and is reported as unknown.
  */
 function knownIds(a: IdedAssessment): Set<string> {
   const ids = new Set<string>();
@@ -487,6 +734,9 @@ function knownIds(a: IdedAssessment): Set<string> {
   }
   for (const m of a.missing) {
     ids.add(m.id);
+  }
+  for (const flag of a.redFlags) {
+    ids.add(flag.id);
   }
   return ids;
 }
@@ -532,6 +782,19 @@ function idTokensIn(text: string): string[] {
  * without terminal punctuation — the final fragment after the last boundary is
  * always included.
  */
+// Scope topics that end in a digit ("… CAD-RADS 2.0"): a full stop right after
+// one of them DOES end the sentence, despite the digit guard above, so
+// "I can help with coronary stenosis graded by CAD-RADS 2.0. The valve is
+// severe." splits into two sentences. Letters become `[xX]` classes because the
+// split regex is case-sensitive (its id patterns must stay upper-case).
+const SCOPE_DIGIT_END = SCOPE_PHRASES.filter((t) => /\d$/u.test(t))
+  .map((t) => phrasePattern(t, true))
+  .join("|") || "(?!)"; // never matches when no scope topic ends in a digit
+const SENTENCE_SPLIT = new RegExp(
+  String.raw`(?<=(?:(?<!\d)[.!?]|(?<![A-Za-z0-9])(?:${SCOPE_DIGIT_END})\.)(?:[ \t]*\[(?:F|E|M|R)\d+\])*)\s+(?![ \t]*\[(?:F|E|M|R)\d+\])`,
+  "u",
+);
+
 function splitSentences(text: string): string[] {
   // Split on: (a '.' not preceded by a digit, OR a '!'/'?'), optionally followed by
   // citation ids, then whitespace. The alternation keeps `!`/`?` unconditional
@@ -541,13 +804,14 @@ function splitSentences(text: string): string[] {
   // Citations written AFTER the full stop ("… rule-defined. [F1]") belong to the
   // sentence they follow — the live check (task 7.4) showed the model writes
   // them this way. So the split never happens between the punctuation and a
-  // following `[F#]`/`[E#]`/`[M#]` (negative lookahead), and does happen after
-  // such a trailing citation group (the optional group inside the lookbehind).
-  // A citation group only ever attaches to the ONE sentence directly before it;
-  // it never covers earlier sentences on the same line.
-  const parts = text.split(
-    /(?<=(?<!\d)[.!?](?:[ \t]*\[(?:F|E|M)\d+\])*)\s+(?![ \t]*\[(?:F|E|M)\d+\])/u,
-  );
+  // following `[F#]`/`[E#]`/`[M#]`/`[R#]` (negative lookahead), and does happen
+  // after such a trailing citation group (the optional group inside the
+  // lookbehind). A citation group only ever attaches to the ONE sentence directly
+  // before it; it never covers earlier sentences on the same line.
+  //
+  // The one exception to the digit guard is `SCOPE_DIGIT_END` (a full stop right
+  // after a scope topic that ends in a digit, see above).
+  const parts = text.split(SENTENCE_SPLIT);
   return parts.map((s) => s.trim()).filter((s) => s.length > 0);
 }
 
@@ -559,15 +823,19 @@ function splitSentences(text: string): string[] {
  *   - unknownIds: every id token in the reply that is not one of the Assessment's
  *     known ids. Order of first appearance, de-duplicated.
  *   - uncitedSentences: every "clinical" sentence that contains no KNOWN id. A
- *     sentence is clinical if it contains a number, a grade word, or a finding
- *     label/condition from the Assessment (case-insensitive substring). Note a
+ *     sentence is clinical if it contains a number, a grade word, a finding
+ *     label/condition from the Assessment (case-insensitive substring), or a
+ *     clinical term (`CLINICAL_TERMS` / abbreviations, whole words). Note a
  *     sentence whose only id is an unknown one is still uncited — the test is for
  *     a KNOWN id, so an invented citation does not satisfy it (and the unknown id
  *     is independently reported in `unknownIds`).
  *
  * Refusal and "what I can help with" sentences carry no number, grade word or
- * finding label, so they are not clinical and never require a citation — no
- * special-casing needed.
+ * finding label. They often name clinical terms, so a sentence that fits the
+ * narrow refusal / help-list templates (`isRefusalOrHelpSentence`) is exempt
+ * from the clinical-term check; it needs no citation. Its scope-topic items are
+ * also cut out before the number, grade-word and finding checks, so listing
+ * "coronary stenosis graded by CAD-RADS 2.0" or "QTc" does not make it clinical.
  */
 export function checkCitations(
   text: string,
@@ -596,13 +864,20 @@ export function checkCitations(
   // Uncited clinical sentences.
   const uncitedSentences: string[] = [];
   for (const sentence of splitSentences(text)) {
-    const lower = sentence.toLowerCase();
+    // For a refusal / help-list sentence, check only what is left after its
+    // scope-topic items are cut out (see `refusalOrHelpResidual`).
+    const residual = refusalOrHelpResidual(sentence);
+    const checked = residual ?? sentence;
+    const lower = checked.toLowerCase();
 
-    const hasNumber = extractNumbers(sentence).length > 0;
-    const hasGradeWord = GRADE_WORD_RE.test(sentence);
+    const hasNumber = extractNumbers(checked).length > 0;
+    const hasGradeWord = GRADE_WORD_RE.test(checked);
     const mentionsFinding = findingTerms.some((term) => lower.includes(term));
+    // A clinical term counts unless the sentence is a refusal that only names
+    // the topic or a "what I can help with" list.
+    const mentionsTerm = residual === null && hasClinicalTerm(sentence);
 
-    const isClinical = hasNumber || hasGradeWord || mentionsFinding;
+    const isClinical = hasNumber || hasGradeWord || mentionsFinding || mentionsTerm;
     if (!isClinical) {
       continue;
     }
@@ -615,6 +890,23 @@ export function checkCitations(
   }
 
   return { unknownIds, uncitedSentences };
+}
+
+/**
+ * The reply with every refusal / help-list sentence replaced by its residual
+ * (scope-topic items cut out); all other text, including line structure, is
+ * kept as is. Input to the number check.
+ */
+function withoutScopeTopics(text: string): string {
+  let out = "";
+  let cursor = 0;
+  for (const sentence of splitSentences(text)) {
+    const at = text.indexOf(sentence, cursor);
+    if (at < 0) continue;
+    out += text.slice(cursor, at) + (refusalOrHelpResidual(sentence) ?? sentence);
+    cursor = at + sentence.length;
+  }
+  return out + text.slice(cursor);
 }
 
 /**
@@ -638,7 +930,9 @@ export function guard(
 
   // Number check: any token that fails to match an allowed value is a violation.
   const allowed = allowedNumbers(a, p);
-  const hasBadNumber = extractNumbers(text).some(
+  // Scope topics listed in refusal / help sentences are cut out first, so the
+  // "2.0" in "CAD-RADS 2.0" is not checked as a record number (Req 6.2).
+  const hasBadNumber = extractNumbers(withoutScopeTopics(text)).some(
     (token) => !matchNumber(token, allowed),
   );
   if (hasBadNumber) {

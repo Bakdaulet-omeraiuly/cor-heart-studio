@@ -6,6 +6,7 @@ import { expect, test, type Page, type Route } from "@playwright/test";
 const DISCLAIMER = "Not a diagnosis — decision support for clinicians";
 const WITHHELD = "Generated answer withheld — showing the engine result.";
 const ENGINE_DISCLAIMER = "Synthetic demo data. Not a medical device; not a diagnosis.";
+const RED_FLAG_TEXT = "Severe aortic stenosis with reported symptoms: urgent specialist (heart valve team) review.";
 
 const assessment = {
   findings: [
@@ -25,7 +26,7 @@ const assessment = {
   ],
   differential: [],
   missing: [{ id: "M1", field: "valves.aortic.area", why: "Valve area confirms the grade when velocity and gradient disagree." }],
-  redFlags: [],
+  redFlags: [{ id: "R1", text: RED_FLAG_TEXT }],
   disclaimer: ENGINE_DISCLAIMER,
 };
 
@@ -34,6 +35,7 @@ const refs = {
   E1: { id: "E1", kind: "evidence", label: "Aortic stenosis, severe", field: "valves.aortic.peakVelocity", value: 4.3, unit: "m/s", rule: "R-VALVE-STEN-01", source: "ESC/EACTS 2021", organ: "heart", target: "aortic_valve" },
   E2: { id: "E2", kind: "evidence", label: "Aortic stenosis, severe", field: "valves.aortic.meanGradient", value: 46, unit: "mmHg", rule: "R-VALVE-STEN-01", source: "ESC/EACTS 2021", organ: "heart", target: "aortic_valve" },
   M1: { id: "M1", kind: "missing", label: "Missing data", field: "valves.aortic.area", why: "Valve area confirms the grade when velocity and gradient disagree." },
+  R1: { id: "R1", kind: "redFlag", label: "Red flag", text: RED_FLAG_TEXT },
 };
 
 const okReply = {
@@ -46,7 +48,7 @@ const okReply = {
 
 const fallbackReply = {
   status: "fallback",
-  text: "F1 Aortic stenosis, severe (rule-defined) — E1 peak velocity 4.3 m/s · E2 mean gradient 46 mmHg.\nMissing: M1 valves.aortic.area.",
+  text: `F1 Aortic stenosis, severe (rule-defined) — E1 peak velocity 4.3 m/s · E2 mean gradient 46 mmHg.\nMissing: M1 valves.aortic.area.\nR1 ${RED_FLAG_TEXT}`,
   assessment,
   refs,
   disclaimer: ENGINE_DISCLAIMER,
@@ -127,6 +129,8 @@ test("a fallback response shows the engine list and the withheld note", async ({
   const finding = log.getByRole("listitem").filter({ has: page.getByRole("button", { name: "Finding F1" }) });
   await expect(finding).toContainText("Aortic stenosis, severe");
   await expect(finding.getByText("(rule-defined)", { exact: true })).toBeVisible();
+  // each id button is separated from its label by a space (rendered text, tooltips are hidden)
+  await expect(finding).toContainText("F1 Aortic stenosis, severe (rule-defined)", { useInnerText: true });
   await expect(log.getByRole("button", { name: "Evidence E1" })).toBeVisible();
   await expect(log.getByText("= 4.3 m/s", { exact: true })).toBeVisible();
   // missing item: M# button with field · why on focus; activating it only highlights it (no 3D selection)
@@ -134,6 +138,12 @@ test("a fallback response shows the engine list and the withheld note", async ({
   // the tooltip repeats the field, so check the row's visible text, not the text alone
   await expect(missing).toBeVisible();
   await expect(missing).toContainText("valves.aortic.area");
+  await expect(missing).toContainText("M1 valves.aortic.area", { useInnerText: true });
+  // red flag: R# button with the flag text on focus, a space before the label
+  const redFlag = log.getByRole("listitem").filter({ has: page.getByRole("button", { name: "Red flag R1" }) });
+  await expect(redFlag).toContainText(`R1 ${RED_FLAG_TEXT}`, { useInnerText: true });
+  await log.getByRole("button", { name: "Red flag R1" }).focus();
+  await expect(log.getByRole("tooltip").filter({ hasText: RED_FLAG_TEXT })).toBeVisible();
   const m1 = log.getByRole("button", { name: "Missing data M1" });
   await m1.focus();
   await expect(log.getByRole("tooltip").filter({ hasText: "Valve area confirms the grade" })).toBeVisible();

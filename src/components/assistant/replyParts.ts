@@ -4,15 +4,15 @@
 // server route as TYPES ONLY (erased at compile time); no server code reaches the client bundle.
 import type { Ref } from "@/app/api/assistant/ids";
 
-/** One piece of a reply: plain text, or a cited id (`F2`, `E5`, `M1`) without brackets. */
+/** One piece of a reply: plain text, or a cited id (`F2`, `E5`, `M1`, `R1`) without brackets. */
 export type ReplyPart = { kind: "text"; text: string } | { kind: "ref"; id: string };
 
 /**
- * Citation brackets: `[F2]`, `[E5]` or `[M1]` as in the design (`\[(?:F|E|M)\d+\]`), plus a grouped `[F2, M1]`.
- * The guard accepts the grouped form (it also recognises bare ids), so the panel renders each id in it as its
- * own button.
+ * Citation brackets: `[F2]`, `[E5]`, `[M1]` or `[R1]` as in the design (`\[(?:F|E|M|R)\d+\]`), plus a grouped
+ * `[F2, M1]`. The guard accepts the grouped form (it also recognises bare ids), so the panel renders each id in
+ * it as its own button.
  */
-const CITATION = /\[((?:F|E|M)\d+(?:\s*,\s*(?:F|E|M)\d+)*)\]/g;
+const CITATION = /\[((?:F|E|M|R)\d+(?:\s*,\s*(?:F|E|M|R)\d+)*)\]/g;
 
 /**
  * Remove Markdown the model slipped in despite the plain-text rule (Requirement 10.8): every `**` marker, and a
@@ -50,13 +50,17 @@ export function refValue(ref: Ref): string | null {
 /**
  * Tooltip lines for a ref, in the order of the design: label · field = value unit · rule · source.
  * Empty parts are skipped, so a finding ref is usually just its label. A missing-data ref shows
- * label · field · why.
+ * label · field · why; a red-flag ref shows label · text.
  */
 export function refDetails(ref: Ref): string[] {
   const lines = [ref.label];
   if (ref.kind === "missing") {
     if (ref.field) lines.push(ref.field);
     if (ref.why) lines.push(ref.why);
+    return lines;
+  }
+  if (ref.kind === "redFlag") {
+    if (ref.text) lines.push(ref.text);
     return lines;
   }
   if (ref.field) {
@@ -68,9 +72,17 @@ export function refDetails(ref: Ref): string[] {
   return lines;
 }
 
-const KIND_NAME: Record<Ref["kind"], string> = { finding: "Finding", evidence: "Evidence", missing: "Missing data" };
+const KIND_NAME: Record<Ref["kind"], string> = {
+  finding: "Finding",
+  evidence: "Evidence",
+  missing: "Missing data",
+  redFlag: "Red flag",
+};
 
-/** Short accessible name for an id button ("Evidence E1", "Missing data M1"); the details are linked as its description. */
+/**
+ * Short accessible name for an id button ("Evidence E1", "Missing data M1", "Red flag R1"); the details are
+ * linked as its description.
+ */
 export function refAccessibleName(id: string, ref: Ref | undefined): string {
   if (!ref) return `Citation ${id}`;
   return `${KIND_NAME[ref.kind]} ${id}`;

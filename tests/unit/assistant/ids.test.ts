@@ -9,6 +9,7 @@ import {
   AORTIC_STENOSIS,
   CONCENTRIC_WALL_THICKENING,
   EMPTY_WITH_MISSING,
+  RED_FLAG,
 } from "@/app/api/assistant/__fixtures__/assess";
 
 describe("withIds — deterministic ids", () => {
@@ -56,6 +57,18 @@ describe("withIds — deterministic ids", () => {
     expect(withIds(CONCENTRIC_WALL_THICKENING).missing.map((m) => m.id)).toEqual(["M1"]);
   });
 
+  it("stamps R# across redFlags in order, wrapping each string as { id, text }", () => {
+    const a: Assessment = { ...RED_FLAG, redFlags: ["first flag", "second flag"] };
+    expect(withIds(a).redFlags).toEqual([
+      { id: "R1", text: "first flag" },
+      { id: "R2", text: "second flag" },
+    ]);
+    // Deterministic, and independent of F#/E#/M#.
+    expect(withIds(RED_FLAG).redFlags).toEqual([{ id: "R1", text: RED_FLAG.redFlags[0] }]);
+    expect(withIds(RED_FLAG)).toEqual(withIds(RED_FLAG));
+    expect(withIds(AORTIC_STENOSIS).redFlags).toEqual([]);
+  });
+
   it("keeps F# and E# sequences independent of each other", () => {
     // AORTIC_STENOSIS has one finding with three evidence items.
     const ided = withIds(AORTIC_STENOSIS);
@@ -82,6 +95,19 @@ describe("refsFor — contents", () => {
     });
     expect(refs.M1).not.toHaveProperty("target");
     expect(refs.M1).not.toHaveProperty("organ");
+  });
+
+  it("populates red-flag refs with kind, label and text, and no target/organ", () => {
+    const refs = refsFor(withIds(RED_FLAG));
+    expect(Object.keys(refs).sort()).toEqual(["E1", "F1", "R1"]);
+    expect(refs.R1).toEqual({
+      id: "R1",
+      kind: "redFlag",
+      label: "Red flag",
+      text: RED_FLAG.redFlags[0],
+    });
+    expect(refs.R1).not.toHaveProperty("target");
+    expect(refs.R1).not.toHaveProperty("organ");
   });
 
   it("populates finding refs with label, target and organ", () => {
@@ -170,10 +196,10 @@ describe("empty Assessment", () => {
     expect(Object.values(refs).every((r) => r.kind === "missing")).toBe(true);
   });
 
-  it("keeps missing field/why and passes redFlags/disclaimer through unchanged", () => {
+  it("keeps missing field/why, yields no red flags and passes the disclaimer through unchanged", () => {
     const ided = withIds(EMPTY_WITH_MISSING);
     expect(ided.missing.map(({ field, why }) => ({ field, why }))).toEqual(EMPTY_WITH_MISSING.missing);
-    expect(ided.redFlags).toEqual(EMPTY_WITH_MISSING.redFlags);
+    expect(ided.redFlags).toEqual([]);
     expect(ided.disclaimer).toBe(EMPTY_WITH_MISSING.disclaimer);
   });
 });

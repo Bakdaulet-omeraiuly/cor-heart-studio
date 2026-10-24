@@ -663,6 +663,139 @@
         "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
         "timestamp": 1792875195436
       }
+    ],
+    "14.1 R ids end to end: `withIds` assigns `R1`, `R2`, … to `redFlags` in order (`IdedAssessment.redFlags`": [
+      {
+        "executionId": "21de9c89-03dc-4b61-ac62-25633b4115af",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792880137753
+      },
+      {
+        "executionId": "21de9c89-03dc-4b61-ac62-25633b4115af",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792880141230
+      },
+      {
+        "executionId": "21de9c89-03dc-4b61-ac62-25633b4115af",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792880703235
+      }
+    ],
+    "14.2 `SYSTEM_PROMPT`: rule 5 cites the red flag as `[R#]`; rule 6 declines without quoting record values or": [
+      {
+        "executionId": "21de9c89-03dc-4b61-ac62-25633b4115af",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792880137803
+      },
+      {
+        "executionId": "21de9c89-03dc-4b61-ac62-25633b4115af",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792880704433
+      },
+      {
+        "executionId": "21de9c89-03dc-4b61-ac62-25633b4115af",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792881170688
+      }
+    ],
+    "14.3 Guard clinical terms: add the clinical-term list to the \"clinical\" sentence test, with the refusal /": [
+      {
+        "executionId": "21de9c89-03dc-4b61-ac62-25633b4115af",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792880137894
+      },
+      {
+        "executionId": "21de9c89-03dc-4b61-ac62-25633b4115af",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792880705503
+      },
+      {
+        "executionId": "21de9c89-03dc-4b61-ac62-25633b4115af",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792881171807
+      }
+    ],
+    "14.4 Full check: `npm run typecheck && npm run lint && npm test && npm run build && npm run test:e2e`; restore": [
+      {
+        "executionId": "21de9c89-03dc-4b61-ac62-25633b4115af",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792880137923
+      },
+      {
+        "executionId": "21de9c89-03dc-4b61-ac62-25633b4115af",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792881172808
+      },
+      {
+        "executionId": "21de9c89-03dc-4b61-ac62-25633b4115af",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792881417718
+      }
+    ],
+    "14. Red-flag ids, out-of-scope rule, clinical terms": [
+      {
+        "executionId": "21de9c89-03dc-4b61-ac62-25633b4115af",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792881417758
+      }
+    ],
+    "15.1 Scope topics: export `SCOPE_TOPICS` from `prompt.ts` and build rule 6's covered-topic list from it. In": [
+      {
+        "executionId": "b4494368-a886-4922-a4f1-c6db87a7be00",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792881884149
+      },
+      {
+        "executionId": "b4494368-a886-4922-a4f1-c6db87a7be00",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792881884986
+      },
+      {
+        "executionId": "b4494368-a886-4922-a4f1-c6db87a7be00",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792882458384
+      }
+    ],
+    "15.2 Referral terms clinical: add `refer`, `refers`, `referred`, `referral`, `referrals` (whole words) to the": [
+      {
+        "executionId": "b4494368-a886-4922-a4f1-c6db87a7be00",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792881884200
+      },
+      {
+        "executionId": "b4494368-a886-4922-a4f1-c6db87a7be00",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792882459397
+      },
+      {
+        "executionId": "b4494368-a886-4922-a4f1-c6db87a7be00",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792882553047
+      }
+    ],
+    "15.3 Check: `npm run typecheck && npm run lint && npm test`.": [
+      {
+        "executionId": "b4494368-a886-4922-a4f1-c6db87a7be00",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792881884243
+      },
+      {
+        "executionId": "b4494368-a886-4922-a4f1-c6db87a7be00",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792882553831
+      },
+      {
+        "executionId": "b4494368-a886-4922-a4f1-c6db87a7be00",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792882593035
+      }
+    ],
+    "15. Scope-topic exception and referral rule": [
+      {
+        "executionId": "b4494368-a886-4922-a4f1-c6db87a7be00",
+        "chatSessionId": "sess_d8f587ff-afc1-4a35-ace1-739282256336",
+        "timestamp": 1792882593099
+      }
     ]
   }
 }
