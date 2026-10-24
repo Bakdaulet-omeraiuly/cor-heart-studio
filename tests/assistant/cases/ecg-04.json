@@ -1,0 +1,31 @@
+{
+  "id": "ecg-04",
+  "title": "QTc 460 ms (woman) → prolonged",
+  "category": "boundary",
+  "source": "AHA/ACCF/HRS 2009 Part IV, doi:10.1016/j.jacc.2008.12.014",
+  "record": {
+    "patientId": "CASE-ecg-04",
+    "studyId": "CASE-ecg-04-A",
+    "synthetic": true,
+    "ecg": {
+      "qtc": {
+        "value": 460,
+        "unit": "ms"
+      }
+    },
+    "demographics": {
+      "biologicalSex": "female"
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "qtc",
+        "grade": "prolonged"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}

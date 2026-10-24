@@ -1,0 +1,38 @@
+{
+  "id": "lv-04",
+  "title": "EF 50 % (man) → preserved, but below the ASE normal range",
+  "category": "boundary",
+  "source": "ASE/EACVI 2015 chamber quantification, doi:10.1016/j.echo.2014.10.003",
+  "record": {
+    "patientId": "CASE-lv-04",
+    "studyId": "CASE-lv-04-A",
+    "synthetic": true,
+    "observations": {
+      "lvEjectionFraction": {
+        "value": 50,
+        "unit": "%"
+      }
+    },
+    "demographics": {
+      "biologicalSex": "male"
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "lv-ef-category",
+        "grade": "preserved"
+      },
+      {
+        "condition": "lv-systolic-dysfunction",
+        "grade": "mildly abnormal"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "absentDifferential": [
+      "heart-failure"
+    ]
+  },
+  "reviewedByClinician": false
+}

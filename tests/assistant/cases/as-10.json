@@ -1,0 +1,76 @@
+{
+  "id": "as-10",
+  "title": "Low-gradient AS with reduced EF (classical low-flow, D2)",
+  "category": "guideline",
+  "source": "ACC/AHA 2020 VHD guideline, doi:10.1161/CIR.0000000000000923",
+  "question": "Is this true severe aortic stenosis?",
+  "record": {
+    "patientId": "CASE-as-10",
+    "studyId": "CASE-as-10-A",
+    "synthetic": true,
+    "observations": {
+      "lvEjectionFraction": {
+        "value": 30,
+        "unit": "%"
+      }
+    },
+    "valveFindings": [
+      {
+        "valve": "aortic_valve",
+        "condition": "stenosis",
+        "peakVelocity": {
+          "value": 3.4,
+          "unit": "m/s"
+        },
+        "meanGradient": {
+          "value": 28,
+          "unit": "mmHg"
+        },
+        "valveArea": {
+          "value": 0.8,
+          "unit": "cm2"
+        }
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "aortic-stenosis",
+        "grade": "discordant"
+      },
+      {
+        "condition": "lv-ef-category",
+        "grade": "reduced"
+      },
+      {
+        "condition": "lv-systolic-dysfunction",
+        "grade": "moderately abnormal"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "differential": [
+      {
+        "condition": "aortic-stenosis-classical-low-flow",
+        "basis": "possible"
+      },
+      {
+        "condition": "aortic-stenosis-moderate-measurement-error",
+        "basis": "possible"
+      },
+      {
+        "condition": "heart-failure",
+        "basis": "possible"
+      }
+    ],
+    "absentDifferential": [
+      "aortic-stenosis-paradoxical-low-flow"
+    ],
+    "missing": [
+      "additionalInvestigations.dobutamineStressEcho",
+      "observations.strokeVolume"
+    ]
+  },
+  "reviewedByClinician": false
+}

@@ -1,0 +1,30 @@
+{
+  "id": "mr-01",
+  "title": "MR vena contracta 0.69 cm → not severe",
+  "category": "boundary",
+  "source": "ACC/AHA 2020 VHD guideline, doi:10.1161/CIR.0000000000000923",
+  "record": {
+    "patientId": "CASE-mr-01",
+    "studyId": "CASE-mr-01-A",
+    "synthetic": true,
+    "doppler": [
+      {
+        "measurement": "vena contracta",
+        "value": 0.69,
+        "unit": "cm",
+        "valve": "mitral"
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "mitral-regurgitation",
+        "grade": "not severe"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}

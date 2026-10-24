@@ -1,0 +1,28 @@
+{
+  "id": "ch-07",
+  "title": "RA minor axis 45 mm → enlarged",
+  "category": "boundary",
+  "source": "ASE 2010 right heart, doi:10.1016/j.echo.2010.05.010",
+  "record": {
+    "patientId": "CASE-ch-07",
+    "studyId": "CASE-ch-07-A",
+    "synthetic": true,
+    "observations": {
+      "raMinorDimension": {
+        "value": 45,
+        "unit": "mm"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "ra-enlargement",
+        "grade": "enlarged"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}

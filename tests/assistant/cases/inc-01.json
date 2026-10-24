@@ -1,0 +1,21 @@
+{
+  "id": "inc-01",
+  "title": "Empty record",
+  "category": "incomplete",
+  "source": "Engine contract: docs/research/diagnosis-engine.md §1, §3",
+  "question": "Summarise this patient.",
+  "record": {
+    "patientId": "CASE-inc-01",
+    "studyId": "CASE-inc-01-A",
+    "synthetic": true
+  },
+  "expected": {
+    "ruleDefined": [],
+    "redFlags": 0,
+    "behavior": "state-missing",
+    "missing": [
+      "observations.lvEjectionFraction"
+    ]
+  },
+  "reviewedByClinician": false
+}

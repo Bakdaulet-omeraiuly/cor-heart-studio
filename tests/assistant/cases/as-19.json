@@ -1,0 +1,38 @@
+{
+  "id": "as-19",
+  "title": "Severe AS, syncope explicitly absent → no red flag",
+  "category": "guideline",
+  "source": "ACC/AHA 2020 VHD guideline, doi:10.1161/CIR.0000000000000923",
+  "record": {
+    "patientId": "CASE-as-19",
+    "studyId": "CASE-as-19-A",
+    "synthetic": true,
+    "valveFindings": [
+      {
+        "valve": "aortic_valve",
+        "condition": "stenosis",
+        "peakVelocity": {
+          "value": 4.6,
+          "unit": "m/s"
+        }
+      }
+    ],
+    "symptomDetails": [
+      {
+        "symptom": "Syncope",
+        "present": false
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "aortic-stenosis",
+        "grade": "severe"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}

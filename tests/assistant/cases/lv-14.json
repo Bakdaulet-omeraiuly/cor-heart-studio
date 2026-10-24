@@ -1,0 +1,48 @@
+{
+  "id": "lv-14",
+  "title": "Concentric remodelling (IVS 10, PW 10, LVEDD 42, BSA 2.0)",
+  "category": "guideline",
+  "source": "ASE/EACVI 2015 chamber quantification, doi:10.1016/j.echo.2014.10.003",
+  "record": {
+    "patientId": "CASE-lv-14",
+    "studyId": "CASE-lv-14-A",
+    "synthetic": true,
+    "demographics": {
+      "biologicalSex": "male",
+      "heightCm": {
+        "value": 180,
+        "unit": "cm"
+      },
+      "weightKg": {
+        "value": 80,
+        "unit": "kg"
+      }
+    },
+    "observations": {
+      "ivsThickness": {
+        "value": 10,
+        "unit": "mm"
+      },
+      "lvPosteriorWallThickness": {
+        "value": 10,
+        "unit": "mm"
+      },
+      "lvEndDiastolicDiameter": {
+        "value": 42,
+        "unit": "mm"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "lv-concentric-remodelling",
+        "grade": "concentric remodelling"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "notes": "LVMI 68.6 g/m² (normal), RWT 0.48.",
+  "reviewedByClinician": false
+}

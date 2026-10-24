@@ -1,0 +1,30 @@
+{
+  "id": "ar-03",
+  "title": "AR VC 0.29 cm → mild",
+  "category": "boundary",
+  "source": "ACC/AHA 2020 VHD guideline, doi:10.1161/CIR.0000000000000923",
+  "record": {
+    "patientId": "CASE-ar-03",
+    "studyId": "CASE-ar-03-A",
+    "synthetic": true,
+    "doppler": [
+      {
+        "measurement": "vena contracta",
+        "value": 0.29,
+        "unit": "cm",
+        "valve": "aortic"
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "aortic-regurgitation",
+        "grade": "mild"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}

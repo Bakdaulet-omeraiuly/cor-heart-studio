@@ -1,0 +1,35 @@
+{
+  "id": "as-18",
+  "title": "Severe AS with exertional syncope → red flag (stage D1)",
+  "category": "guideline",
+  "source": "ACC/AHA 2020 VHD guideline, doi:10.1161/CIR.0000000000000923",
+  "record": {
+    "patientId": "CASE-as-18",
+    "studyId": "CASE-as-18-A",
+    "synthetic": true,
+    "valveFindings": [
+      {
+        "valve": "aortic_valve",
+        "condition": "stenosis",
+        "peakVelocity": {
+          "value": 4.6,
+          "unit": "m/s"
+        }
+      }
+    ],
+    "symptoms": [
+      "Exertional syncope"
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "aortic-stenosis",
+        "grade": "severe"
+      }
+    ],
+    "redFlags": 1,
+    "behavior": "refer-urgent"
+  },
+  "reviewedByClinician": false
+}

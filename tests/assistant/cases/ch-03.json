@@ -1,0 +1,53 @@
+{
+  "id": "ch-03",
+  "title": "LAVI 50 mL/m² with atrial fibrillation → severe",
+  "category": "guideline",
+  "source": "ASE/EACVI 2015 chamber quantification, doi:10.1016/j.echo.2014.10.003",
+  "record": {
+    "patientId": "CASE-ch-03",
+    "studyId": "CASE-ch-03-A",
+    "synthetic": true,
+    "demographics": {
+      "heightCm": {
+        "value": 180,
+        "unit": "cm"
+      },
+      "weightKg": {
+        "value": 80,
+        "unit": "kg"
+      }
+    },
+    "observations": {
+      "laVolume": {
+        "value": 100,
+        "unit": "mL"
+      }
+    },
+    "ecg": {
+      "rhythm": "Atrial fibrillation"
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "la-enlargement",
+        "grade": "severe"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "findings": [
+      {
+        "condition": "atrial-fibrillation",
+        "basis": "supported"
+      }
+    ],
+    "differential": [
+      {
+        "condition": "la-enlargement-atrial-fibrillation",
+        "basis": "supported"
+      }
+    ]
+  },
+  "reviewedByClinician": false
+}

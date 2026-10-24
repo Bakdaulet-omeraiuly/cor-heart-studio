@@ -1,0 +1,144 @@
+{
+  "id": "lv-17",
+  "title": "SYN-007: reduced EF with LAD-territory wall-motion abnormality",
+  "category": "synthetic-sample",
+  "source": "ESC 2021 HF doi:10.1093/eurheartj/ehab368; AHA/ACC/HFSA 2022 doi:10.1161/CIR.0000000000001063",
+  "question": "What explains the reduced EF?",
+  "record": {
+    "patientId": "SYN-007",
+    "studyId": "STUDY-007-A",
+    "displayName": "Synthetic 07 · Regional wall-motion abnormality",
+    "synthetic": true,
+    "studyDate": "2026-03-20",
+    "diagnoses": [
+      {
+        "text": "Prior anterior myocardial infarction",
+        "source": "synthetic clinician assessment"
+      }
+    ],
+    "observations": {
+      "heartRate": {
+        "value": 76,
+        "unit": "bpm",
+        "source": "synthetic measurement"
+      },
+      "lvEndDiastolicVolume": {
+        "value": 150,
+        "unit": "mL",
+        "source": "synthetic echo report"
+      },
+      "lvEndSystolicVolume": {
+        "value": 93,
+        "unit": "mL",
+        "source": "synthetic echo report"
+      },
+      "lvEjectionFraction": {
+        "value": 38,
+        "unit": "%",
+        "source": "synthetic echo report"
+      },
+      "lvEndDiastolicDiameter": {
+        "value": 56,
+        "unit": "mm",
+        "source": "synthetic echo report"
+      }
+    },
+    "echo": {
+      "regionalWallMotion": [
+        {
+          "segment": 1,
+          "motion": "akinetic",
+          "source": "synthetic echo report"
+        },
+        {
+          "segment": 2,
+          "motion": "hypokinetic",
+          "source": "synthetic echo report"
+        },
+        {
+          "segment": 7,
+          "motion": "akinetic",
+          "source": "synthetic echo report"
+        },
+        {
+          "segment": 8,
+          "motion": "hypokinetic",
+          "source": "synthetic echo report"
+        },
+        {
+          "segment": 13,
+          "motion": "akinetic",
+          "source": "synthetic echo report"
+        },
+        {
+          "segment": 14,
+          "motion": "dyskinetic",
+          "source": "synthetic echo report"
+        },
+        {
+          "segment": 17,
+          "motion": "akinetic",
+          "source": "synthetic echo report"
+        }
+      ]
+    },
+    "imaging": {
+      "findings": [
+        {
+          "modality": "MRI",
+          "category": "fibrosis_scar",
+          "finding": "Transmural late gadolinium enhancement",
+          "segment": 7,
+          "source": "synthetic MRI report"
+        },
+        {
+          "modality": "MRI",
+          "category": "fibrosis_scar",
+          "finding": "Transmural late gadolinium enhancement",
+          "segment": 13,
+          "source": "synthetic MRI report"
+        }
+      ]
+    },
+    "symptoms": [
+      "Exertional breathlessness"
+    ],
+    "clinicianNotes": "Fictional demonstration record. Segment convention: AHA 17-segment."
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "lv-ef-category",
+        "grade": "reduced"
+      },
+      {
+        "condition": "lv-systolic-dysfunction",
+        "grade": "moderately abnormal"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "findings": [
+      {
+        "condition": "regional-wall-motion-abnormality",
+        "basis": "supported",
+        "grade": "dyskinetic"
+      }
+    ],
+    "differential": [
+      {
+        "condition": "ischaemic-cardiomyopathy",
+        "basis": "supported"
+      },
+      {
+        "condition": "heart-failure",
+        "basis": "possible"
+      }
+    ],
+    "missing": [
+      "coronaryFindings",
+      "demographics.biologicalSex"
+    ]
+  },
+  "reviewedByClinician": false
+}

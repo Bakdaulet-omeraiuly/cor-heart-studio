@@ -1,0 +1,36 @@
+{
+  "id": "ar-02",
+  "title": "AR VC 0.70 cm, RVol 65 mL → severe",
+  "category": "guideline",
+  "source": "ACC/AHA 2020 VHD guideline, doi:10.1161/CIR.0000000000000923",
+  "record": {
+    "patientId": "CASE-ar-02",
+    "studyId": "CASE-ar-02-A",
+    "synthetic": true,
+    "doppler": [
+      {
+        "measurement": "vena contracta",
+        "value": 0.7,
+        "unit": "cm",
+        "valve": "aortic"
+      },
+      {
+        "measurement": "regurgitant volume",
+        "value": 65,
+        "unit": "mL",
+        "valve": "aortic"
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "aortic-regurgitation",
+        "grade": "severe"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}

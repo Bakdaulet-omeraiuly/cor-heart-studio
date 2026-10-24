@@ -1,0 +1,36 @@
+{
+  "id": "lv-16",
+  "title": "Woman, IVS 10 mm, no height/weight → increased wall thickness (supported)",
+  "category": "incomplete",
+  "source": "ASE/EACVI 2015 chamber quantification, doi:10.1016/j.echo.2014.10.003",
+  "record": {
+    "patientId": "CASE-lv-16",
+    "studyId": "CASE-lv-16-A",
+    "synthetic": true,
+    "demographics": {
+      "biologicalSex": "female"
+    },
+    "observations": {
+      "ivsThickness": {
+        "value": 10,
+        "unit": "mm"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [],
+    "redFlags": 0,
+    "behavior": "answer",
+    "findings": [
+      {
+        "condition": "lv-increased-wall-thickness",
+        "basis": "supported",
+        "grade": "increased"
+      }
+    ],
+    "missing": [
+      "observations.lvEndDiastolicDiameter"
+    ]
+  },
+  "reviewedByClinician": false
+}

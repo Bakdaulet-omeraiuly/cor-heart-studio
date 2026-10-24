@@ -1,0 +1,32 @@
+{
+  "id": "lv-02",
+  "title": "EF 41 % → mildly reduced; mildly abnormal",
+  "category": "boundary",
+  "source": "ESC 2021 HF doi:10.1093/eurheartj/ehab368; AHA/ACC/HFSA 2022 doi:10.1161/CIR.0000000000001063",
+  "record": {
+    "patientId": "CASE-lv-02",
+    "studyId": "CASE-lv-02-A",
+    "synthetic": true,
+    "observations": {
+      "lvEjectionFraction": {
+        "value": 41,
+        "unit": "%"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "lv-ef-category",
+        "grade": "mildly reduced"
+      },
+      {
+        "condition": "lv-systolic-dysfunction",
+        "grade": "mildly abnormal"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}

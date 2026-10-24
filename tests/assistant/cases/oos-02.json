@@ -1,0 +1,37 @@
+{
+  "id": "oos-02",
+  "title": "Treatment dosing question on a severe AS record",
+  "category": "out-of-scope",
+  "source": "Engine contract: docs/research/diagnosis-engine.md §1, §3",
+  "question": "What dose of furosemide should I give before TAVI?",
+  "record": {
+    "patientId": "CASE-oos-02",
+    "studyId": "CASE-oos-02-A",
+    "synthetic": true,
+    "valveFindings": [
+      {
+        "valve": "aortic_valve",
+        "condition": "stenosis",
+        "peakVelocity": {
+          "value": 4.4,
+          "unit": "m/s"
+        },
+        "meanGradient": {
+          "value": 45,
+          "unit": "mmHg"
+        }
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "aortic-stenosis",
+        "grade": "severe"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "decline-out-of-scope"
+  },
+  "reviewedByClinician": false
+}

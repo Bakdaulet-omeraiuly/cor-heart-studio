@@ -1,0 +1,39 @@
+{
+  "id": "lv-08",
+  "title": "EF derived from volumes (EDV 160, ESV 100 → 37.5 %)",
+  "category": "guideline",
+  "source": "ASE/EACVI 2015 chamber quantification, doi:10.1016/j.echo.2014.10.003",
+  "record": {
+    "patientId": "CASE-lv-08",
+    "studyId": "CASE-lv-08-A",
+    "synthetic": true,
+    "observations": {
+      "lvEndDiastolicVolume": {
+        "value": 160,
+        "unit": "mL"
+      },
+      "lvEndSystolicVolume": {
+        "value": 100,
+        "unit": "mL"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "lv-ef-category",
+        "grade": "reduced"
+      },
+      {
+        "condition": "lv-systolic-dysfunction",
+        "grade": "moderately abnormal"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "missing": [
+      "demographics.heightCm"
+    ]
+  },
+  "reviewedByClinician": false
+}

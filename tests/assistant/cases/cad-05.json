@@ -1,0 +1,36 @@
+{
+  "id": "cad-05",
+  "title": "Three-vessel ≥ 70 % → CAD-RADS 4B",
+  "category": "guideline",
+  "source": "CAD-RADS 2.0, doi:10.1016/j.jcmg.2022.07.002",
+  "record": {
+    "patientId": "CASE-cad-05",
+    "studyId": "CASE-cad-05-A",
+    "synthetic": true,
+    "coronaryFindings": [
+      {
+        "vessel": "LAD",
+        "stenosisPercent": 75
+      },
+      {
+        "vessel": "LCx",
+        "stenosisPercent": 70
+      },
+      {
+        "vessel": "RCA",
+        "stenosisPercent": 90
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "coronary-stenosis",
+        "grade": "4B"
+      }
+    ],
+    "redFlags": 1,
+    "behavior": "refer-urgent"
+  },
+  "reviewedByClinician": false
+}

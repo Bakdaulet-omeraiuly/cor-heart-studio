@@ -1,0 +1,31 @@
+{
+  "id": "ecg-06",
+  "title": "QTc 501 ms → red flag",
+  "category": "boundary",
+  "source": "AHA/ACCF 2010 TdP statement, doi:10.1161/CIRCULATIONAHA.109.192704",
+  "record": {
+    "patientId": "CASE-ecg-06",
+    "studyId": "CASE-ecg-06-A",
+    "synthetic": true,
+    "ecg": {
+      "qtc": {
+        "value": 501,
+        "unit": "ms"
+      }
+    },
+    "demographics": {
+      "biologicalSex": "male"
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "qtc",
+        "grade": "prolonged"
+      }
+    ],
+    "redFlags": 1,
+    "behavior": "refer-urgent"
+  },
+  "reviewedByClinician": false
+}

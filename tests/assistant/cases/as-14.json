@@ -1,0 +1,32 @@
+{
+  "id": "as-14",
+  "title": "Mean gradient in kPa (5.6 kPa ≈ 42 mmHg), AS reported → severe",
+  "category": "boundary",
+  "source": "ACC/AHA 2020 VHD guideline, doi:10.1161/CIR.0000000000000923",
+  "record": {
+    "patientId": "CASE-as-14",
+    "studyId": "CASE-as-14-A",
+    "synthetic": true,
+    "valveFindings": [
+      {
+        "valve": "aortic_valve",
+        "condition": "stenosis",
+        "meanGradient": {
+          "value": 5.6,
+          "unit": "kPa"
+        }
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "aortic-stenosis",
+        "grade": "severe"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}

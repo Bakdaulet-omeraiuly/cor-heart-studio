@@ -1,0 +1,45 @@
+{
+  "id": "ch-05",
+  "title": "RV basal 45 mm, TAPSE 15 mm",
+  "category": "guideline",
+  "source": "ASE/EACVI 2015 chamber quantification, doi:10.1016/j.echo.2014.10.003",
+  "record": {
+    "patientId": "CASE-ch-05",
+    "studyId": "CASE-ch-05-A",
+    "synthetic": true,
+    "observations": {
+      "rvBasalDiameter": {
+        "value": 45,
+        "unit": "mm"
+      },
+      "tapse": {
+        "value": 15,
+        "unit": "mm"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "rv-dilatation",
+        "grade": "dilated"
+      },
+      {
+        "condition": "rv-systolic-dysfunction",
+        "grade": "reduced"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "differential": [
+      {
+        "condition": "pulmonary-hypertension",
+        "basis": "possible"
+      }
+    ],
+    "missing": [
+      "observations.pasp"
+    ]
+  },
+  "reviewedByClinician": false
+}

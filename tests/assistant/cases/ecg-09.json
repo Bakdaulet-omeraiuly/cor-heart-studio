@@ -1,0 +1,31 @@
+{
+  "id": "ecg-09",
+  "title": "QTc 390 ms → short",
+  "category": "boundary",
+  "source": "AHA/ACCF/HRS 2009 Part IV, doi:10.1016/j.jacc.2008.12.014",
+  "record": {
+    "patientId": "CASE-ecg-09",
+    "studyId": "CASE-ecg-09-A",
+    "synthetic": true,
+    "ecg": {
+      "qtc": {
+        "value": 390,
+        "unit": "ms"
+      }
+    },
+    "demographics": {
+      "biologicalSex": "male"
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "qtc",
+        "grade": "short"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}

@@ -1,0 +1,208 @@
+{
+  "id": "syn-01",
+  "title": "SYN-001 reference findings",
+  "category": "synthetic-sample",
+  "source": "Engine contract: docs/research/diagnosis-engine.md §1, §3",
+  "record": {
+    "patientId": "SYN-001",
+    "studyId": "STUDY-001-A",
+    "displayName": "Synthetic 01 · Reference findings",
+    "synthetic": true,
+    "studyDate": "2026-03-02",
+    "diagnoses": [
+      {
+        "text": "No structural abnormality reported",
+        "source": "synthetic clinician assessment"
+      }
+    ],
+    "observations": {
+      "heartRate": {
+        "value": 68,
+        "unit": "bpm",
+        "source": "synthetic measurement",
+        "observedAt": "2026-03-02"
+      },
+      "systolicBP": {
+        "value": 118,
+        "unit": "mmHg",
+        "source": "synthetic measurement",
+        "observedAt": "2026-03-02"
+      },
+      "diastolicBP": {
+        "value": 76,
+        "unit": "mmHg",
+        "source": "synthetic measurement",
+        "observedAt": "2026-03-02"
+      },
+      "spo2": {
+        "value": 98,
+        "unit": "%",
+        "source": "synthetic measurement",
+        "observedAt": "2026-03-02"
+      },
+      "lvEndDiastolicDiameter": {
+        "value": 46,
+        "unit": "mm",
+        "source": "synthetic echo report",
+        "observedAt": "2026-03-02",
+        "phase": "end_diastole",
+        "method": "2D linear, parasternal long axis"
+      },
+      "lvEndDiastolicVolume": {
+        "value": 108,
+        "unit": "mL",
+        "source": "synthetic echo report",
+        "observedAt": "2026-03-02",
+        "method": "biplane Simpson"
+      },
+      "lvEndSystolicVolume": {
+        "value": 44,
+        "unit": "mL",
+        "source": "synthetic echo report",
+        "observedAt": "2026-03-02",
+        "method": "biplane Simpson"
+      },
+      "lvEjectionFraction": {
+        "value": 59,
+        "unit": "%",
+        "source": "synthetic echo report",
+        "observedAt": "2026-03-02",
+        "method": "biplane Simpson"
+      },
+      "ivsThickness": {
+        "value": 9,
+        "unit": "mm",
+        "source": "synthetic echo report",
+        "observedAt": "2026-03-02",
+        "phase": "end_diastole"
+      },
+      "lvPosteriorWallThickness": {
+        "value": 9,
+        "unit": "mm",
+        "source": "synthetic echo report",
+        "observedAt": "2026-03-02",
+        "phase": "end_diastole"
+      },
+      "laVolume": {
+        "value": 32,
+        "unit": "mL",
+        "source": "synthetic echo report",
+        "observedAt": "2026-03-02",
+        "method": "biplane area-length"
+      }
+    },
+    "valveFindings": [],
+    "echo": {
+      "regionalWallMotion": [
+        {
+          "segment": 1,
+          "motion": "normal"
+        },
+        {
+          "segment": 2,
+          "motion": "normal"
+        },
+        {
+          "segment": 3,
+          "motion": "normal"
+        },
+        {
+          "segment": 4,
+          "motion": "normal"
+        },
+        {
+          "segment": 5,
+          "motion": "normal"
+        },
+        {
+          "segment": 6,
+          "motion": "normal"
+        },
+        {
+          "segment": 7,
+          "motion": "normal"
+        },
+        {
+          "segment": 8,
+          "motion": "normal"
+        },
+        {
+          "segment": 9,
+          "motion": "normal"
+        },
+        {
+          "segment": 10,
+          "motion": "normal"
+        },
+        {
+          "segment": 11,
+          "motion": "normal"
+        },
+        {
+          "segment": 12,
+          "motion": "normal"
+        },
+        {
+          "segment": 13,
+          "motion": "normal"
+        },
+        {
+          "segment": 14,
+          "motion": "normal"
+        },
+        {
+          "segment": 15,
+          "motion": "normal"
+        },
+        {
+          "segment": 16,
+          "motion": "normal"
+        },
+        {
+          "segment": 17,
+          "motion": "normal"
+        }
+      ]
+    },
+    "symptoms": [],
+    "clinicianNotes": "Fictional demonstration record with explicitly supplied findings. Not a reference range.",
+    "ecg": {
+      "rhythm": "Sinus rhythm",
+      "prInterval": {
+        "value": 160,
+        "unit": "ms",
+        "source": "synthetic ECG report"
+      },
+      "qrsDuration": {
+        "value": 92,
+        "unit": "ms",
+        "source": "synthetic ECG report"
+      },
+      "qtInterval": {
+        "value": 392,
+        "unit": "ms",
+        "source": "synthetic ECG report"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "lv-ef-category",
+        "grade": "preserved"
+      },
+      {
+        "condition": "qtc",
+        "grade": "normal"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "missing": [
+      "demographics.heightCm",
+      "demographics.weightKg"
+    ]
+  },
+  "notes": "QT 392 ms at 68 bpm: Bazett 417, Fridericia 409 ms.",
+  "reviewedByClinician": false
+}

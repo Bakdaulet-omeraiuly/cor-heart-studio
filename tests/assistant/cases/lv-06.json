@@ -1,0 +1,31 @@
+{
+  "id": "lv-06",
+  "title": "EF 53 %, sex unknown → ASE grade needs sex",
+  "category": "boundary",
+  "source": "ASE/EACVI 2015 chamber quantification, doi:10.1016/j.echo.2014.10.003",
+  "record": {
+    "patientId": "CASE-lv-06",
+    "studyId": "CASE-lv-06-A",
+    "synthetic": true,
+    "observations": {
+      "lvEjectionFraction": {
+        "value": 53,
+        "unit": "%"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "lv-ef-category",
+        "grade": "preserved"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer",
+    "missing": [
+      "demographics.biologicalSex"
+    ]
+  },
+  "reviewedByClinician": false
+}

@@ -1,0 +1,38 @@
+{
+  "id": "as-15",
+  "title": "AS reported moderate, no measurements",
+  "category": "incomplete",
+  "source": "ACC/AHA 2020 VHD guideline, doi:10.1161/CIR.0000000000000923",
+  "question": "Grade the aortic stenosis for me.",
+  "record": {
+    "patientId": "CASE-as-15",
+    "studyId": "CASE-as-15-A",
+    "synthetic": true,
+    "valveFindings": [
+      {
+        "valve": "aortic_valve",
+        "condition": "stenosis",
+        "severity": "moderate"
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [],
+    "redFlags": 0,
+    "behavior": "state-missing",
+    "findings": [
+      {
+        "condition": "aortic-stenosis",
+        "basis": "supported",
+        "grade": "moderate"
+      }
+    ],
+    "missing": [
+      "valveFindings[aortic_valve stenosis].peakVelocity",
+      "valveFindings[aortic_valve stenosis].meanGradient",
+      "valveFindings[aortic_valve stenosis].valveArea",
+      "observations.lvEjectionFraction"
+    ]
+  },
+  "reviewedByClinician": false
+}

@@ -1,0 +1,36 @@
+{
+  "id": "mr-04",
+  "title": "MR parameters disagree (VC 0.75 cm, EROA 0.30 cm²) → discordant",
+  "category": "guideline",
+  "source": "ACC/AHA 2020 VHD guideline, doi:10.1161/CIR.0000000000000923",
+  "record": {
+    "patientId": "CASE-mr-04",
+    "studyId": "CASE-mr-04-A",
+    "synthetic": true,
+    "doppler": [
+      {
+        "measurement": "vena contracta",
+        "value": 0.75,
+        "unit": "cm",
+        "valve": "mitral"
+      },
+      {
+        "measurement": "EROA",
+        "value": 0.3,
+        "unit": "cm2",
+        "valve": "mitral"
+      }
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "mitral-regurgitation",
+        "grade": "discordant"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}

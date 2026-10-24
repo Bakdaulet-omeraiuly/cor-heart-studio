@@ -35,7 +35,7 @@ export interface Facts {
 
 const SYMPTOM_KEYWORDS: [SymptomKey, RegExp][] = [
   ["syncope", /syncope|fainting|faint\b/i],
-  ["angina", /angina|chest pain|chest tightness/i],
+  ["angina", /angina|chest pain|chest tightness|chest pressure/i],
   ["dyspnoea", /dyspn|breathless|shortness of breath|orthopn/i],
   ["heart_failure", /oedema|edema|orthopn|paroxysmal nocturnal|heart failure/i],
   ["palpitations", /palpitation/i],

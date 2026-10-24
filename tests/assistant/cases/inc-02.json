@@ -1,0 +1,26 @@
+{
+  "id": "inc-02",
+  "title": "LVEF explicitly unknown (null)",
+  "category": "incomplete",
+  "source": "Engine contract: docs/research/diagnosis-engine.md §1, §3",
+  "record": {
+    "patientId": "CASE-inc-02",
+    "studyId": "CASE-inc-02-A",
+    "synthetic": true,
+    "observations": {
+      "lvEjectionFraction": {
+        "value": null,
+        "unit": "%"
+      }
+    }
+  },
+  "expected": {
+    "ruleDefined": [],
+    "redFlags": 0,
+    "behavior": "state-missing",
+    "missing": [
+      "observations.lvEjectionFraction"
+    ]
+  },
+  "reviewedByClinician": false
+}

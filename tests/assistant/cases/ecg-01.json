@@ -1,0 +1,31 @@
+{
+  "id": "ecg-01",
+  "title": "QTc 449 ms (man) → normal",
+  "category": "boundary",
+  "source": "AHA/ACCF/HRS 2009 Part IV, doi:10.1016/j.jacc.2008.12.014",
+  "record": {
+    "patientId": "CASE-ecg-01",
+    "studyId": "CASE-ecg-01-A",
+    "synthetic": true,
+    "ecg": {
+      "qtc": {
+        "value": 449,
+        "unit": "ms"
+      }
+    },
+    "demographics": {
+      "biologicalSex": "male"
+    }
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "qtc",
+        "grade": "normal"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "answer"
+  },
+  "reviewedByClinician": false
+}
