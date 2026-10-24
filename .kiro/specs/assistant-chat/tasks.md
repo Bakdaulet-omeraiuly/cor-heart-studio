@@ -14,50 +14,50 @@ Before the first task, read `node_modules/next/dist/docs/01-app/01-getting-start
   - Create `assessFixture(patient)` and `src/app/api/assistant/engine.ts` re-exporting it as `assess`.
   - _Requirements: 3.1, 3.5_
 
-- [ ] 2. Ids and refs
-  - [ ] 2.1 Implement `withIds()` and `refsFor()` in `ids.ts`.
+- [x] 2. Ids and refs
+  - [x] 2.1 Implement `withIds()` and `refsFor()` in `ids.ts`.
     - _Requirements: 3.2, 7.1_
-  - [ ] 2.2 Unit tests `tests/unit/assistant/ids.test.ts` (deterministic ids, refs fields).
+  - [x] 2.2 Unit tests `tests/unit/assistant/ids.test.ts` (deterministic ids, refs fields).
     - _Requirements: 12.1_
 
-- [ ] 3. Output guard
-  - [ ] 3.1 Implement `extractNumbers()` with units, decimals, commas, ranges, percentages; strip ids and list markers.
+- [x] 3. Output guard
+  - [x] 3.1 Implement `extractNumbers()` with units, decimals, commas, ranges, percentages; strip ids and list markers.
     - _Requirements: 6.1, 6.7_
-  - [ ] 3.2 Implement `allowedNumbers()` and `matchNumber()` (precision rule, unit aliases).
+  - [x] 3.2 Implement `allowedNumbers()` and `matchNumber()` (precision rule, unit aliases).
     - _Requirements: 6.2_
-  - [ ] 3.3 Implement `checkCitations()` (unknown ids, uncited clinical sentences) and `guard()`.
+  - [x] 3.3 Implement `checkCitations()` (unknown ids, uncited clinical sentences) and `guard()`.
     - _Requirements: 6.3, 6.4_
-  - [ ] 3.4 Implement `fallbackText()` and a test that its output always passes `guard()`.
+  - [x] 3.4 Implement `fallbackText()` and a test that its output always passes `guard()`.
     - _Requirements: 6.5_
-  - [ ] 3.5 Table-driven unit tests `tests/unit/assistant/guard.test.ts`.
+  - [x] 3.5 Table-driven unit tests `tests/unit/assistant/guard.test.ts`.
     - _Requirements: 12.1_
 
-- [ ] 4. Request parsing
-  - [ ] 4.1 Implement `AssistantRequest` schema and `parseRequest()` with the 1 MB cap in `request.ts`.
+- [x] 4. Request parsing
+  - [x] 4.1 Implement `AssistantRequest` schema and `parseRequest()` with the 1 MB cap in `request.ts`.
     - _Requirements: 2.2, 2.3, 2.4_
-  - [ ] 4.2 Unit tests `tests/unit/assistant/request.test.ts`.
+  - [x] 4.2 Unit tests `tests/unit/assistant/request.test.ts`.
     - _Requirements: 12.1_
 
-- [ ] 5. Prompt and tool definition
-  - [ ] 5.1 Write `SYSTEM_PROMPT`, `toolDefinitions` (with `strict: true`) and `assessmentForModel()` in `prompt.ts`;
+- [x] 5. Prompt and tool definition
+  - [x] 5.1 Write `SYSTEM_PROMPT`, `toolDefinitions` (with `strict: true`) and `assessmentForModel()` in `prompt.ts`;
     record-quoted strings wrapped as `recordText` and capped at 200 characters; cache_control on system and tools.
     - _Requirements: 3.3, 3.4, 4.5, 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8_
-  - [ ] 5.2 Unit tests `tests/unit/assistant/prompt.test.ts`, including "no record free text reaches the model".
+  - [x] 5.2 Unit tests `tests/unit/assistant/prompt.test.ts`, including "no record free text reaches the model".
     - _Requirements: 12.1_
 
-- [ ] 6. Claude loop with an injected client
-  - [ ] 6.1 Add the dependency `@anthropic-ai/sdk` (exact version, like the other dependencies).
+- [x] 6. Claude loop with an injected client
+  - [x] 6.1 Add the dependency `@anthropic-ai/sdk` (exact version, like the other dependencies).
     - _Requirements: 4.1_
-  - [ ] 6.2 Implement `runChat()` in `chat.ts`: forced first tool call, tool_result, `auto` after, max 3 calls,
+  - [x] 6.2 Implement `runChat()` in `chat.ts`: forced first tool call, tool_result, `auto` after, max 3 calls,
     `max_tokens` cap, abort signal, `max_tokens` stop on the final call → error.
     - _Requirements: 3.3, 4.4_
-  - [ ] 6.3 Unit tests `tests/unit/assistant/chat.test.ts` with a fake client.
+  - [x] 6.3 Unit tests `tests/unit/assistant/chat.test.ts` with a fake client.
     - _Requirements: 12.1_
 
 - [ ] 7. Route handler
-  - [ ] 7.1 Implement `rateLimit.ts` (10 / 60 s per IP + session, per instance).
+  - [x] 7.1 Implement `rateLimit.ts` (10 / 60 s per IP + session, per instance).
     - _Requirements: 8.2_
-  - [ ] 7.2 Implement `route.ts`: `runtime = "nodejs"`, `maxDuration = 60`, no `dynamic`/`revalidate`/`fetchCache`;
+  - [x] 7.2 Implement `route.ts`: `runtime = "nodejs"`, `maxDuration = 60`, no `dynamic`/`revalidate`/`fetchCache`;
     pipeline parse → key check → normalize → assess → ids → runChat (45 s) → guard → response; error mapping table;
     `cache-control: no-store`; one content-free log line.
     - _Requirements: 2.1, 2.5, 3.1, 4.2, 4.3, 4.6, 6.6, 7.1, 7.2, 7.3, 8.1, 8.3, 9.1, 9.2, 9.3_

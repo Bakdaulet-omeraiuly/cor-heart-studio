@@ -12,6 +12,393 @@
         "chatSessionId": "sess_05dee95b-7e77-4fef-b180-950b82f0cb75",
         "timestamp": 1792862395368
       }
+    ],
+    "2.1 Implement `withIds()` and `refsFor()` in `ids.ts`.": [
+      {
+        "executionId": "99d53bdd-67b8-4446-bfe7-16ed3d6ecc0d",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792863786923
+      },
+      {
+        "executionId": "99d53bdd-67b8-4446-bfe7-16ed3d6ecc0d",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864193830
+      }
+    ],
+    "2.2 Unit tests `tests/unit/assistant/ids.test.ts` (deterministic ids, refs fields).": [
+      {
+        "executionId": "99d53bdd-67b8-4446-bfe7-16ed3d6ecc0d",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864196267
+      },
+      {
+        "executionId": "99d53bdd-67b8-4446-bfe7-16ed3d6ecc0d",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864306127
+      }
+    ],
+    "2. Ids and refs": [
+      {
+        "executionId": "99d53bdd-67b8-4446-bfe7-16ed3d6ecc0d",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864306163
+      }
+    ],
+    "3.1 Implement `extractNumbers()` with units, decimals, commas, ranges, percentages; strip ids and list markers.": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864538602
+      },
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864548912
+      },
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864957989
+      }
+    ],
+    "3.2 Implement `allowedNumbers()` and `matchNumber()` (precision rule, unit aliases).": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864538666
+      },
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864960982
+      },
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792865084752
+      }
+    ],
+    "3.3 Implement `checkCitations()` (unknown ids, uncited clinical sentences) and `guard()`.": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864538691
+      },
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792865087166
+      },
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792865207707
+      }
+    ],
+    "3.4 Implement `fallbackText()` and a test that its output always passes `guard()`.": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864538727
+      },
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792865210080
+      },
+      {
+        "executionId": "db6f486d-e15b-4b86-80dd-1ef2a45b9bdd",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792865290327
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792865529311
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792865619202
+      }
+    ],
+    "3.5 Table-driven unit tests `tests/unit/assistant/guard.test.ts`.": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864538758
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792865621446
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792865868142
+      }
+    ],
+    "4.1 Implement `AssistantRequest` schema and `parseRequest()` with the 1 MB cap in `request.ts`.": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864538778
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792865871091
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792865957733
+      }
+    ],
+    "4.2 Unit tests `tests/unit/assistant/request.test.ts`.": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864538808
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792865960130
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792866100280
+      }
+    ],
+    "5.1 Write `SYSTEM_PROMPT`, `toolDefinitions` (with `strict: true`) and `assessmentForModel()` in `prompt.ts`;": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864538829
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792866103129
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792866259730
+      }
+    ],
+    "5.2 Unit tests `tests/unit/assistant/prompt.test.ts`, including \"no record free text reaches the model\".": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864538851
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792866262353
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792866367777
+      }
+    ],
+    "6.1 Add the dependency `@anthropic-ai/sdk` (exact version, like the other dependencies).": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864538909
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792866370696
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792866428184
+      }
+    ],
+    "6.2 Implement `runChat()` in `chat.ts`: forced first tool call, tool_result, `auto` after, max 3 calls,": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864538927
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792866430671
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792866737571
+      }
+    ],
+    "6.3 Unit tests `tests/unit/assistant/chat.test.ts` with a fake client.": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864538949
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792866740069
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792866880945
+      }
+    ],
+    "7.1 Implement `rateLimit.ts` (10 / 60 s per IP + session, per instance).": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864538966
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792866883869
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792867010326
+      }
+    ],
+    "7.2 Implement `route.ts`: `runtime = \"nodejs\"`, `maxDuration = 60`, no `dynamic`/`revalidate`/`fetchCache`;": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864538984
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792867013037
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792867840800
+      }
+    ],
+    "7.3 Unit tests `tests/unit/assistant/route.test.ts` (ok, fallback, 503 without key, 400, 413, 429).": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864539007
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792867843371
+      },
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792868093232
+      }
+    ],
+    "7.4 Manual check with a local key in `.env.local` (never committed): ask about SYN-004 and SYN-003.": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864539025
+      }
+    ],
+    "8.1 Implement `useAssistant()` (in-memory state, reset on record change, fetch with abort).": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864539042
+      }
+    ],
+    "8.2 Implement `AssistantPanel` and `ReplyText` per `docs/design-system.md`: header, always-visible disclaimer,": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864539061
+      }
+    ],
+    "8.3 Mount `<AssistantPanel />` in `src/components/workspace/InspectorColumn.tsx` (one import, one element —": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864539080
+      }
+    ],
+    "9.1 Implement `focusTarget()`: structure selection, valve close-ups, coronary view like the inspector's": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864539100
+      }
+    ],
+    "10.1 Write `tests/e2e/assistant.spec.ts` with `page.route(\"**/api/assistant\")` canned responses: disclaimer,": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864539118
+      }
+    ],
+    "11.1 Write `scripts/eval-assistant.ts` reusing the route's functions; arms per `EVAL_MODELS` plus the LLM-only": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864539142
+      }
+    ],
+    "11.2 Add `\"eval:assistant\": \"tsx scripts/eval-assistant.ts\"` to `package.json`.": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864539163
+      }
+    ],
+    "12. Switch to the real engine (after @HyorinmaruK pushes `src/domain/diagnosis/types.ts` and `assess()`)": [
+      {
+        "executionId": "37614299-dc27-4d62-9373-b12054843338",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792864539184
+      }
+    ],
+    "3. Output guard": [
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792865868227
+      }
+    ],
+    "4. Request parsing": [
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792866100321
+      }
+    ],
+    "5. Prompt and tool definition": [
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792866367838
+      }
+    ],
+    "6. Claude loop with an injected client": [
+      {
+        "executionId": "d4f4dd1a-0437-4e99-addd-012652565291",
+        "chatSessionId": "sess_b420c9d1-d559-4931-ad45-cb8dc5defffd",
+        "timestamp": 1792866881001
+      }
     ]
   }
 }
