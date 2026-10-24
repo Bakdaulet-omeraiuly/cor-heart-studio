@@ -87,34 +87,46 @@ body {
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
-/* structure-anchored labels projected from 3D anchors */
+/* structure-anchored labels projected from 3D anchors: a thin annotation (dot + leader + text), no
+   badge chrome, so the image stays primary. Bottom-centre of the element sits on the anchor. */
 .structure-label {
   display: inline-block;
   white-space: nowrap;
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.01em;
-  padding: 2px 7px;
-  border-radius: 999px;
-  color: #f4f5f7;
-  background: rgb(14 16 20 / 0.72);
-  border: 1px solid rgb(255 255 255 / 0.14);
-  backdrop-filter: blur(4px);
-  transform: translateY(-14px);
+  letter-spacing: 0.02em;
+  padding: 0 0 15px;
+  color: #eef1f4;
+  text-shadow: 0 0 3px rgb(0 0 0 / 0.95), 0 1px 2px rgb(0 0 0 / 0.85);
   transition: opacity 120ms;
 }
 .structure-label::after {
   content: "";
   position: absolute;
   left: 50%;
-  bottom: -10px;
+  bottom: 3px;
   width: 1px;
-  height: 9px;
-  background: rgb(255 255 255 / 0.45);
+  height: 10px;
+  background: rgb(255 255 255 / 0.6);
+  box-shadow: 0 0 2px rgb(0 0 0 / 0.8);
 }
-.structure-label.is-selected { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
-[data-theme="light"] .structure-label { background: rgb(255 255 255 / 0.86); color: #15191f; border-color: rgb(0 0 0 / 0.12); }
-[data-theme="light"] .structure-label::after { background: rgb(0 0 0 / 0.35); }
+.structure-label::before {
+  content: "";
+  position: absolute;
+  left: calc(50% - 2.5px);
+  bottom: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: #eef1f4;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.55);
+}
+.structure-label.is-selected { color: var(--accent); }
+.structure-label.is-selected::before { background: var(--accent); }
+.structure-label.is-selected::after { background: var(--accent); }
+[data-theme="light"] .structure-label { color: #15191f; text-shadow: 0 0 3px rgb(255 255 255 / 0.95), 0 1px 2px rgb(255 255 255 / 0.85); }
+[data-theme="light"] .structure-label::after { background: rgb(0 0 0 / 0.45); box-shadow: none; }
+[data-theme="light"] .structure-label::before { background: #15191f; box-shadow: 0 0 0 1px rgb(255 255 255 / 0.8); }
 
 /* evidence badges: symbol + colour (colour is never the only signal) */
 .ev { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; line-height: 1; padding: 3px 6px; border-radius: 6px; border: 1px solid currentColor; white-space: nowrap; }

@@ -79,7 +79,7 @@ export const useApp = create<AppState>((set, get) => ({
   compareKeys: [],
   workspace: "single",
   mode: "natural",
-  layers: { outer: true, chambers: true, vessels: true, coronary: true, valves: true, labels: true, highlights: true, flow: false },
+  layers: { outer: true, chambers: true, vessels: true, coronary: true, valves: true, labels: false, highlights: true, flow: false },
   hidden: {},
   isolate: null,
   cutaway: { enabled: false, axis: "four_chamber", offset: 0 },

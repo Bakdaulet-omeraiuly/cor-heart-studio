@@ -135,10 +135,18 @@ def surface(mask: np.ndarray, affine: np.ndarray, sigma: float, smooth: int, fac
     return mesh
 
 
-def nearest_region(points_mm: np.ndarray, region_index: np.ndarray, affine: np.ndarray, max_voxels: float = 1.5) -> np.ndarray:
+def nearest_region(points_mm: np.ndarray, region_index: np.ndarray, affine: np.ndarray, max_voxels: float = 1.5,
+                   normals: np.ndarray | None = None) -> np.ndarray:
     """Cortical region index of the nearest cortical voxel for each surface point; 0 where no
     cortical voxel is within `max_voxels` (e.g. the medial wall facing the third ventricle, which is
-    white matter or deep grey matter, not cortex)."""
+    white matter or deep grey matter, not cortex).
+
+    With outward `normals`, each point is first moved half a voxel inward: a surface vertex sits on
+    the face between a tissue voxel and an outside voxel, and the outside side can be nearer to the
+    region across a narrow sulcus (parahippocampal vs fusiform across the collateral sulcus)."""
+    if normals is not None:
+        step = 0.5 * float(np.linalg.norm(affine[:3, :3], axis=0).min())
+        points_mm = points_mm - step * normals
     dist, nearest = ndimage.distance_transform_edt(region_index == 0, return_indices=True)
     inv = np.linalg.inv(affine)
     idx = np.round(points_mm @ inv[:3, :3].T + inv[:3, 3]).astype(int)
@@ -184,7 +192,7 @@ def build(subject_dir: Path, lods=LODS):
         for hemi, mask in hemis.items():
             mask, _, _ = main_components(mask)
             m = constrained_surface(mask, affine, faces=cortex_faces)
-            region = nearest_region(m.vertices, cortex_index, affine)
+            region = nearest_region(m.vertices, cortex_index, affine, normals=np.asarray(m.vertex_normals))
             meshes.append(gl_mesh(f"cortex_{hemi[0]}h", m, frame, region, {"group": "cortex", "hemisphere": hemi}))
             ras.append(("cortex", hemi, m, region))
         for s in table:

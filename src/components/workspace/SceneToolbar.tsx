@@ -86,7 +86,7 @@ const LAYER_ROWS: { k: keyof L; label: string; hint?: string }[] = [
   { k: "coronary", label: "Coronary vessels" },
   { k: "valves", label: "Valves & chordae" },
   { k: "highlights", label: "Abnormality highlights", hint: "Hatched findings, regurgitation cue" },
-  { k: "labels", label: "Structure labels" },
+  { k: "labels", label: "Structure labels (L)", hint: "Off: only the hovered and selected structure are named" },
   { k: "flow", label: "Flow particles", hint: "Illustrative only — not measured flow" },
 ];
 
@@ -103,6 +103,7 @@ export function SceneToolbar({ onFallback, tierName, lod }: { onFallback: () => 
       if (p) { useApp.getState().requestCamera(p.id); e.preventDefault(); }
       if (e.key === " ") { const st = useApp.getState(); st.set({ playing: !st.playing }); e.preventDefault(); }
       if (e.key.toLowerCase() === "r") useApp.getState().requestCamera("anterior");
+      if (e.key.toLowerCase() === "l") { const st = useApp.getState(); st.setLayer("labels", !st.layers.labels); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);

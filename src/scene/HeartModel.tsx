@@ -246,6 +246,7 @@ export function HeartModel({ entry, spec, asset, pickAsset, clockId, primaryCloc
   const marker = ct && ctCrosshair ? voxelToApp(ct.voxelToApp, ctCrosshair) : null;
   const layersLabels = useApp((s) => s.layers.labels);
   const selected = useApp((s) => s.selectedStructure);
+  const hovered = useApp((s) => s.hoverStructure);
 
   return (
     <group scale={scale}>
@@ -273,7 +274,7 @@ export function HeartModel({ entry, spec, asset, pickAsset, clockId, primaryCloc
           onPointerOut={onOut}
           onClick={onClick}
         />
-        {showLabels && <LabelOverlay anchors={labelAnchors} occluder={pickRef} enabled={layersLabels} selected={selected} />}
+        {showLabels && <LabelOverlay anchors={labelAnchors} occluder={pickRef} enabled={layersLabels} selected={selected} hover={hovered} />}
       </group>
     </group>
   );

@@ -50,3 +50,9 @@ body/data, 13 px controls, 15 px titles. Numbers always `.num` (tabular).
 - Inspector collapses from the app bar to widen the 3D view.
 - Brain: choosing a structure in the list turns the camera to it (from its hemisphere's side) and makes
   the cortex see-through for deep structures.
+
+## Annotations
+
+- Structure labels are thin annotations (dot, 1 px leader, haloed text), never badges.
+- Off by default: only the hovered and the selected structure are named. All labels: Layers ›
+  Structure labels, or key **L**. Selected label uses the accent colour.

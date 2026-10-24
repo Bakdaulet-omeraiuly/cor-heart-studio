@@ -138,3 +138,17 @@ test("light theme", async ({ page }) => {
   await page.screenshot({ path: `${shots}/e2e-light-theme.png` });
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 });
+
+test("structure labels: clean image by default, all labels with L", async ({ page }) => {
+  await ready(page);
+  const shown = () => page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".structure-label")].filter((el) => el.style.opacity === "1").length);
+  await page.waitForTimeout(800);
+  expect(await shown()).toBe(0);
+  await page.getByTestId("viewport").click({ position: { x: 5, y: 60 } }); // focus the page, not a text field
+  await page.keyboard.press("l");
+  await expect.poll(shown).toBeGreaterThan(3);
+  await page.waitForTimeout(600);
+  await viewport(page).screenshot({ path: `${shots}/e2e-labels-on.png` });
+  await page.keyboard.press("l");
+  await expect.poll(shown).toBe(0);
+});

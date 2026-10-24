@@ -13,7 +13,11 @@ export interface LabelAnchor {
   occludable: boolean;
 }
 
-export function LabelOverlay({ anchors, occluder, enabled, selected }: { anchors: LabelAnchor[]; occluder: React.RefObject<THREE.Mesh | null>; enabled: boolean; selected: StructureId | null }) {
+/**
+ * `enabled` shows every label (Layers › Structure labels, key L). Otherwise only the hovered and the
+ * selected structure are labelled, so the image stays clean (imaging-viewer convention).
+ */
+export function LabelOverlay({ anchors, occluder, enabled, selected, hover }: { anchors: LabelAnchor[]; occluder: React.RefObject<THREE.Mesh | null>; enabled: boolean; selected: StructureId | null; hover?: StructureId | null }) {
   const { camera, gl, size } = useThree();
   const nodes = useRef(new Map<StructureId, HTMLSpanElement>());
   const occluded = useRef(new Map<StructureId, boolean>());
@@ -61,7 +65,7 @@ export function LabelOverlay({ anchors, occluder, enabled, selected }: { anchors
     for (const a of anchors) {
       const el = nodes.current.get(a.id);
       if (!el) continue;
-      if (!enabled || !a.visible) { el.style.opacity = "0"; continue; }
+      if (!(enabled || a.id === selected || a.id === hover) || !a.visible) { el.style.opacity = "0"; continue; }
       v.copy(a.position).project(camera);
       if (v.z > 1 || v.z < -1) { el.style.opacity = "0"; continue; }
       if (checkOcclusion && a.occludable && occluder.current) {
