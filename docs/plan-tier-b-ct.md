@@ -12,6 +12,23 @@ Status 2026-10-24: **decided, not started.** Read this first in a new session.
 - Our differentiator vs HeartFlow / Axial3D / Materialise: explainability — every structure labelled
   "from CT", "from echo measurement" or "illustrative" (valves stay illustrative: not reliably segmentable on CT).
 
+## Multimodal fusion (user priority: every modality matters)
+
+CT is only the starting point for *shape*. The target model fuses all modalities, each labelled by source:
+
+| Aspect | Primary source | Fallback |
+|---|---|---|
+| 3D shape (chambers, walls, aorta, coronaries) | CT or MRI segmentation | Tier A template adapted to echo measurements |
+| Motion over the cycle | cine MRI (multi-phase) or multi-phase CT | echo EF + regional wall motion (already implemented) |
+| Valves | echo / Doppler findings (already implemented) | illustrative |
+| Scar / fibrosis | MRI LGE (segment overlay already implemented) | — |
+| Coronary stenosis location | CT angiography + invasive coronary angiography (stenosis at a vessel segment) | text only |
+| Rhythm / timing | ECG (HR already drives timing; rhythm irregularity e.g. AF is a future addition) | default |
+
+Already implemented today: echo, ECG timing, valve findings, AHA-17 wall motion, MRI scar overlay.
+Missing: imaging-derived shape (this phase), real image-derived motion, stenosis markers on the 3D
+coronary tree, irregular-rhythm animation.
+
 ## Research summary (sources in the conversation; re-verify before relying on them)
 
 - Everyone uses CT/MRI → AI segmentation → expert review → mesh. Nobody builds exact 3D from echo.
