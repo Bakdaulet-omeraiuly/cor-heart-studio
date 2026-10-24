@@ -50,6 +50,9 @@ export interface NumberToken {
 // than a space-separated unit and is handled by a dedicated capture group below,
 // so that `55%` yields unit `%` while `55 mmHg` yields unit `mmHg`.
 const UNITS = [
+  "%/year", // signed annual rates (brain volume change), engine canonical unit
+  "cm\u00B2/m\u00B2", // cm²/m² (indexed valve area) — must win over cm²
+  "cm2/m2",
   "mL/m\u00B2", // mL/m²
   "mL/m2",
   "g/m\u00B2", // g/m²
@@ -176,9 +179,17 @@ export function extractNumbers(text: string): NumberToken[] {
   for (const match of cleaned.matchAll(NUMBER_TOKEN)) {
     const [raw, lowRaw, lowUnit, highRaw, highUnit] = match;
 
+    // A minus sign directly before the number, itself at the start or after
+    // whitespace / an opening bracket / a colon, is a sign ("-4.8 %/year"), not a
+    // range separator (ranges have a digit before the hyphen: "40-50").
+    const at = match.index ?? 0;
+    const prev = cleaned[at - 1];
+    const beforePrev = at >= 2 ? cleaned[at - 2] : undefined;
+    const negative = (prev === "-" || prev === "\u2212") && (beforePrev === undefined || /[\s([:=]/u.test(beforePrev));
+
     const token: NumberToken = {
-      raw,
-      value: parseNumber(lowRaw),
+      raw: negative ? `-${raw}` : raw,
+      value: negative ? -parseNumber(lowRaw) : parseNumber(lowRaw),
     };
 
     // A unit on either end describes the whole range; prefer an explicit unit
@@ -213,6 +224,8 @@ export function extractNumbers(text: string): NumberToken[] {
  * pass through unchanged.
  */
 const UNIT_ALIASES: Record<string, string> = {
+  "cm2/m2": "cm\u00B2/m\u00B2", // cm2/m2 → cm²/m²
+  "cm\u00B2/m\u00B2": "cm\u00B2/m\u00B2",
   cm2: "cm\u00B2", // cm2  → cm²
   "cm\u00B2": "cm\u00B2",
   "mL/m2": "mL/m\u00B2", // mL/m2 → mL/m²
@@ -334,6 +347,17 @@ export function allowedNumbers(
           if (token.rangeWith !== undefined) push(token.rangeWith, token.unit);
         }
       }
+    }
+  }
+
+  // 8. Digits inside the engine's own string values and grades: the CAD-RADS
+  //    category ("4A" → 4, "4B" → 4, "3" → 3) and the ACC/AHA stage ("D2" → 2).
+  //    They are engine output, not invented numbers, so restating them is fine.
+  for (const finding of [...a.findings, ...a.differential]) {
+    const strings = [finding.grade, ...finding.evidence.map((e) => (typeof e.value === "string" ? e.value : undefined))];
+    for (const text of strings) {
+      if (text === undefined) continue;
+      for (const m of text.matchAll(/\d+(?:\.\d+)?/gu)) push(Number(m[0]));
     }
   }
 
