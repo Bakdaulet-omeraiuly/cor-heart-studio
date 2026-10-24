@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   RECORD_TEXT_CAP,
+  SCOPE_TOPICS,
   SYSTEM_PROMPT,
   assessmentForModel,
   toolDefinitions,
@@ -125,6 +126,30 @@ describe("SYSTEM_PROMPT — governing concepts present", () => {
     expect(scope).toMatch(/do not quote any record values or numbers/i);
     expect(scope).toMatch(/the topic is not assessed/i);
     expect(scope).toMatch(/list what you can help with/i);
+  });
+
+  it("builds rule 6's covered-topic list from SCOPE_TOPICS, containing every entry", () => {
+    const scope = SYSTEM_PROMPT.split("\n").find((l) => l.startsWith("6. "));
+    expect(scope).toBeDefined();
+    for (const topic of SCOPE_TOPICS) expect(scope).toContain(topic);
+    const list = `${SCOPE_TOPICS.slice(0, -1).join(", ")} and ${SCOPE_TOPICS[SCOPE_TOPICS.length - 1]}`;
+    expect(scope).toContain(`You cover: ${list}.`);
+  });
+
+  it("keeps the agreed scope topics", () => {
+    expect(SCOPE_TOPICS).toEqual(
+      expect.arrayContaining([
+        "aortic stenosis",
+        "aortic regurgitation",
+        "mitral valve prolapse",
+        "left ventricular function, dilatation, hypertrophy and wall motion",
+        "left and right atrial and right ventricular size",
+        "coronary stenosis graded by CAD-RADS 2.0",
+        "ECG intervals",
+        "QTc",
+        "brain atrophy pattern",
+      ]),
+    );
   });
 
   it("mentions the coronary grading scale and the certainty basis", () => {

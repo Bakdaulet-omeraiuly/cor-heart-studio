@@ -149,17 +149,41 @@ Before the first task, read `node_modules/next/dist/docs/01-app/01-getting-start
     `docs/visual-review/` screenshots if they were rewritten without an intended visual change.
     - _Requirements: 12.3_
 
+- [x] 15. Scope-topic exception and referral rule
+  - Fixes the user report: a "what I can help with" sentence listing our own scope topics was blocked as uncited when
+    it contained "QTc", "CAD-RADS 2.0" or "graded by". Code changes stay in `src/app/api/assistant/` and
+    `tests/unit/assistant/`. Nothing in `src/domain/diagnosis/` changes.
+  - [x] 15.1 Scope topics: export `SCOPE_TOPICS` from `prompt.ts` and build rule 6's covered-topic list from it. In
+    `guard.ts`, the refusal / "what I can help with" exception accepts any list item equal to a scope topic
+    (case-insensitive), including "coronary stenosis graded by CAD-RADS 2.0": for both the citation check (its grade
+    word, number, clinical term or finding label/condition match does not make the sentence clinical) and the number
+    check (its "2.0" is not checked). Non-scope items fall back to the short-noun-phrase rule; any claim word still
+    blocks. The sentence split ends a sentence at a full stop right after a scope topic that ends in a digit. Unit
+    tests in `guard.test.ts` and `prompt.test.ts`: "I can help with aortic stenosis, LV function and QTc.", "I can
+    help with coronary stenosis graded by CAD-RADS 2.0." and "I can help with QTc." → accepted, against the inline
+    fixture and against real-engine Assessments whose finding label/condition overlaps a scope topic (SYN-004 aortic
+    stenosis, an ECG/QTc case); "Low oxygen saturation can lengthen the QT interval." → rejected; a non-scope list
+    item is still checked; rule 6 text contains every `SCOPE_TOPICS` entry.
+    - _Requirements: 5.6, 6.2, 6.4, 12.1_
+  - [x] 15.2 Referral terms clinical: add `refer`, `refers`, `referred`, `referral`, `referrals` (whole words) to the
+    clinical terms. Unit tests in `guard.test.ts`: "Urgent specialist referral is advised." uncited → rejected; with
+    `[R1]` → accepted (SYN-004, real engine); other `refer` forms uncited → rejected. Confirm `fallbackText` still
+    always passes `guard()` (`fallback.test.ts`).
+    - _Requirements: 5.5, 6.4, 6.5, 12.1_
+  - [x] 15.3 Check: `npm run typecheck && npm run lint && npm test`.
+    - _Requirements: 12.3_
+
 ## Task Dependency Graph
 
-Only incomplete leaf sub-tasks are listed. 14.2 and 14.3 build on the R ids from 14.1 and touch different files
-(`prompt.ts`, `guard.ts`); 14.4 runs last.
+Only incomplete leaf sub-tasks are listed. 15.1 and 15.2 both touch `guard.ts`, so they run one after the other;
+15.3 runs last.
 
 ```json
 {
   "waves": [
-    { "id": 0, "tasks": ["14.1"] },
-    { "id": 1, "tasks": ["14.2", "14.3"] },
-    { "id": 2, "tasks": ["14.4"] }
+    { "id": 0, "tasks": ["15.1"] },
+    { "id": 1, "tasks": ["15.2"] },
+    { "id": 2, "tasks": ["15.3"] }
   ]
 }
 ```

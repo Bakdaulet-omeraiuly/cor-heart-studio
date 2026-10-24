@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   allowedNumbers,
+  checkCitations,
   extractNumbers,
   guard,
   hasClinicalTerm,
@@ -649,9 +650,11 @@ describe("guard — real engine on the SYN-004 sample", () => {
   });
 
   it("rejects the same sentence citing a red flag that does not exist", () => {
+    // Referral terms are clinical (task 15.2), so an unknown R2 also leaves the
+    // sentence uncited.
     expect(guard("Urgent specialist referral is advised [R2].", ided, n.patient)).toEqual({
       ok: false,
-      reasons: ["unknown_id"],
+      reasons: ["unknown_id", "uncited"],
     });
   });
 
@@ -663,10 +666,184 @@ describe("guard — real engine on the SYN-004 sample", () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// Referral terms are clinical (task 15.2, Requirements 5.5, 6.4, 6.5)
+// ---------------------------------------------------------------------------
+
+describe("guard — referral terms need a citation", () => {
+  const syn004 = (() => {
+    const samples = (
+      JSON.parse(readFileSync(resolve(process.cwd(), "public/samples/synthetic-patients.json"), "utf8")) as {
+        patients: { patientId?: string }[];
+      }
+    ).patients;
+    const n = normalizeRecord(samples.find((p) => p.patientId === "SYN-004"));
+    if (!n.ok) throw new Error("SYN-004 sample does not normalize");
+    return { ided: withIds(assess(n.patient.record)), patient: n.patient };
+  })();
+  const contexts = [
+    { name: "inline fixture", ided: IDED, patient: PATIENT },
+    { name: "real engine SYN-004", ...syn004 },
+  ];
+
+  it.each(["refer", "Refers", "REFERRED", "referring", "Referral", "referrals"])(
+    "hasClinicalTerm matches %s",
+    (word) => {
+      expect(hasClinicalTerm(`We ${word} now`)).toBe(true);
+    },
+  );
+
+  it.each(["reference", "preference", "referee", "References", "deferral", "referendum"])(
+    "hasClinicalTerm does not match %s",
+    (word) => {
+      expect(hasClinicalTerm(`A ${word} here`)).toBe(false);
+    },
+  );
+
+  describe.each(contexts)("$name", ({ ided, patient }) => {
+    it.each([
+      "Urgent specialist referral is advised.",
+      "Please refer to a valve specialist.",
+      "The patient should be referred urgently.",
+      "We are referring this case onward.",
+      "Two referrals are advised.",
+    ])("rejects uncited %s", (text) => {
+      const result = guard(text, ided, patient);
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.reasons).toContain("uncited");
+    });
+
+    it.each([
+      "See the reference section for details.",
+      "Your preference is noted.",
+      "The referee made a call.",
+    ])("accepts non-referral words: %s", (text) => {
+      expect(guard(text, ided, patient)).toEqual({ ok: true });
+    });
+
+    it("accepts a refusal that names referral decisions as not assessed", () => {
+      // Names the topic and says it is not assessed, so the refusal exception
+      // applies (Requirement 6.4): no citation needed.
+      expect(guard("Referral decisions are not something I assess.", ided, patient)).toEqual({ ok: true });
+    });
+  });
+
+  it("the uncited referral sentence is reported for the inline fixture", () => {
+    expect(checkCitations("Urgent specialist referral is advised.", IDED).uncitedSentences).toEqual([
+      "Urgent specialist referral is advised.",
+    ]);
+  });
+
+  it("accepts the referral sentence cited [R1] for SYN-004", () => {
+    expect(guard("Urgent specialist referral is advised [R1].", syn004.ided, syn004.patient)).toEqual({ ok: true });
+  });
+
+  it("the SYN-004 red-flag line from the engine passes when it starts with its R id", () => {
+    const [flag] = syn004.ided.redFlags;
+    expect(flag.id).toBe("R1");
+    expect(guard(`${flag.id} ${flag.text}`, syn004.ided, syn004.patient)).toEqual({ ok: true });
+  });
+});
+
 describe("extractNumbers — units do not swallow the start of a word", () => {
   it("reads '2020 guideline' as a unitless 2020", () => {
     const [token] = extractNumbers("ACC/AHA 2020 guideline");
     expect(token.value).toBe(2020);
     expect(token.unit).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Scope topics in refusal / "what I can help with" sentences (task 15.1,
+// Requirements 5.6, 6.2, 6.4)
+// ---------------------------------------------------------------------------
+
+/** Normalize a record, run the real engine and stamp ids, as route.ts does. */
+function realEngine(record: unknown): { ided: ReturnType<typeof withIds>; patient: NormalizedPatient } {
+  const n = normalizeRecord(record);
+  if (!n.ok) throw new Error("record does not normalize");
+  return { ided: withIds(assess(n.patient.record)), patient: n.patient };
+}
+
+const readJson = (path: string): unknown => JSON.parse(readFileSync(resolve(process.cwd(), path), "utf8"));
+
+const SYN004 = realEngine(
+  (readJson("public/samples/synthetic-patients.json") as { patients: { patientId?: string }[] }).patients.find(
+    (p) => p.patientId === "SYN-004",
+  ),
+);
+// ecg-01: QTc 449 ms → the engine's finding has condition "qtc", which used to
+// match the "QTc" item of a help list as a finding mention.
+const ECG01 = realEngine((readJson("tests/assistant/cases/ecg-01.json") as { record: unknown }).record);
+
+const SCOPE_CONTEXTS = [
+  { name: "inline fixture", ided: IDED, patient: PATIENT },
+  { name: "real engine SYN-004 (aortic stenosis)", ...SYN004 },
+  { name: "real engine ecg-01 (QTc)", ...ECG01 },
+];
+
+describe("guard — scope topics in a help list", () => {
+  it("the real-engine Assessments overlap the scope topics", () => {
+    expect(SYN004.ided.findings.map((f) => f.condition)).toContain("aortic-stenosis");
+    expect(ECG01.ided.findings.map((f) => f.condition)).toContain("qtc");
+  });
+
+  describe.each(SCOPE_CONTEXTS)("$name", ({ ided, patient }) => {
+    it.each([
+      "I can help with aortic stenosis, LV function and QTc.",
+      "I can help with coronary stenosis graded by CAD-RADS 2.0.",
+      "I can help with QTc.",
+      "Oxygen saturation is not something I assess. I can help with coronary stenosis graded by CAD-RADS 2.0, ECG intervals and QTc.",
+    ])("accepts %s", (text) => {
+      expect(checkCitations(text, ided).uncitedSentences).toEqual([]);
+      expect(guard(text, ided, patient)).toEqual({ ok: true });
+    });
+
+    it("rejects an uncited QT claim", () => {
+      expect(guard("Low oxygen saturation can lengthen the QT interval.", ided, patient)).toEqual({
+        ok: false,
+        reasons: ["uncited"],
+      });
+    });
+
+    it("still checks a non-scope claim item in the list", () => {
+      expect(
+        guard("I can help with QTc and low oxygen saturation lengthening the QT interval.", ided, patient),
+      ).toEqual({ ok: false, reasons: ["uncited"] });
+    });
+
+    it("still flags the sentence after '… CAD-RADS 2.0.'", () => {
+      const text = "I can help with coronary stenosis graded by CAD-RADS 2.0. The valve is severe.";
+      expect(checkCitations(text, ided).uncitedSentences).toEqual(["The valve is severe."]);
+      expect(guard(text, ided, patient)).toEqual({ ok: false, reasons: ["uncited"] });
+    });
+  });
+
+  it.each([
+    { name: "a grade word in a non-scope item", text: "I can help with QTc and severe valve disease." },
+    { name: "a claim word after a scope topic", text: "I can help with QTc, which is prolonged." },
+    { name: "a scope topic followed by more words", text: "I can help with aortic stenosis that is severe." },
+  ])("rejects $name", ({ text }) => {
+    expect(guard(text, ECG01.ided, ECG01.patient)).toEqual({ ok: false, reasons: ["uncited"] });
+  });
+
+  it("checks a number in a non-scope item", () => {
+    expect(guard("I can help with QTc and the 9.9 m/s jet.", IDED, PATIENT)).toEqual({
+      ok: false,
+      reasons: ["number", "uncited"],
+    });
+  });
+
+  it("checks the '2.0' when it is written outside a help list", () => {
+    expect(guard("I can help with QTc. The scale used is CAD-RADS 2.0 [F1].", IDED, PATIENT)).toEqual({
+      ok: false,
+      reasons: ["number"],
+    });
+  });
+
+  it("splits after '… CAD-RADS 2.0.' so a citation on the next sentence covers only that one", () => {
+    expect(
+      guard("I can help with coronary stenosis graded by CAD-RADS 2.0. The valve is severe [F1].", IDED, PATIENT),
+    ).toEqual({ ok: true });
   });
 });
