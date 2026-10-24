@@ -1,0 +1,37 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Diagnosis tests on save",
+      "description": "Runs the engine's unit, property and case tests whenever an engine file, its tests or a case file is saved.",
+      "trigger": "PostFileSave",
+      "matcher": "(src/domain/diagnosis/.*\\.ts|tests/unit/diagnosis/.*\\.ts|tests/assistant/cases/.*\\.json)$",
+      "action": { "type": "command", "command": "npx vitest run tests/unit/diagnosis --reporter=dot" },
+      "timeout": 120
+    },
+    {
+      "name": "Data dictionary on field-registry save",
+      "description": "Regenerates the generated table in docs/medical-data-dictionary.md after src/domain/schema/fields.ts changes, so docs never drift from the registry.",
+      "trigger": "PostFileSave",
+      "matcher": "src/domain/schema/fields\\.ts$",
+      "action": { "type": "command", "command": "npx tsx scripts/generate-data-dictionary.ts" },
+      "timeout": 60
+    },
+    {
+      "name": "Guideline guard before engine tasks",
+      "description": "Before a spec task runs, reminds the agent of the sourcing and ownership rules for clinical thresholds.",
+      "trigger": "PreTaskExec",
+      "action": {
+        "type": "agent",
+        "prompt": "Before implementing: (1) every threshold you add or change must have an R-DX-* rule id, a DOI in src/domain/diagnosis/sources.ts and a status row in docs/research/diagnosis-engine.md; never change a threshold to make a test pass. (2) Only edit the owner's folders listed in .kiro/steering/product.md; ask before touching shared files. (3) Add boundary unit tests on both sides of every threshold."
+      }
+    },
+    {
+      "name": "Full check before finishing",
+      "description": "When the agent stops, runs the same checks CONTRIBUTING.md requires before a push (a push to main deploys to production).",
+      "trigger": "Stop",
+      "action": { "type": "command", "command": "npm run typecheck && npm run lint && npm test" },
+      "timeout": 600
+    }
+  ]
+}
