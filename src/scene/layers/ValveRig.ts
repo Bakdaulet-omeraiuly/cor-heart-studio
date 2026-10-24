@@ -39,7 +39,8 @@ export class ValveRig {
   private matrix = new THREE.Matrix4();
 
   constructor(sampler: AttributeSampler, clipping: THREE.Plane[]) {
-    this.leafletMaterial = new THREE.MeshPhysicalMaterial({ color: 0xf2dfcb, roughness: 0.5, clearcoat: 0.35, clearcoatRoughness: 0.3, sheen: 0.7, sheenRoughness: 0.5, sheenColor: new THREE.Color(1.0, 0.72, 0.66), side: THREE.DoubleSide, transparent: true, opacity: 0.93, clippingPlanes: clipping });
+    // thin fibrous membrane: warm off-white, soft sheen, slight translucency (approximation; no transmission pass)
+    this.leafletMaterial = new THREE.MeshPhysicalMaterial({ color: 0xead2bb, roughness: 0.58, clearcoat: 0.25, clearcoatRoughness: 0.45, sheen: 0.85, sheenRoughness: 0.45, sheenColor: new THREE.Color(1.0, 0.68, 0.6), side: THREE.DoubleSide, transparent: true, opacity: 0.88, depthWrite: true, clippingPlanes: clipping });
     this.annulusMaterial = new THREE.MeshPhysicalMaterial({ color: 0xd8b8a0, roughness: 0.55, clearcoat: 0.2, clippingPlanes: clipping });
     this.chordMaterial = new THREE.MeshStandardMaterial({ color: 0xf0e4d4, roughness: 0.5, clippingPlanes: clipping });
     const m = HEART_MANIFEST;
@@ -55,7 +56,7 @@ export class ValveRig {
       const vm = m.valves[id];
       const center = V(vm.center), normal = V(vm.normal).normalize();
       const ref = id === "mitral_valve" ? V(m.valves.aortic_valve.center) : id === "tricuspid_valve" ? lvBase.clone().addScaledVector(sep, 3) : center.clone().add(new THREE.Vector3(0, 0, 1));
-      const restRing = restAnnulus(spec, center, normal, vm.radius * 0.92, ref);
+      const restRing = restAnnulus(spec, center, normal, vm.radius * (spec.kind === "semilunar" ? 0.84 : 0.92), ref);
       const ringAttrs = restRing.map((p) => sampler.nearest(p));
       const leaflets = new THREE.Mesh(createLeafletGeometry(spec), this.leafletMaterial);
       leaflets.userData.structure = id;
@@ -115,14 +116,14 @@ export class ValveRig {
         gap: valve.regurgitation ? GAP[valve.regurgitation] : 0,
         billow: valve.prolapse ? 0.35 : 0,
       };
-      updateLeaflets(spec, part.leaflets.geometry, part.ring, centre, normal, radius, state, 0.045, part.edges);
+      updateLeaflets(spec, part.leaflets.geometry, part.ring, centre, normal, radius, state, 0.055, part.edges);
       updateRingTube(part.annulus.geometry, part.ring, 0.1);
       if (part.chordae) {
         for (const t of part.papTips) this.deform(P, t.rest, t.attrs, t.now);
         part.edges.forEach((e, i) => {
           let tip = part.papTips[0].now;
           if (part.id === "mitral_valve") tip = e.distanceTo(part.papTips[0].now) < e.distanceTo(part.papTips[1].now) ? part.papTips[0].now : part.papTips[1].now;
-          else tip = i < 5 ? part.papTips[1].now : part.papTips[0].now; // septal leaflet -> septal attachment
+          else tip = i < part.edges.length / VALVE_SPECS[part.id].commissures.length ? part.papTips[1].now : part.papTips[0].now; // septal leaflet -> septal attachment
           const len = e.distanceTo(tip);
           // Matrix4.lookAt(eye, target) points +Z from target to eye; the cylinder extends along +Z
           this.matrix.lookAt(tip, e, this.tmp.set(0, 1, 0));
@@ -139,7 +140,7 @@ export class ValveRig {
       const highlight = opts.selected === part.id ? 0.35 : opts.hover === part.id ? 0.18 : 0;
       const base = opts.clinical
         ? f.stenosis ? new THREE.Color(0.95, 0.66, 0.1) : f.regurgitation ? new THREE.Color(0.85, 0.35, 0.75) : new THREE.Color(0.78, 0.8, 0.85)
-        : new THREE.Color(0xf2dfcb);
+        : new THREE.Color(0xead2bb);
       const target = base.lerp(new THREE.Color(1, 1, 1), highlight);
       if (!(part.leaflets.material as THREE.MeshPhysicalMaterial).userData.perValve) {
         part.leaflets.material = this.leafletMaterial.clone();

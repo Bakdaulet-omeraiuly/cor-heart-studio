@@ -14,6 +14,7 @@ const PRESETS: { id: CameraPreset; label: string; key: string }[] = [
   { id: "superior", label: "Superior", key: "5" },
   { id: "inferior", label: "Inferior", key: "6" },
   { id: "four_chamber", label: "Four-chamber", key: "7" },
+  { id: "short_axis", label: "LV short axis", key: "0" },
   { id: "mitral_closeup", label: "Mitral close-up", key: "8" },
   { id: "aortic_closeup", label: "Aortic close-up", key: "9" },
 ];
@@ -97,7 +98,13 @@ export function SceneToolbar({ onFallback, tierName, lod }: { onFallback: () => 
           <Switch label="Cutaway plane" hint="Reveals modelled interior geometry with section shading" checked={s.cutaway.enabled} onChange={(v) => s.set({ cutaway: { ...s.cutaway, enabled: v } })} />
           <label className="mt-2 block text-[12px] text-muted" htmlFor="cut-axis">Plane</label>
           <select id="cut-axis" className="mt-1 h-8 w-full rounded-lg border border-line bg-panel-2 px-2 text-[13px]" value={s.cutaway.axis}
-            onChange={(e) => s.set({ cutaway: { ...s.cutaway, axis: e.target.value as CutAxis, enabled: true } })}>
+            onChange={(e) => {
+              const axis = e.target.value as CutAxis;
+              s.set({ cutaway: { ...s.cutaway, axis, enabled: true } });
+              // frame the cut face so the section (not the outside) faces the viewer
+              if (axis === "short_axis") s.requestCamera("short_axis");
+              if (axis === "four_chamber") s.requestCamera("four_chamber");
+            }}>
             <option value="four_chamber">Four-chamber (long axis)</option>
             <option value="short_axis">LV short axis</option>
             <option value="coronal">Coronal</option>

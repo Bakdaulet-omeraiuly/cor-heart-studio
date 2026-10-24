@@ -42,7 +42,7 @@ export function restAnnulus(spec: ValveSpec, center: V, normal: V, radius: numbe
       // commissures sit downstream (higher), cusp nadirs upstream
       const k = spec.commissures.length;
       const phase = spec.commissures[0];
-      h = 0.32 * radius * Math.cos(k * (u - phase));
+      h = 0.22 * radius * Math.cos(k * (u - phase));
     }
     pts.push(center.clone().addScaledVector(e1, Math.cos(u) * radius).addScaledVector(e2, Math.sin(u) * radius).addScaledVector(n, h));
   }
@@ -59,8 +59,8 @@ export interface ValveState {
  * Builds leaflets between the deformed annulus and a closure target. Returns positions for a
  * double-layer shell (thickness `thick`), written into `out` (sized by leafletVertexCount).
  */
-export const NU = 14; // samples across each leaflet
-export const NV = 8; // samples from hinge to free edge
+export const NU = 22; // samples across each leaflet
+export const NV = 12; // samples from hinge to free edge
 export function leafletVertexCount(spec: ValveSpec) { return spec.commissures.length * NU * NV * 2; }
 
 function leafletIndex(spec: ValveSpec): number[] {
@@ -107,15 +107,28 @@ function ringAt(ring: V[], u: number, out: V) {
 /**
  * Update leaflet positions. `ring` is the deformed annulus; `centre`/`normal` its deformed frame.
  * Free-edge points are returned in `edgeOut` for chordae attachment.
+ *
+ * Each leaflet is a smooth membrane: hinge → free edge follows a quadratic Bézier whose control point
+ * carries the belly (AV leaflets billow toward the atrium; semilunar cusps sag into pockets). The last
+ * part of the closed leaflet turns downstream to form a coaptation zone, so neighbouring leaflets meet
+ * along a surface instead of a knife-edge crease.
  */
+const mid = new THREE.Vector3(), du = new THREE.Vector3(), dv = new THREE.Vector3(), nn = new THREE.Vector3();
+let midBuf = new Float32Array(0);
 export function updateLeaflets(spec: ValveSpec, geom: THREE.BufferGeometry, ring: V[], centre: V, normal: V, radius: number, s: ValveState, thick: number, edgeOut: V[]) {
   const pos = geom.getAttribute("position") as THREE.BufferAttribute;
   const arr = pos.array as Float32Array;
   const C = spec.commissures;
   const L = C.length;
   const layer = L * NU * NV;
+  if (midBuf.length < layer * 3) midBuf = new Float32Array(layer * 3);
+  const M = midBuf;
   const n = normal;
+  const av = spec.kind === "atrioventricular";
+  const coapt = av ? 0.24 : 0.2; // fraction of the leaflet in the coaptation zone
+  const coaptLen = (av ? 0.28 : 0.2) * radius;
   let ei = 0;
+  const bez = (a: number, c: number, b: number, t: number) => (1 - t) * (1 - t) * a + 2 * t * (1 - t) * c + t * t * b;
   for (let l = 0; l < L; l++) {
     const u0 = C[l];
     let u1 = C[(l + 1) % L];
@@ -123,55 +136,63 @@ export function updateLeaflets(spec: ValveSpec, geom: THREE.BufferGeometry, ring
     const um = (u0 + u1) / 2;
     for (let i = 0; i < NU; i++) {
       const fu = i / (NU - 1);
-      // keep a sliver at commissures so neighbouring leaflets do not intersect
-      const u = u0 + (u1 - u0) * (0.02 + 0.96 * fu);
+      const u = u0 + (u1 - u0) * (0.015 + 0.97 * fu);
       const hinge = ringAt(ring, u, tmpA);
-      // closure target: Y / line coaptation toward the centre along the commissure lines
+      // closure line: toward the centre along the commissure directions, eased so the edge is curved
       let t: number, dirU: number;
       if (u < um) { t = 1 - (u - u0) / (um - u0); dirU = u0; } else { t = (u - um) / (u1 - um); dirU = u1; }
+      t = t * t * (3 - 2 * t) * 0.85 + t * 0.15;
       const commPt = ringAt(ring, dirU, tmpB);
       const target = tmpC.copy(centre).lerp(commPt, Math.max(t, s.gap));
-      const belly = Math.sin(Math.PI * fu); // 0 at commissures, 1 at the leaflet middle
+      const belly = Math.sin(Math.PI * fu);
+      const rx = hinge.x - centre.x, ry = hinge.y - centre.y, rz = hinge.z - centre.z;
+      const rl = Math.hypot(rx, ry, rz) || 1;
+      // closed-state control point
+      const sag = av ? -(0.22 + s.billow) * radius * (0.35 + 0.65 * belly) : -0.62 * radius * (0.25 + 0.75 * belly);
+      const ccx = (hinge.x + target.x) / 2 + n.x * sag, ccy = (hinge.y + target.y) / 2 + n.y * sag, ccz = (hinge.z + target.z) / 2 + n.z * sag;
+      // open-state geometry: soft funnel (AV) or cusp pressed toward the sinus wall (semilunar)
+      const scallop = av ? 1 - 0.12 * Math.pow(Math.sin(Math.PI * fu * (spec.id === "mitral_valve" && l === 1 ? 3 : 2)), 2) : 1;
+      const len = spec.leafletLength * radius * scallop;
+      const inward = av ? 0.32 : 0.18;
+      const ex = hinge.x - rx * inward + n.x * len, ey = hinge.y - ry * inward + n.y * len, ez = hinge.z - rz * inward + n.z * len;
+      // semilunar cusps stay just inside the sinus wall when open (never through it)
+      const bulge = (av ? 0.14 : -0.06) * radius * (0.5 + 0.5 * belly) / rl;
+      const ocx = (hinge.x + ex) / 2 + rx * bulge, ocy = (hinge.y + ey) / 2 + ry * bulge, ocz = (hinge.z + ez) / 2 + rz * bulge;
       for (let j = 0; j < NV; j++) {
         const fv = j / (NV - 1);
-        // closed: hinge -> target, bowing upstream (AV) or forming a pocket downstream-to-upstream (semilunar)
-        let cx = hinge.x + (target.x - hinge.x) * fv;
-        let cy = hinge.y + (target.y - hinge.y) * fv;
-        let cz = hinge.z + (target.z - hinge.z) * fv;
-        const bow = spec.kind === "atrioventricular"
-          ? -(0.1 + s.billow) * radius * Math.sin(Math.PI * fv * 0.85) * (0.4 + 0.6 * belly)
-          : -0.42 * radius * Math.sin(Math.PI * fv * 0.9) * belly;
-        cx += n.x * bow; cy += n.y * bow; cz += n.z * bow;
-        // open: leaflet swings downstream, lying against the wall (semilunar) or hanging as a soft funnel (AV).
-        // Scalloped free edge and a gentle belly so the leaflet reads as a membrane, not a flat sheet.
-        const scallop = spec.kind === "atrioventricular" ? 1 - 0.14 * Math.pow(Math.sin(Math.PI * fu * (spec.id === "mitral_valve" && l === 1 ? 3 : 2)), 2) : 1;
-        const len = spec.leafletLength * radius * scallop;
-        const inward = spec.kind === "atrioventricular" ? 0.3 : 0.1;
-        const bellyOut = (spec.kind === "atrioventricular" ? -0.16 : -0.08) * radius * Math.sin(Math.PI * fv) * (0.5 + 0.5 * belly);
-        const rx = hinge.x - centre.x, ry = hinge.y - centre.y, rz = hinge.z - centre.z;
-        const rl = Math.hypot(rx, ry, rz) || 1;
-        const pull = inward * fv * fv - bellyOut / rl;
-        const ox = hinge.x - rx * pull + n.x * len * fv;
-        const oy = hinge.y - ry * pull + n.y * len * fv;
-        const oz = hinge.z - rz * pull + n.z * len * fv;
+        // closed: belly curve to the coaptation line, then the coaptation zone runs downstream
+        let cx: number, cy: number, cz: number;
+        if (fv <= 1 - coapt) {
+          const tt = fv / (1 - coapt);
+          cx = bez(hinge.x, ccx, target.x, tt); cy = bez(hinge.y, ccy, target.y, tt); cz = bez(hinge.z, ccz, target.z, tt);
+        } else {
+          const tt = (fv - (1 - coapt)) / coapt;
+          const d = coaptLen * tt * (1 - 0.25 * tt);
+          cx = target.x + n.x * d; cy = target.y + n.y * d; cz = target.z + n.z * d;
+        }
+        const ox = bez(hinge.x, ocx, ex, fv), oy = bez(hinge.y, ocy, ey, fv), oz = bez(hinge.z, ocz, ez, fv);
         const o = s.opening;
-        const x = cx + (ox - cx) * o, y = cy + (oy - cy) * o, z = cz + (oz - cz) * o;
         const k = (l * NU * NV + i * NV + j) * 3;
-        arr[k] = x; arr[k + 1] = y; arr[k + 2] = z;
-        if (j === NV - 1 && i % 3 === 1 && edgeOut[ei]) edgeOut[ei++].set(x, y, z);
+        M[k] = cx + (ox - cx) * o; M[k + 1] = cy + (oy - cy) * o; M[k + 2] = cz + (oz - cz) * o;
       }
     }
   }
-  // offset layers along the per-vertex surface normal for real thickness
-  geom.computeVertexNormals();
-  const nor = geom.getAttribute("normal") as THREE.BufferAttribute;
-  for (let v = 0; v < layer; v++) {
-    const k = v * 3;
-    const nx = nor.array[k], ny = nor.array[k + 1], nz = nor.array[k + 2];
-    const tx = arr[k], ty = arr[k + 1], tz = arr[k + 2];
-    arr[k] = tx + nx * thick * 0.5; arr[k + 1] = ty + ny * thick * 0.5; arr[k + 2] = tz + nz * thick * 0.5;
-    const kk = (layer + v) * 3;
-    arr[kk] = tx - nx * thick * 0.5; arr[kk + 1] = ty - ny * thick * 0.5; arr[kk + 2] = tz - nz * thick * 0.5;
+  // mid-surface normals from the grid itself (no stale data), then offset both layers for real thickness
+  for (let l = 0; l < L; l++) for (let i = 0; i < NU; i++) for (let j = 0; j < NV; j++) {
+    const at = (ii: number, jj: number) => (l * NU * NV + Math.min(NU - 1, Math.max(0, ii)) * NV + Math.min(NV - 1, Math.max(0, jj))) * 3;
+    const a = at(i + 1, j), b = at(i - 1, j), c = at(i, j + 1), d = at(i, j - 1);
+    du.set(M[a] - M[b], M[a + 1] - M[b + 1], M[a + 2] - M[b + 2]);
+    dv.set(M[c] - M[d], M[c + 1] - M[d + 1], M[c + 2] - M[d + 2]);
+    nn.crossVectors(du, dv).normalize();
+    const k = at(i, j);
+    mid.set(M[k], M[k + 1], M[k + 2]);
+    // leaflets thin slightly toward the free edge (thicker at the hinge / rough zone)
+    const h = thick * 0.5 * (1.15 - 0.35 * (j / (NV - 1)));
+    arr[k] = mid.x + nn.x * h; arr[k + 1] = mid.y + nn.y * h; arr[k + 2] = mid.z + nn.z * h;
+    const kk = layer * 3 + k;
+    arr[kk] = mid.x - nn.x * h; arr[kk + 1] = mid.y - nn.y * h; arr[kk + 2] = mid.z - nn.z * h;
+    // chordae insert just behind the free edge on the ventricular side
+    if (j === NV - 2 && i % 3 === 1 && edgeOut[ei]) edgeOut[ei++].set(mid.x - nn.x * h, mid.y - nn.y * h, mid.z - nn.z * h);
   }
   pos.needsUpdate = true;
   geom.computeVertexNormals();

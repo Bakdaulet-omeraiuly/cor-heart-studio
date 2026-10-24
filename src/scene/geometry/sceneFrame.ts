@@ -29,10 +29,16 @@ export function cameraPose(preset: CameraPreset, distance = CAMERA_DISTANCE): Ca
       const t = toWorld(lv.base).addScaledVector(AXIS, 2.5);
       return at(ANT.clone().addScaledVector(AXIS, 0.35), distance * 0.85, t, AXIS.clone().negate());
     }
+    case "short_axis": {
+      // look from the base toward the apex so the short-axis cut face (apical part kept) faces the camera
+      const t = toWorld(lv.base).addScaledVector(AXIS, 4.2);
+      return at(AXIS.clone().negate(), distance * 0.75, t, ANT.clone());
+    }
     case "mitral_closeup": {
+      // side view across the valve from the four-chamber cut: leaflets, chordae and the atrial side together
       const mv = HEART_MANIFEST.valves.mitral_valve;
-      const c = toWorld(mv.center);
-      return at(new THREE.Vector3(...(mv.normal as [number, number, number])).addScaledVector(ANT, 0.9), 19, c, AXIS.clone().negate());
+      const c = toWorld(mv.center).addScaledVector(new THREE.Vector3(...(mv.normal as [number, number, number])), -0.8);
+      return at(ANT.clone().addScaledVector(SEP, -0.35), 21, c, AXIS.clone().negate());
     }
     case "aortic_closeup": {
       const av = HEART_MANIFEST.valves.aortic_valve;

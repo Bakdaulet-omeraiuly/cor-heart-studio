@@ -30,7 +30,7 @@ export class FlowRig {
   private tmp: [number, number, number] = [0, 0, 0];
   private valveRest: Record<ValveId, { c: THREE.Vector3; n: THREE.Vector3; attrs: SampledAttributes }>;
   readonly count = 260;
-  readonly jetCount = 120;
+  readonly jetCount = 180;
 
   constructor(sampler: AttributeSampler, clipping: THREE.Plane[]) {
     const m = HEART_MANIFEST;
@@ -60,7 +60,7 @@ export class FlowRig {
       return p;
     };
     this.forward = mk(this.count, new THREE.Color(0.92, 0.93, 0.96), 0.22);
-    this.jets = mk(this.jetCount, new THREE.Color(1.0, 0.72, 0.12), 0.26);
+    this.jets = mk(this.jetCount, new THREE.Color(1.0, 0.72, 0.12), 0.34);
     this.forward.renderOrder = 5;
     this.jets.renderOrder = 6;
     this.group.add(this.forward, this.jets);

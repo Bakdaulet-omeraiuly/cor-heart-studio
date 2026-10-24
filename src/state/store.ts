@@ -8,7 +8,7 @@ export type DisplayMode = "natural" | "clinical";
 export type CutAxis = "coronal" | "sagittal" | "short_axis" | "four_chamber";
 export type Quality = "auto" | "high" | "low";
 export type InspectorTab = "observations" | "changes" | "evidence" | "warnings";
-export type CameraPreset = "anterior" | "posterior" | "left_lateral" | "right_lateral" | "superior" | "inferior" | "four_chamber" | "mitral_closeup" | "aortic_closeup";
+export type CameraPreset = "anterior" | "posterior" | "left_lateral" | "right_lateral" | "superior" | "inferior" | "four_chamber" | "short_axis" | "mitral_closeup" | "aortic_closeup";
 
 export interface Layers {
   outer: boolean;
