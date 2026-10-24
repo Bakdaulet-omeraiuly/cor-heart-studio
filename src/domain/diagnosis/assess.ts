@@ -3,6 +3,7 @@
 import { normalizeRecord } from "../normalization/normalize";
 import { assessChambers } from "./chambers";
 import { Ctx } from "./context";
+import { assessCoronary } from "./coronary";
 import { assessLv } from "./lv";
 import type { Assess, Assessment } from "./types";
 import { assessValves } from "./valves";
@@ -21,5 +22,6 @@ export const assess: Assess = (record): Assessment => {
   assessValves(c);
   assessLv(c, true);
   assessChambers(c);
+  assessCoronary(c);
   return { findings: c.findings, differential: c.differential, missing: c.missing, redFlags: c.redFlags, disclaimer: DISCLAIMER };
 };
