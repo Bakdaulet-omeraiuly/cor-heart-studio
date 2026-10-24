@@ -1,6 +1,6 @@
 # How we used Kiro — COR Heart Studio diagnostic assistant
 
-**Challenge track:** _⟨fill in the track name⟩_
+**Challenge track:** Healthcare & Biotech
 
 **Project.** COR Heart Studio is a 3D heart and brain viewer driven by a patient record. We added a guideline-based
 diagnostic assistant for clinicians, in two parts:
