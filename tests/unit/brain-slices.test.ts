@@ -3,7 +3,7 @@ import { gunzipSync } from "node:zlib";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { appToVoxel, flatIndex, renderSlice, screenToVoxel, viewMapping, voxelToApp, voxelToScreen, type Vec3 } from "@/brain/sliceGeometry";
+import { appToVoxel, flatIndex, renderSlice, screenToVoxel, viewMapping, voxelToApp, voxelToScreen, type Vec3 } from "@/imaging/sliceGeometry";
 import type { BrainManifest, ViewId } from "@/brain/types";
 import { ROOT } from "./helpers";
 

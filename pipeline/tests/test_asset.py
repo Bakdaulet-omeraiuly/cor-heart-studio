@@ -15,9 +15,10 @@ PROCEDURAL_MANIFEST = Path(__file__).parents[2] / "src/scene/asset-adapters/proc
 @pytest.fixture(scope="module")
 def asset():
     labels, affine = make_volume()
-    glbs, manifest, proxy, qa = build_asset(labels, affine, "mmwhs", "synthetic", None, lods=(("high", 40_000), ("low", 15_000)))
+    ct = np.where(labels > 0, 300, -100).astype(np.int16)  # synthetic "CT": bright blood/tissue in fat
+    glbs, manifest, proxy, qa, volumes = build_asset(labels, affine, "mmwhs", "synthetic", None, lods=(("high", 40_000), ("low", 15_000)), ct=ct)
     mesh = next(iter(trimesh.load(io.BytesIO(glbs["low"]), file_type="glb").geometry.values()))
-    return glbs, manifest, proxy, qa, mesh
+    return glbs, manifest, proxy, qa, mesh, volumes
 
 
 def _keys(d, prefix=""):
@@ -40,7 +41,7 @@ def test_manifest_has_every_field_the_app_reads(asset):
 
 
 def test_attribute_contract(asset):
-    *_, mesh = asset
+    *_, mesh, _ = asset
     w = np.asarray(mesh.vertex_attributes["_WEIGHTS"])
     t = np.asarray(mesh.vertex_attributes["_TISSUE"])
     assert w.dtype == np.uint8 and t.dtype == np.uint8 and w.shape[1] == t.shape[1] == 4
@@ -97,3 +98,19 @@ def test_snap_inside_moves_a_point_into_a_crescent_cavity():
     p = snap_inside(centroid, mask, affine, frame, 3.0)
     depth = ndimage.distance_transform_edt(mask)
     assert mask[idx(p)] and depth[idx(p)] >= 3.0
+
+
+def test_ct_slices_share_the_mesh_frame(asset):
+    _, manifest, proxy, _, _, volumes = asset
+    meta, image, index = volumes
+    assert image.shape == index.shape == tuple(meta["dims"])
+    lv = meta["structures"][0]
+    assert lv["key"] == "lv_cavity" and lv["volumeMl"] == pytest.approx(manifest["baseline"]["lvEndDiastolicVolumeMl"], rel=0.01)
+    # LV cavity voxels mapped with voxelToApp land where the 3D LV cavity mesh is
+    m = np.array(meta["voxelToApp"])
+    ijk = np.argwhere(index == lv["index"])
+    centroid_slices = (ijk @ m[:3, :3].T + m[:3, 3]).mean(axis=0)
+    centroid_mesh = np.reshape(proxy["positions"], (-1, 3)).mean(axis=0)
+    assert np.linalg.norm(centroid_slices - centroid_mesh) < 0.2  # cm
+    # 8-bit window: -100 HU -> 51, 300 HU -> 153 with the -300..700 HU range
+    assert set(np.unique(image)) <= {51, 153}

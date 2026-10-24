@@ -80,6 +80,11 @@ def main() -> None:
     for lod in manifest["files"]:
         shutil.copyfile(case_out / "asset" / f"heart-{lod}.glb", models / f"heart-{lod}.glb")
         manifest["files"][lod]["url"] = f"/models/ct/{case_id}/heart-{lod}.glb"
+    if "imaging" in manifest:  # CT slice volumes for the evidence panel (derived from CC BY CT images)
+        for key in ("image", "labels"):
+            name = manifest["imaging"][key]
+            shutil.copyfile(case_out / "asset" / name, models / name)
+            manifest["imaging"][key] = f"/models/ct/{case_id}/{name}"
     adapters = REPO / "src/scene/asset-adapters/ct"
     adapters.mkdir(parents=True, exist_ok=True)
     (adapters / f"{case_id}.manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")

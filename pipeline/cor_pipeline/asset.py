@@ -343,8 +343,62 @@ def _r(v, d=4):
     return [round(float(x), d) for x in v] if np.ndim(v) else round(float(v), d)
 
 
-def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None, lods=(("high", 300_000), ("low", 120_000))):
-    """Returns ({lod: glb bytes}, manifest dict, lv cavity proxy dict, qa list)."""
+# Source-image evidence for the slice views: label index -> (key, name, colour). Colours follow the app's
+# clinical-overlay legend (src/components/workspace/Legend.tsx).
+CT_STRUCTURES = [
+    ("lv_cavity", "LV cavity", (0.80, 0.33, 0.06)),
+    ("lv_myocardium", "LV myocardium", (0.93, 0.55, 0.62)),
+    ("rv", "RV (label may include wall)", (0.05, 0.38, 0.68)),
+    ("la", "Left atrium", (0.86, 0.60, 0.10)),
+    ("ra", "Right atrium", (0.30, 0.62, 0.85)),
+    ("aorta", "Aorta", (0.72, 0.36, 0.55)),
+    ("pulmonary_artery", "Pulmonary artery", (0.10, 0.58, 0.44)),
+]
+CT_HU_RANGE = (-300.0, 700.0)  # 8-bit display range: blood pool, myocardium, fat, contrast
+CT_MARGIN_MM = 20.0
+
+
+def ct_volumes(ct: np.ndarray, masks: dict[str, np.ndarray], affine: np.ndarray, frame: Frame):
+    """Crop the CT to the heart, rescale to 8 bit, and build a matching label-index volume."""
+    heart = np.logical_or.reduce(list(masks.values()))
+    spacing = np.linalg.norm(affine[:3, :3], axis=0)
+    margin = np.ceil(CT_MARGIN_MM / spacing).astype(int)
+    idx = np.argwhere(heart)
+    lo = np.maximum(idx.min(axis=0) - margin, 0)
+    hi = np.minimum(idx.max(axis=0) + margin + 1, heart.shape)
+    crop = tuple(slice(a, b) for a, b in zip(lo, hi))
+    lo_hu, hi_hu = CT_HU_RANGE
+    image = np.clip((ct[crop].astype(np.float32) - lo_hu) / (hi_hu - lo_hu) * 255, 0, 255).round().astype(np.uint8)
+    index = np.zeros(image.shape, dtype=np.uint8)
+    structures = []
+    voxel_ml = abs(np.linalg.det(affine[:3, :3])) / 1000
+    for i, (key, name, colour) in enumerate(CT_STRUCTURES, start=1):
+        m = masks[key][crop] & (index == 0)
+        index[m] = i
+        structures.append({"index": i, "key": key, "name": name, "colour": list(colour), "volumeMl": round(float(m.sum()) * voxel_ml, 1)})
+    shift = np.eye(4)
+    shift[:3, 3] = lo
+    crop_affine = affine @ shift
+    to_app = np.eye(4)
+    to_app[:3, :3] = RAS_TO_APP @ crop_affine[:3, :3]
+    to_app[:3, 3] = frame.point(crop_affine[:3, 3])
+    meta = {
+        "modality": "CT (contrast-enhanced, single phase)",
+        "image": "ct.u8.gz", "labels": "ctlabels.u8.gz",
+        "dims": [int(v) for v in image.shape], "order": "C (i slowest, k fastest)",
+        "spacingMm": [round(float(v), 4) for v in np.linalg.norm(crop_affine[:3, :3], axis=0)],
+        "voxelToApp": [[round(float(v), 6) for v in row] for row in to_app],
+        "intensity": {"unit": "HU", "byte0": lo_hu, "byte255": hi_hu},
+        "structures": structures,
+    }
+    return meta, image, index
+
+
+def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None, lods=(("high", 300_000), ("low", 120_000)), ct=None):
+    """Returns ({lod: glb bytes}, manifest dict, lv cavity proxy dict, qa list, volumes or None).
+
+    With `ct` (the CT on the labels' grid), volumes = (meta, image u8, label-index u8) for the slice views.
+    """
     masks = structure_masks(labels, source)
     grid = FineGrid(masks, affine)
     fields = build_fields(masks, grid)
@@ -530,4 +584,9 @@ def build_asset(labels, affine, source: str, case_id: str, dataset: dict | None,
         "positions": [round(float(v), 3) for v in lv_cav_mesh.vertices.ravel()],
         "indices": [int(i) for i in lv_cav_mesh.faces.ravel()],
     }
-    return glbs, manifest, proxy, qa
+    volumes = None
+    if ct is not None:
+        meta, image, index = ct_volumes(ct, masks, affine, frame)
+        manifest["imaging"] = meta
+        volumes = (meta, image, index)
+    return glbs, manifest, proxy, qa, volumes

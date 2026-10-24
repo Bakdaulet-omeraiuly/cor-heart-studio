@@ -12,6 +12,7 @@ import { SceneToolbar } from "./SceneToolbar";
 import { PlaybackBar } from "./PlaybackBar";
 import { Legend } from "./Legend";
 import { GeometryBadge } from "./GeometryBadge";
+import { CtEvidencePanel } from "./CtEvidencePanel";
 
 const HeartCanvas = dynamic(() => import("@/scene/HeartCanvas"), { ssr: false });
 
@@ -49,36 +50,39 @@ export function HeartViewport() {
   }
   const asset = assets.high ?? assets.low;
   return (
-    <div className="relative h-full w-full overflow-hidden" data-testid="viewport">
-      {asset && assets.low && !lost && (
-        <HeartCanvas key={`${canvasKey}:${spec.id}`} entry={entry} spec={spec} asset={asset} pickAsset={assets.low} tier={tier} onContextLost={() => setLost(true)} />
-      )}
-      {!assets.low && (
-        <div className="absolute inset-0 flex items-center justify-center" role="status">
-          <div className="flex items-center gap-2 rounded-lg border border-line bg-panel px-3 py-2 text-[13px] text-muted shadow">
-            <Loader2 className="h-4 w-4 animate-spin" /> Loading anatomical asset…
-          </div>
-        </div>
-      )}
-      {lost && (
-        <div className="absolute inset-0 flex items-center justify-center bg-bg/80" role="alert">
-          <div className="max-w-sm rounded-xl border border-line bg-panel p-4 text-[13px] shadow-lg">
-            <p className="flex items-center gap-2 font-medium"><AlertTriangle className="h-4 w-4 text-warn" /> The 3D graphics context was lost</p>
-            <p className="mt-1 text-muted">This can happen when the GPU is reset or memory is low. Patient data is unaffected.</p>
-            <div className="mt-3 flex gap-2">
-              <Button variant="primary" onClick={() => { setLost(false); setCanvasKey((k) => k + 1); }}><RotateCcw className="h-3.5 w-3.5" /> Restore 3D</Button>
-              <Button onClick={() => { setLost(false); setForceFallback(true); }}>Use 2D view</Button>
+    <div className="flex h-full w-full">
+      <div className="relative h-full min-w-0 flex-1 overflow-hidden" data-testid="viewport">
+        {asset && assets.low && !lost && (
+          <HeartCanvas key={`${canvasKey}:${spec.id}`} entry={entry} spec={spec} asset={asset} pickAsset={assets.low} tier={tier} onContextLost={() => setLost(true)} />
+        )}
+        {!assets.low && (
+          <div className="absolute inset-0 flex items-center justify-center" role="status">
+            <div className="flex items-center gap-2 rounded-lg border border-line bg-panel px-3 py-2 text-[13px] text-muted shadow">
+              <Loader2 className="h-4 w-4 animate-spin" /> Loading anatomical asset…
             </div>
           </div>
+        )}
+        {lost && (
+          <div className="absolute inset-0 flex items-center justify-center bg-bg/80" role="alert">
+            <div className="max-w-sm rounded-xl border border-line bg-panel p-4 text-[13px] shadow-lg">
+              <p className="flex items-center gap-2 font-medium"><AlertTriangle className="h-4 w-4 text-warn" /> The 3D graphics context was lost</p>
+              <p className="mt-1 text-muted">This can happen when the GPU is reset or memory is low. Patient data is unaffected.</p>
+              <div className="mt-3 flex gap-2">
+                <Button variant="primary" onClick={() => { setLost(false); setCanvasKey((k) => k + 1); }}><RotateCcw className="h-3.5 w-3.5" /> Restore 3D</Button>
+                <Button onClick={() => { setLost(false); setForceFallback(true); }}>Use 2D view</Button>
+              </div>
+            </div>
+          </div>
+        )}
+        <SceneToolbar onFallback={() => setForceFallback(true)} tierName={tier.name} lod={assets.high ? "high" : "low"} />
+        {/* legend and player share one bottom column so they can never overlap each other */}
+        <div className="pointer-events-none absolute inset-x-3 bottom-3 z-20 flex flex-col items-start gap-2">
+          <GeometryBadge spec={spec} />
+          <Legend />
+          <PlaybackBar />
         </div>
-      )}
-      <SceneToolbar onFallback={() => setForceFallback(true)} tierName={tier.name} lod={assets.high ? "high" : "low"} />
-      {/* legend and player share one bottom column so they can never overlap each other */}
-      <div className="pointer-events-none absolute inset-x-3 bottom-3 z-20 flex flex-col items-start gap-2">
-        <GeometryBadge spec={spec} />
-        <Legend />
-        <PlaybackBar />
       </div>
+      {spec.manifest.imaging && <CtEvidencePanel spec={spec} />}
     </div>
   );
 }

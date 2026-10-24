@@ -12,6 +12,8 @@ import type { HeartAssetSpec } from "./asset-adapters/registry";
 import { advance, getClock, notifyPhase } from "./animation/clock";
 import { deformPoint, frameParams, lvCoords, restParams, segmentAt } from "./animation/deform";
 import { DISABLED_PLANE, sceneFrame } from "./geometry/sceneFrame";
+import { appToVoxel, voxelToApp, type Vec3 } from "@/imaging/sliceGeometry";
+import { useCtSlices } from "./ctSlices";
 import { LabelOverlay, type LabelAnchor } from "./annotations/LabelOverlay";
 import { FlowRig } from "./layers/FlowRig";
 import { ValveRig } from "./layers/ValveRig";
@@ -230,9 +232,18 @@ export function HeartModel({ entry, spec, asset, pickAsset, clockId, primaryCloc
     if (e.delta > 4) return; // a drag, not a click
     const h = firstVisibleHit(e);
     useApp.getState().selectStructure(h?.structure ?? null, h?.segment ?? null);
+    // Tier B: move the CT slices to the clicked point (rest pose = the scanned shape)
+    if (ct && h) {
+      const p = e.point.clone().divideScalar(scale).add(center);
+      const ijk = appToVoxel(ct.voxelToApp, [p.x, p.y, p.z]).map((v, i) => Math.max(0, Math.min(ct.dims[i] - 1, Math.round(v)))) as Vec3;
+      useCtSlices.getState().set({ crosshair: ijk });
+    }
   };
 
   const offset = useMemo(() => center.clone().multiplyScalar(-1), [center]);
+  const ct = manifest.imaging;
+  const ctCrosshair = useCtSlices((s) => s.crosshair);
+  const marker = ct && ctCrosshair ? voxelToApp(ct.voxelToApp, ctCrosshair) : null;
   const layersLabels = useApp((s) => s.layers.labels);
   const selected = useApp((s) => s.selectedStructure);
 
@@ -246,6 +257,12 @@ export function HeartModel({ entry, spec, asset, pickAsset, clockId, primaryCloc
         ))}
         <primitive object={valves.group} onPointerMove={onMove} onClick={onClick} onPointerOut={onOut} />
         <primitive object={flow.group} />
+        {marker && (
+          <mesh position={marker} renderOrder={20}>
+            <sphereGeometry args={[0.22, 16, 12]} />
+            <meshBasicMaterial color="#ffd166" depthTest={false} transparent opacity={0.95} />
+          </mesh>
+        )}
         <mesh
           ref={pickRef}
           geometry={pick}

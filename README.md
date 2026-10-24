@@ -58,7 +58,10 @@ Tier B (two bundled "Open CT" cases): chamber and great-artery shape from an ope
 not reviewed by a clinician. Single-phase scans, so motion is the same illustrative motion; only the
 LV wall is from imaging (other walls fixed thickness); no coronaries or veins; valves are placed at
 label-derived annuli but leaflets are illustrative. The viewport badge and Inspector say this per
-patient. No DICOM is processed in the app or deployed; no CFD or clinical thresholds.
+patient. Next to each Tier B heart, the source CT is shown in axial, coronal and sagittal views with
+the segmentation overlaid and a crosshair shared with the 3D model (the evidence for the shape). No
+DICOM is processed in the app or deployed (the open-dataset CT is shipped as a cropped 8-bit volume,
+HU −300…700); no CFD or clinical thresholds.
 
 Tools used: code only (no Blender/Figma/Meshy/Tripo). License: MIT (see `LICENSE`).
 
@@ -78,7 +81,8 @@ The Tier B hearts (`public/models/ct/`, `src/scene/asset-adapters/ct/`, `public/
 are derived from the TotalSegmentator dataset v1.0 — Wasserthal J. et al., "TotalSegmentator: Robust
 Segmentation of 104 Anatomic Structures in CT Images", Radiology: Artificial Intelligence 2023 —
 https://zenodo.org/records/6802614, licensed CC BY 4.0. Changes: label masks were converted to meshes,
-measurements and the app's attribute contract by `pipeline/`. Only labels were used, never the CT images.
+measurements and the app's attribute contract by `pipeline/`; the CT images of the two published cases
+were cropped to the heart and rescaled to 8 bit (HU −300…700) for the slice views.
 
 The brain module (`public/brain/`) is derived from Mindboggle-101 release 3 — Klein A., Tourville J.,
 "101 labeled brain images and a consistent human cortical labeling protocol", Frontiers in

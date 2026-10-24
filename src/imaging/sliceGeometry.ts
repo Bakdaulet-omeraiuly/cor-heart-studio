@@ -3,9 +3,8 @@
 //
 // Screen conventions (radiological): axial and coronal show the patient's left on screen right;
 // axial has anterior up; sagittal has anterior on the left and superior up.
-import type { BrainManifest, ViewId } from "./types";
-
 export type Vec3 = [number, number, number];
+export type ViewId = "axial" | "coronal" | "sagittal";
 
 /** App-frame directions: +X patient left, +Y superior, +Z anterior. */
 const VIEW_AXES: Record<ViewId, { normal: Vec3; right: Vec3; up: Vec3 }> = {
@@ -123,7 +122,7 @@ export function renderSlice(
 }
 
 /** Physical size (mm) of a view's image, for an aspect-correct display. */
-export function viewSizeMm(manifest: BrainManifest, map: ViewMapping): [number, number] {
-  const { dims, spacingMm } = manifest.volume;
+export function viewSizeMm(volume: { dims: number[]; spacingMm: number[] }, map: ViewMapping): [number, number] {
+  const { dims, spacingMm } = volume;
   return [dims[map.right.axis] * spacingMm[map.right.axis], dims[map.up.axis] * spacingMm[map.up.axis]];
 }

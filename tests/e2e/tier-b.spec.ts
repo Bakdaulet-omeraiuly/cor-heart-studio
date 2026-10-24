@@ -33,6 +33,20 @@ test("a CT-derived heart (Tier B) renders with its provenance", async ({ page })
   await page.waitForTimeout(1500);
   await viewport(page).screenshot({ path: `${shots}/e2e-tier-b-s0270-four-chamber.png` });
 
+  // source CT evidence: three planes, crosshair shared between them
+  await expect(page.getByTestId("ct-evidence")).toBeVisible();
+  for (const v of ["axial", "coronal", "sagittal"]) await expect(page.getByTestId(`slice-${v}`)).toBeVisible();
+  const axial = page.getByTestId("slice-axial").locator("canvas");
+  const coronal = page.getByTestId("slice-coronal").locator("canvas");
+  await expect(coronal).toHaveAttribute("data-crosshair", /\d/);
+  const before = await coronal.getAttribute("data-crosshair");
+  const box = (await axial.boundingBox())!;
+  await axial.click({ position: { x: box.width * 0.55, y: box.height * 0.45 } });
+  await expect(coronal).not.toHaveAttribute("data-crosshair", before!);
+  await page.getByRole("button", { name: "Soft tissue" }).click();
+  await page.waitForTimeout(800);
+  await page.getByRole("main").screenshot({ path: `${shots}/e2e-tier-b-s0270-ct-evidence.png` });
+
   // the Inspector states the tier and the dataset
   await page.getByRole("tab", { name: /Evidence/ }).click();
   await expect(page.getByText(/^B — CT segmentation/)).toBeVisible();

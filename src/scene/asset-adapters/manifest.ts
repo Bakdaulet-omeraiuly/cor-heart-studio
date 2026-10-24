@@ -39,5 +39,16 @@ export interface HeartManifest {
     raMinorDimensionMm: number;
   };
   provenance?: { geometry: string; reviewedByClinician: boolean; motion: string };
+  /** Tier B: the source CT (cropped, 8 bit) and its label volume, for the slice views. */
+  imaging?: {
+    modality: string;
+    image: string;
+    labels: string;
+    dims: number[];
+    spacingMm: number[];
+    voxelToApp: number[][];
+    intensity: { unit: string; byte0: number; byte255: number };
+    structures: { index: number; key: string; name: string; colour: number[]; volumeMl: number }[];
+  };
   knownLimitations: string[];
 }

@@ -7,7 +7,8 @@
 Outputs (all under out_dir, which must stay inside the git-ignored data/ folder):
     structures.glb   one named mesh per structure, app frame, centimetres
     report.json      provenance, measurements, QA issues, mesh stats
-    asset/           with --asset: heart-high.glb, heart-low.glb, manifest.json, lv-cavity-proxy.json
+    asset/           with --asset: heart-high.glb, heart-low.glb, manifest.json, lv-cavity-proxy.json,
+                     and ct.u8.gz + ctlabels.u8.gz when the case folder has ct.nii.gz (slice views)
                      in the app's attribute contract (see asset.py)
 """
 
@@ -128,13 +129,30 @@ def main() -> None:
     if args.asset:
         from .asset import build_asset
 
-        glbs, manifest, proxy, qa = build_asset(labels, affine, args.source, case_id, DATASETS.get(args.source))
+        ct = None
+        ct_path = Path(args.labels or "") / "ct.nii.gz"
+        if args.labels and ct_path.exists():
+            import nibabel as nib
+
+            ct_img = nib.load(ct_path)
+            if ct_img.shape == labels.shape and np.allclose(ct_img.affine, affine):
+                ct = np.asarray(ct_img.dataobj)
+            else:
+                print("  [warning] ct.nii.gz is not on the label grid; no slice volumes written")
+        glbs, manifest, proxy, qa, volumes = build_asset(labels, affine, args.source, case_id, DATASETS.get(args.source), ct=ct)
         asset_dir = out / "asset"
         asset_dir.mkdir(exist_ok=True)
         for lod, data in glbs.items():
             (asset_dir / f"heart-{lod}.glb").write_bytes(data)
         (asset_dir / "manifest.json").write_text(json.dumps(manifest, indent=2))
         (asset_dir / "lv-cavity-proxy.json").write_text(json.dumps(proxy))
+        if volumes:
+            import gzip
+
+            meta, image, index = volumes
+            (asset_dir / meta["image"]).write_bytes(gzip.compress(image.tobytes(order="C"), 9))
+            (asset_dir / meta["labels"]).write_bytes(gzip.compress(index.tobytes(order="C"), 9))
+            print(f"  CT slices {meta['dims']} -> {(asset_dir / meta['image']).stat().st_size / 1e6:.2f} MB")
         print(f"  asset -> {asset_dir} ({', '.join(f'{k} {len(v) / 1e6:.1f} MB' for k, v in glbs.items())})")
         for issue in qa:
             print(f"  [{issue['level']}] {issue['structure']}: {issue['message']}")

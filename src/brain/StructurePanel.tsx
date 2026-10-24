@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { ChevronRight, Eye, EyeOff, Search } from "lucide-react";
 import { cx } from "@/components/ui/primitives";
 import { useBrain } from "./brainStore";
-import { flatIndex, type Vec3 } from "./sliceGeometry";
+import { flatIndex, type Vec3 } from "@/imaging/sliceGeometry";
 import type { BrainData } from "./useBrainData";
 import type { BrainStructure } from "./types";
 

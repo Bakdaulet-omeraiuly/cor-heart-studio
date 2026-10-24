@@ -43,4 +43,4 @@ export interface BrainManifest {
   knownLimitations: string[];
 }
 
-export type ViewId = "axial" | "coronal" | "sagittal";
+export type { ViewId } from "@/imaging/sliceGeometry";

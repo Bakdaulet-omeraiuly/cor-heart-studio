@@ -5,7 +5,7 @@ import { GizmoHelper, GizmoViewport, OrbitControls } from "@react-three/drei";
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { useBrain } from "./brainStore";
-import { appToVoxel, voxelToApp, type Vec3 } from "./sliceGeometry";
+import { appToVoxel, voxelToApp, type Vec3 } from "@/imaging/sliceGeometry";
 import type { BrainData } from "./useBrainData";
 
 const PLANE_COLOUR = { axial: "#e5484d", coronal: "#46a758", sagittal: "#3e8ed0" };

@@ -1,7 +1,7 @@
 "use client";
 // Brain module view state (session-only, like the heart store).
 import { create } from "zustand";
-import type { Vec3 } from "./sliceGeometry";
+import type { Vec3 } from "@/imaging/sliceGeometry";
 
 export interface BrainState {
   /** Crosshair in voxel indices (shared by the three slice views and the 3D marker). */

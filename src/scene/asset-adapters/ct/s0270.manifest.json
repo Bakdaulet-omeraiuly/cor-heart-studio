@@ -421,5 +421,131 @@
     "No epicardial fat in the labels",
     "Labels are 1.5 mm resampled; scans are mostly not ECG-gated, so the cardiac phase is unknown.",
     "RV volume is consistently ~1.5x LV in sampled cases: the RV/atrial labels may include their walls (only LV myocardium is a separate label). Unverified - do not report RV volume as RVEDV."
-  ]
+  ],
+  "imaging": {
+    "modality": "CT (contrast-enhanced, single phase)",
+    "image": "/models/ct/s0270/ct.u8.gz",
+    "labels": "/models/ct/s0270/ctlabels.u8.gz",
+    "dims": [
+      122,
+      143,
+      91
+    ],
+    "order": "C (i slowest, k fastest)",
+    "spacingMm": [
+      1.5,
+      1.5,
+      1.5
+    ],
+    "voxelToApp": [
+      [
+        -0.15,
+        0.0,
+        0.0,
+        9.155912
+      ],
+      [
+        0.0,
+        0.0,
+        0.15,
+        -6.75
+      ],
+      [
+        0.0,
+        0.15,
+        0.0,
+        -10.7
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "intensity": {
+      "unit": "HU",
+      "byte0": -300.0,
+      "byte255": 700.0
+    },
+    "structures": [
+      {
+        "index": 1,
+        "key": "lv_cavity",
+        "name": "LV cavity",
+        "colour": [
+          0.8,
+          0.33,
+          0.06
+        ],
+        "volumeMl": 126.5
+      },
+      {
+        "index": 2,
+        "key": "lv_myocardium",
+        "name": "LV myocardium",
+        "colour": [
+          0.93,
+          0.55,
+          0.62
+        ],
+        "volumeMl": 166.8
+      },
+      {
+        "index": 3,
+        "key": "rv",
+        "name": "RV (label may include wall)",
+        "colour": [
+          0.05,
+          0.38,
+          0.68
+        ],
+        "volumeMl": 197.1
+      },
+      {
+        "index": 4,
+        "key": "la",
+        "name": "Left atrium",
+        "colour": [
+          0.86,
+          0.6,
+          0.1
+        ],
+        "volumeMl": 78.5
+      },
+      {
+        "index": 5,
+        "key": "ra",
+        "name": "Right atrium",
+        "colour": [
+          0.3,
+          0.62,
+          0.85
+        ],
+        "volumeMl": 95.6
+      },
+      {
+        "index": 6,
+        "key": "aorta",
+        "name": "Aorta",
+        "colour": [
+          0.72,
+          0.36,
+          0.55
+        ],
+        "volumeMl": 162.7
+      },
+      {
+        "index": 7,
+        "key": "pulmonary_artery",
+        "name": "Pulmonary artery",
+        "colour": [
+          0.1,
+          0.58,
+          0.44
+        ],
+        "volumeMl": 48.6
+      }
+    ]
+  }
 }
