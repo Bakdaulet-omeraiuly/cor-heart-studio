@@ -9,6 +9,7 @@ import {
   pendingTurn,
   prepareQuestion,
   toOutcome,
+  toOutlookOutcome,
   type AssistantReply,
   type ChatState,
 } from "@/components/assistant/chatState";
@@ -116,5 +117,28 @@ describe("toOutcome", () => {
     expect(toOutcome(429, "<html>")).toMatchObject({ status: "error", code: "rate_limited" });
     const e = toOutcome(500, { status: "ok", text: 1 });
     expect(e).toMatchObject({ status: "error", code: "network" });
+  });
+});
+
+describe("toOutlookOutcome", () => {
+  const explain = { ok: true, answer: "Losartan regressed mass [1].", sources: [{ id: "life", cite: "Devereux 2004", title: "t", journal: "Circulation", doi: "10.1/x", studyType: "RCT" }], note: "n1" };
+  const propose = { ok: true, proposals: [{ id: "lvh-losartan", reason: "Regresses mass." }], note: "n2" };
+
+  it("combines the explanation and the proposed buttons", () => {
+    expect(toOutlookOutcome("lvh", explain, propose)).toMatchObject({ status: "outlook", condition: "lvh", answer: "Losartan regressed mass [1].", proposals: [{ id: "lvh-losartan" }], note: "n1" });
+  });
+
+  it("keeps the half that worked", () => {
+    expect(toOutlookOutcome("lvh", undefined, propose)).toMatchObject({ status: "outlook", answer: null, sources: [], proposals: [{ id: "lvh-losartan" }] });
+    expect(toOutlookOutcome("lvh", explain, { ok: false, code: "model_error" })).toMatchObject({ status: "outlook", proposals: [] });
+  });
+
+  it("is an error with the server's code when both failed", () => {
+    expect(toOutlookOutcome("ad", { ok: false, code: "rate_limited" }, { ok: false, code: "rate_limited" })).toMatchObject({ status: "error", code: "rate_limited" });
+    expect(toOutlookOutcome("ad", { ok: false, code: "not_configured" }, { ok: false, code: "not_configured" })).toMatchObject({ status: "error", code: "not_configured" });
+  });
+
+  it("never echoes an unexpected body", () => {
+    expect(toOutlookOutcome("ad", "<html>502</html>", null)).toMatchObject({ status: "error", code: "network" });
   });
 });

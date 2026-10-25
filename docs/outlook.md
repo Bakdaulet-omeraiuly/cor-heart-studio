@@ -85,7 +85,7 @@ Code: `src/domain/outlook/` (evidence table, pure projection, heart record copy)
 
 Buttons turn a treatment on or off; the right-hand 3D organ is recomputed from the buttons that are on, and with every button off
 it shows the natural course. Code: `src/domain/treatments/` (evidence, selection, projection, chat proposals), `src/outlook/TreatmentButtons.tsx`,
-`src/outlook/TreatmentChat.tsx`, `src/app/api/treatments/`. Design: `docs/superpowers/specs/2026-10-24-treatment-scenarios-design.md`.
+the Assistant panel (`src/components/assistant/`, one chat: with the Outlook open it asks `/api/treatments/explain` and `/api/treatments` and shows the proposals as buttons), `src/app/api/treatments/`. Design: `docs/superpowers/specs/2026-10-24-treatment-scenarios-design.md`.
 
 **Evidence rule.** A treatment effect that moves a model comes only from a randomised trial or a meta-analysis of trials
 (`rct`, `meta-analysis`); a unit test fails otherwise. The natural course may come from a placebo arm or a prospective cohort and is

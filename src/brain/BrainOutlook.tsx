@@ -1,6 +1,7 @@
 "use client";
 // Brain outlook: today's measured volumes projected with published cohort rates; drives the 3D deformation.
 import { useMemo } from "react";
+import { AssistantPanel } from "@/components/assistant/AssistantPanel";
 import { PanelHeader, Segmented } from "@/components/ui/primitives";
 import { BRAIN_SCENARIOS, SOURCES, SPREAD_LABEL, type BrainScenarioId, type BrainTarget } from "@/domain/outlook/evidence";
 import { cortexShiftMm, projectBrain, type BrainProjection } from "@/domain/outlook/project";
@@ -8,7 +9,6 @@ import { projectBrainTreated } from "@/domain/treatments/project";
 import { useOutlook } from "@/outlook/outlookStore";
 import { HorizonControls, OutlookCaveat, SourceList, fmtSigned } from "@/outlook/shared";
 import { TreatmentButtons } from "@/outlook/TreatmentButtons";
-import { TreatmentChat } from "@/outlook/TreatmentChat";
 import type { BrainManifest } from "./types";
 
 /** Structure keys whose meshes each outlook target deforms. */
@@ -88,7 +88,7 @@ export function BrainOutlookPanel({ manifest }: { manifest: BrainManifest }) {
             options={Object.values(BRAIN_SCENARIOS).map((s) => ({ value: s.id, label: s.label }))} />
           <p className="mt-1.5 text-[11px] text-faint">Rates from: {sc.cohort}.</p>
         </div>
-        {scenario === "alzheimers" && <div className="space-y-2"><TreatmentChat condition="ad" /><TreatmentButtons condition="ad" /></div>}
+        {scenario === "alzheimers" && <TreatmentButtons condition="ad" />}
         <HorizonControls paceHint="Slower and faster ends of each source's reported spread (see the column note)." />
         <TreatmentNotes />
 
@@ -150,6 +150,7 @@ export function BrainOutlookPanel({ manifest }: { manifest: BrainManifest }) {
           <SourceList ids={ids} />
         </div>
       </div>
+      <AssistantPanel />
     </aside>
   );
 }

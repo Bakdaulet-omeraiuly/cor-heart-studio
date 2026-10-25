@@ -8,6 +8,9 @@
 // code reaches the client bundle.
 import type { AssistantResponse } from "@/app/api/assistant/route";
 import type { IdedAssessment, Ref } from "@/app/api/assistant/ids";
+import type { CitedSource } from "@/domain/treatments/explain";
+import type { Proposal } from "@/domain/treatments/propose";
+import type { ConditionId } from "@/domain/treatments/types";
 
 /** Request caps mirrored from `src/app/api/assistant/request.ts` (Requirement 2.2). */
 export const MAX_QUESTION_CHARS = 2000;
@@ -32,11 +35,25 @@ export interface AssistantError {
   message: string;
 }
 
+/**
+ * An Outlook answer: the cited explanation plus the treatment buttons the assistant proposes. Both come from the
+ * closed evidence file (sources checked, ids from the enum), and either may be missing when only one call worked.
+ */
+export interface OutlookReply {
+  status: "outlook";
+  condition: ConditionId;
+  answer: string | null;
+  sources: CitedSource[];
+  proposals: Proposal[];
+  note: string;
+}
+
 /** What happened to one question. `cancelled` = the clinician pressed Cancel while it was pending. */
 export type TurnOutcome =
   | { status: "pending" }
   | { status: "cancelled" }
   | AssistantReply
+  | OutlookReply
   | AssistantError;
 
 /** One question and its outcome. The panel renders turns in order. */
@@ -52,7 +69,7 @@ export interface ChatState {
 
 export type ChatAction =
   | { type: "send"; turnId: string; question: string }
-  | { type: "resolve"; turnId: string; outcome: AssistantReply | AssistantError }
+  | { type: "resolve"; turnId: string; outcome: AssistantReply | OutlookReply | AssistantError }
   | { type: "cancel"; turnId: string }
   /** Drop a failed or cancelled turn so its question can be sent again (Retry). */
   | { type: "discard"; turnId: string }
@@ -152,6 +169,35 @@ export function toOutcome(httpStatus: number, body: unknown): AssistantReply | A
   if (httpStatus === 504) return { status: "error", code: "timeout", message: "The assistant took too long to respond. Please try again." };
   if (httpStatus === 429) return { status: "error", code: "rate_limited", message: "Too many requests. Please retry shortly." };
   return { status: "error", code: "network", message: NETWORK_MESSAGE };
+}
+
+const OUTLOOK_ERRORS: Record<string, string> = {
+  rate_limited: "Too many questions; try again in a minute.",
+  timeout: "The assistant took too long; try again.",
+  too_large: "The record is too large to send.",
+  not_configured: "The assistant is not available on this server. The treatment buttons still work.",
+};
+
+/**
+ * Combine the two Outlook endpoint bodies (`/api/treatments/explain` and `/api/treatments`) into one outcome.
+ * Shapes are checked here, and nothing from an unexpected body is echoed. If neither call worked the turn is an
+ * error carrying the first known code; if one worked the reply simply lacks the other half.
+ */
+export function toOutlookOutcome(condition: ConditionId, explain: unknown, propose: unknown): OutlookReply | AssistantError {
+  const ok = (b: unknown): b is Record<string, unknown> => !!b && typeof b === "object" && (b as { ok?: unknown }).ok === true;
+  const answer = ok(explain) && typeof explain.answer === "string" && explain.answer ? explain.answer : null;
+  const sources = ok(explain) && Array.isArray(explain.sources) ? (explain.sources as CitedSource[]) : [];
+  const proposals = ok(propose) && Array.isArray(propose.proposals) ? (propose.proposals as Proposal[]) : [];
+  if (answer === null && !ok(propose)) {
+    const code = [explain, propose]
+      .map((b) => (b && typeof b === "object" ? (b as { code?: unknown }).code : undefined))
+      .find((c): c is string => typeof c === "string" && c in OUTLOOK_ERRORS);
+    return code
+      ? { status: "error", code: code as AssistantErrorCode, message: OUTLOOK_ERRORS[code] }
+      : { status: "error", code: "network", message: NETWORK_MESSAGE };
+  }
+  const note = [explain, propose].map((b) => (ok(b) && typeof b.note === "string" ? b.note : "")).find(Boolean) ?? "";
+  return { status: "outlook", condition, answer, sources, proposals, note };
 }
 
 export const networkError: AssistantError = { status: "error", code: "network", message: NETWORK_MESSAGE };

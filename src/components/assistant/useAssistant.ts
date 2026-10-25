@@ -9,6 +9,7 @@
 //   the reducer (turn ids are unique for the lifetime of the hook).
 import { useEffect, useReducer, useRef, useState } from "react";
 import { useApp } from "@/state/store";
+import type { ConditionId } from "@/domain/treatments/types";
 import {
   buildHistory,
   chatReducer,
@@ -17,17 +18,20 @@ import {
   pendingTurn,
   prepareQuestion,
   toOutcome,
+  toOutlookOutcome,
   type ChatTurnView,
 } from "./chatState";
 
-export type { ChatTurnView, TurnOutcome, AssistantReply, AssistantError, AssistantErrorCode } from "./chatState";
+export type { ChatTurnView, TurnOutcome, AssistantReply, OutlookReply, AssistantError, AssistantErrorCode } from "./chatState";
 export { MAX_QUESTION_CHARS } from "./chatState";
 
 export interface UseAssistant {
   /** Questions and their outcomes, oldest first. */
   turns: ChatTurnView[];
-  /** A record is selected, so questions can be asked (Requirement 1.2 disables the input otherwise). */
+  /** A record is selected (Requirement 1.2). */
   hasRecord: boolean;
+  /** Questions can be asked: a record is selected, or the Outlook names the condition (the brain has no record). */
+  canAsk: boolean;
   /** A reply is pending (Requirement 1.4: show progress, offer Cancel). */
   pending: boolean;
   /** Send a question about the selected record. Returns false if it was not sent (no record, pending, empty or too long). */
@@ -44,15 +48,19 @@ function newSessionId(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
-export function useAssistant(selectedKey: string | null): UseAssistant {
+/**
+ * `outlook` is the condition the open Outlook shows, or null. With it a question goes to the two treatment
+ * endpoints and the reply carries the cited explanation plus the buttons; without it, to the record engine.
+ */
+export function useAssistant(selectedKey: string | null, outlook: ConditionId | null = null): UseAssistant {
   const patient = useApp((s) => (selectedKey ? s.entries[selectedKey]?.patient : undefined));
   const [state, dispatch] = useReducer(chatReducer, initialChatState);
 
   // Reset when the record changes: adjust state during render (React's pattern for "reset on prop change"),
   // so the old chat is never painted for the new record.
-  const [seen, setSeen] = useState({ key: selectedKey, patient });
-  if (seen.key !== selectedKey || seen.patient !== patient) {
-    setSeen({ key: selectedKey, patient });
+  const [seen, setSeen] = useState({ key: selectedKey, patient, outlook });
+  if (seen.key !== selectedKey || seen.patient !== patient || seen.outlook !== outlook) {
+    setSeen({ key: selectedKey, patient, outlook });
     dispatch({ type: "reset" });
   }
 
@@ -66,25 +74,50 @@ export function useAssistant(selectedKey: string | null): UseAssistant {
       controllerRef.current?.abort();
       controllerRef.current = null;
     };
-  }, [selectedKey, patient]);
+  }, [selectedKey, patient, outlook]);
 
+  const canAsk = outlook !== null || patient !== undefined;
   const pending = pendingTurn(state) !== undefined;
 
   function sendFrom(turns: readonly ChatTurnView[], raw: string): boolean {
     const question = prepareQuestion(raw);
-    if (!question || !patient || controllerRef.current) return false;
+    if (!question || !canAsk || controllerRef.current) return false;
+    // canAsk means a record or an Outlook condition; the record route needs the record itself
+    if (!outlook && !patient) return false;
 
     const turnId = `t${nextIdRef.current++}`;
     sessionRef.current ??= newSessionId();
     const controller = new AbortController();
     controllerRef.current = controller;
+    dispatch({ type: "send", turnId, question });
+
+    if (outlook) {
+      const post = async (url: string, payload: object): Promise<unknown> => {
+        try {
+          const res = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload), signal: controller.signal, cache: "no-store" });
+          return await res.json();
+        } catch {
+          return undefined;
+        }
+      };
+      const sessionId = sessionRef.current;
+      void (async () => {
+        const [explain, propose] = await Promise.all([
+          post("/api/treatments/explain", { condition: outlook, question, sessionId }),
+          post("/api/treatments", { condition: outlook, question, record: patient?.record, sessionId }),
+        ]);
+        if (!controller.signal.aborted) dispatch({ type: "resolve", turnId, outcome: toOutlookOutcome(outlook, explain, propose) });
+        if (controllerRef.current === controller) controllerRef.current = null;
+      })();
+      return true;
+    }
+
     const body = JSON.stringify({
       question,
       history: buildHistory(turns),
-      record: patient.record,
+      record: patient?.record,
       sessionId: sessionRef.current,
     });
-    dispatch({ type: "send", turnId, question });
 
     void (async () => {
       try {
@@ -134,5 +167,5 @@ export function useAssistant(selectedKey: string | null): UseAssistant {
     return true;
   }
 
-  return { turns: state.turns, hasRecord: patient !== undefined, pending, send, cancel, retry };
+  return { turns: state.turns, hasRecord: patient !== undefined, canAsk, pending, send, cancel, retry };
 }

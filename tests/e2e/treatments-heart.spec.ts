@@ -43,22 +43,29 @@ test("LVH: the evidence for a button sits behind its info tip", async ({ page })
   await expect(page.getByRole("tooltip").filter({ hasText: "LIFE echo substudy" })).toBeVisible();
 });
 
-test("LVH: a chat proposal becomes a button that moves the model, and an unconfigured server hides the chat", async ({ page }) => {
+test("LVH: the assistant's proposal becomes a button that moves the model, and an unconfigured server keeps the buttons", async ({ page }) => {
   await openLvhOutlook(page);
+  await page.route("**/api/treatments/explain", (route) =>
+    route.fulfill({ json: { ok: true, answer: "Losartan regressed LV mass more than atenolol [1].", sources: [{ id: "life", cite: "Devereux 2004", title: "LIFE echo substudy", journal: "Circulation", doi: "10.1161/01.CIR.0000145613.16787.0A", studyType: "RCT" }], note: "Explains the cited studies only." } }));
   await page.route("**/api/treatments", (route) =>
     route.fulfill({ json: { ok: true, proposals: [{ id: "lvh-losartan", reason: "Regresses mass more than atenolol." }], note: "Clinician decision support, not a diagnosis." } }));
   const natural = await lvmi(page);
-  await page.getByLabel("Ask the assistant which treatments to consider").fill("What should I consider?");
-  await page.getByRole("button", { name: "Ask" }).click();
+  const input = page.getByLabel("Question about the selected record");
+  await input.fill("What should I consider?");
+  await input.press("Enter");
+  await expect(page.getByTestId("treatment-explanation")).toContainText("Losartan");
   const proposal = page.getByTestId("proposal-lvh-losartan");
   await expect(proposal).toBeVisible();
   await proposal.click();
   await expect(page.getByTestId("treatment-lvh-losartan")).toHaveAttribute("aria-pressed", "true");
   await expect.poll(() => lvmi(page)).toBeLessThan(natural - 10);
 
-  await page.unroute("**/api/treatments");
-  await page.route("**/api/treatments", (route) => route.fulfill({ status: 503, json: { ok: false, code: "not_configured" } }));
-  await page.getByRole("button", { name: "Ask" }).click();
-  await expect(page.getByTestId("treatment-chat-unavailable")).toBeVisible();
+  for (const url of ["**/api/treatments/explain", "**/api/treatments"]) {
+    await page.unroute(url);
+    await page.route(url, (route) => route.fulfill({ status: 503, json: { ok: false, code: "not_configured" } }));
+  }
+  await input.fill("And now?");
+  await input.press("Enter");
+  await expect(page.getByRole("log")).toContainText("not available on this server");
   await expect(page.getByTestId("treatment-lvh-atenolol")).toBeVisible();
 });
