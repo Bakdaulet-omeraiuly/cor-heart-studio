@@ -20,6 +20,7 @@ import { useOutlook, type HeartScenario } from "./outlookStore";
 import { HorizonControls, OutlookCaveat, SourceList, fmtSigned } from "./shared";
 import { TreatmentButtons } from "./TreatmentButtons";
 import { TreatmentChat } from "./TreatmentChat";
+import { WallMap } from "./WallMap";
 
 const CompareCanvas = dynamic(() => import("@/scene/CompareCanvas"), { ssr: false });
 
@@ -224,6 +225,9 @@ function LvhOutlook({ entry }: { entry: PatientEntry }) {
       <p className="text-[11px] text-faint">Left ventricular mass in hypertrophy: natural course, or on the treatment buttons below.</p>
 
       <div className="mt-3 space-y-2"><TreatmentChat condition="lvh" record={entry.patient.record} /><TreatmentButtons condition="lvh" /></div>
+
+      <H3>Wall thickness</H3>
+      <WallMap today={now} later={later} lvidMm={inp.lvidMm} years={years} />
 
       <div className="mt-3 grid grid-cols-2 gap-2">
         <NumberField label="IVSd today" unit="mm" value={inp.ivsMm} step={0.5} min={5} max={35} hint={field("ivsMm")} onChange={(v) => set({ lvhOverrides: { ...lvhOverrides, ivsMm: v } })} />
