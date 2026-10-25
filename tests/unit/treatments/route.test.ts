@@ -51,7 +51,8 @@ describe("handleTreatments", () => {
     const create = vi.fn().mockResolvedValue(toolUse([]));
     await handleTreatments(request({ condition: "ad" }), deps(create));
     const arg = create.mock.calls[0][0];
-    expect(arg.tool_choice).toEqual({ type: "tool", name: "propose_treatments" });
+    // claude-sonnet-5-5 rejects a forced tool_choice with HTTP 400 (see assistant/chat.ts)
+    expect(arg.tool_choice).toEqual({ type: "auto" });
     const ids = arg.tools[0].input_schema.properties.proposals.items.properties.id.enum;
     expect(ids.sort()).toEqual(["ad-antiamyloid", "ad-exercise"]);
   });

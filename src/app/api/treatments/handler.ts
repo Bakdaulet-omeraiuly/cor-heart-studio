@@ -86,7 +86,8 @@ export async function handleTreatments(req: Request, deps: TreatmentsDeps): Prom
           },
           strict: true,
         }],
-        tool_choice: { type: "tool", name: "propose_treatments" },
+        // a forced tool_choice is rejected by claude-sonnet-5-5 (HTTP 400); the system prompt says to call the tool
+        tool_choice: { type: "auto" },
         messages: [{ role: "user", content: `Condition: ${CONDITION_LABEL[body.condition]}\nEngine findings: ${findings.length ? findings.join("; ") : "none"}\nClinician's question: ${body.question}` }],
       },
       { signal: AbortSignal.timeout(TIMEOUT_MS) },
