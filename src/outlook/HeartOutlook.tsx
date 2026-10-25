@@ -25,6 +25,9 @@ import { WallMap } from "./WallMap";
 const CompareCanvas = dynamic(() => import("@/scene/CompareCanvas"), { ssr: false });
 
 const yearsLabel = (years: number, pace: string) => (years ? `+${years} year${years > 1 ? "s" : ""} · ${pace === "mean" ? "average" : pace} pace` : "Today (move the slider)");
+/** LVH: the three ends of the study's spread, not a speed. Worst case = the treatment does nothing, never harm. */
+const LVH_RANGE_LABEL = { slow: "Best case", mean: "Likely", fast: "Worst case" } as const;
+const lvhYearsLabel = (years: number, pace: "slow" | "mean" | "fast") => (years ? `+${years} year${years > 1 ? "s" : ""} · ${LVH_RANGE_LABEL[pace].toLowerCase()}` : "Today (move the slider)");
 const sourceHint = (recorded: number | null, typed: number | undefined | null) => (typed != null ? "entered" : recorded != null ? "from record" : "example value");
 
 export function HeartOutlook() {
@@ -221,7 +224,7 @@ function LvhOutlook({ entry }: { entry: PatientEntry }) {
   return (
     <OutlookLayout entry={entry} entries={entries}
       toolbar={null}
-      cards={[<LvhCard key="t" title="Today" p={now} lvidMm={inp.lvidMm} />, <LvhCard key="l" title={yearsLabel(years, pace)} p={later} lvidMm={inp.lvidMm} />]}>
+      cards={[<LvhCard key="t" title="Today" p={now} lvidMm={inp.lvidMm} />, <LvhCard key="l" title={lvhYearsLabel(years, pace)} p={later} lvidMm={inp.lvidMm} />]}>
       <p className="text-[11px] text-faint">Left ventricular mass in hypertrophy: natural course, or on the treatment buttons below.</p>
 
       <div className="mt-3 space-y-2"><TreatmentChat condition="lvh" record={entry.patient.record} /><TreatmentButtons condition="lvh" /></div>
@@ -239,7 +242,8 @@ function LvhOutlook({ entry }: { entry: PatientEntry }) {
         <button className="mt-1 text-[11px] text-muted underline hover:text-ink" onClick={() => set({ lvhOverrides: {} })}>Use the record&apos;s values</button>
       )}
 
-      <div className="mt-4"><HorizonControls paceHint="Average = the study's mean LVMI change; slower/faster = favourable/unfavourable end of its spread (±1 SD between patients, never past no change)." /></div>
+      <div className="mt-4"><HorizonControls labels={LVH_RANGE_LABEL} paceHint="Likely = the study's mean LVMI change; best / worst case = the favourable / unfavourable end of its spread (±1 SD between patients, never past no change)." />
+        {pace === "fast" && years > 0 && active.length > 0 && <p className="mt-1 text-[10px] text-faint" data-testid="lvh-worst-note">Worst case: at the unfavourable end of the study&apos;s spread the treatment has no effect on LV mass. It is never shown as harm.</p>}</div>
 
       <dl className="mt-4 grid grid-cols-[1fr_auto] gap-y-1 text-[11px]">
         <dt className="text-faint">{active.length ? "On treatment" : "Natural course"}</dt><dd className="num">{fmtSigned(later.lvmiChange, 1)} g/m²</dd>

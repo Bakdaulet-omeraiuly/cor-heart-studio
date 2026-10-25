@@ -6,7 +6,7 @@ import { SOURCES } from "@/domain/outlook/evidence";
 import { PACE_LABEL, type Pace } from "@/domain/outlook/project";
 import { MAX_YEARS, useOutlook } from "./outlookStore";
 
-export function HorizonControls({ paceHint }: { paceHint: string }) {
+export function HorizonControls({ paceHint, labels = PACE_LABEL }: { paceHint: string; labels?: Record<Pace, string> }) {
   const years = useOutlook((s) => s.years);
   const pace = useOutlook((s) => s.pace);
   const set = useOutlook((s) => s.set);
@@ -24,7 +24,7 @@ export function HorizonControls({ paceHint }: { paceHint: string }) {
       <div className="flex items-center justify-between gap-2">
         <span className="text-[12px] text-muted" title={paceHint}>Pace of change</span>
         <Segmented<Pace> label="Pace of change" value={pace} onChange={(v) => set({ pace: v })}
-          options={(["slow", "mean", "fast"] as const).map((p) => ({ value: p, label: PACE_LABEL[p], title: paceHint }))} />
+          options={(["slow", "mean", "fast"] as const).map((p) => ({ value: p, label: labels[p], title: paceHint }))} />
       </div>
     </div>
   );
