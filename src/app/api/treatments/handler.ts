@@ -78,8 +78,8 @@ export async function handleTreatments(req: Request, deps: TreatmentsDeps): Prom
             type: "object",
             properties: {
               proposals: {
-                type: "array", maxItems: 5,
-                items: { type: "object", properties: { id: { type: "string", enum: ids }, reason: { type: "string", maxLength: 200 } }, required: ["id", "reason"], additionalProperties: false },
+                type: "array",
+                items: { type: "object", properties: { id: { type: "string", enum: ids }, reason: { type: "string" } }, required: ["id", "reason"], additionalProperties: false },
               },
             },
             required: ["proposals"], additionalProperties: false,
@@ -96,6 +96,8 @@ export async function handleTreatments(req: Request, deps: TreatmentsDeps): Prom
     const raw = call && call.type === "tool_use" ? (call.input as { proposals?: unknown }).proposals : undefined;
     return respond(200, { ok: true, proposals: sanitizeProposals(raw, body.condition), note: NOTE });
   } catch (e) {
+    // status and message of the API error only, never record content
+    console.error("treatments model error", (e as { status?: number }).status, e instanceof Error ? e.message.slice(0, 300) : "unknown");
     return e instanceof Error && e.name === "TimeoutError" ? respond(504, { ok: false, code: "timeout" }) : respond(502, { ok: false, code: "model_error" });
   }
 }

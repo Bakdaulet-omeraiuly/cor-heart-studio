@@ -55,6 +55,8 @@ describe("handleTreatments", () => {
     expect(arg.tool_choice).toEqual({ type: "auto" });
     const ids = arg.tools[0].input_schema.properties.proposals.items.properties.id.enum;
     expect(ids.sort()).toEqual(["ad-antiamyloid", "ad-exercise"]);
+    // the API rejects maxItems / maxLength in a strict tool schema (HTTP 400)
+    expect(JSON.stringify(arg.tools[0].input_schema)).not.toMatch(/maxItems|maxLength/);
   });
 
   it("rejects a record that fails the schema without calling the model", async () => {
