@@ -1,0 +1,30 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Chat tests on save",
+      "description": "Runs the assistant unit tests (guard, ids, prompt, Claude loop with a fake client, route, panel helpers) whenever a chat file or its tests are saved.",
+      "trigger": "PostFileSave",
+      "matcher": "(src/app/api/assistant/.*\\.ts|src/components/assistant/.*\\.tsx?|tests/unit/assistant/.*\\.ts|scripts/eval-assistant\\.ts)$",
+      "action": { "type": "command", "command": "npx vitest run tests/unit/assistant --reporter=dot" },
+      "timeout": 120
+    },
+    {
+      "name": "Engine-chat contract on guard change",
+      "description": "When the guard, ids, prompt or fallback change, re-runs the cross-team contract: the fallback text for all 94 engine cases and random records must pass the guard.",
+      "trigger": "PostFileSave",
+      "matcher": "src/app/api/assistant/(guard|ids|prompt|fallback)\\.ts$",
+      "action": { "type": "command", "command": "npx vitest run tests/unit/diagnosis/chat-contract.test.ts --reporter=dot" },
+      "timeout": 120
+    },
+    {
+      "name": "Chat guardrails before tasks",
+      "description": "Before a spec task runs, reminds the agent of the chat's safety, cost and ownership rules.",
+      "trigger": "PreTaskExec",
+      "action": {
+        "type": "agent",
+        "prompt": "If this task belongs to .kiro/specs/assistant-chat/: (1) Never loosen the output guard to make a reply pass; every new guard rule needs a passing and a blocked unit-test sentence, and fallbackText must still pass the guard. (2) No paid Claude API call or eval run unless the task asks for it; never print or log ANTHROPIC_API_KEY or any record, question or reply text. (3) Edit only src/app/api/assistant/, src/components/assistant/, tests/unit/assistant/, tests/e2e/assistant.spec.ts and scripts/eval-assistant.ts; never src/domain/diagnosis/. (4) If a requirement conflicts with what the API or the code allows, stop and report the conflict with options instead of picking one."
+      }
+    }
+  ]
+}
