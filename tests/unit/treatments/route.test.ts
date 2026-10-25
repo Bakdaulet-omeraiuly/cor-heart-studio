@@ -55,6 +55,8 @@ describe("handleTreatments", () => {
     expect(arg.tool_choice).toEqual({ type: "auto" });
     const ids = arg.tools[0].input_schema.properties.proposals.items.properties.id.enum;
     expect(ids.sort()).toEqual(["ad-antiamyloid", "ad-bvitamins", "ad-exercise"]);
+    // an off-topic question must get no button (found by scripts/eval-outlook.ts: "best pizza in Boston" used to get five)
+    expect(arg.system).toMatch(/off-topic[\s\S]*empty proposals list/);
     // the API rejects maxItems / maxLength in a strict tool schema (HTTP 400)
     expect(JSON.stringify(arg.tools[0].input_schema)).not.toMatch(/maxItems|maxLength/);
   });
