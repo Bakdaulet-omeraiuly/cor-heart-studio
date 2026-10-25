@@ -192,6 +192,39 @@
       "studyType": "meta-analysis",
       "n": 8062,
       "population": "Randomised trials of anti-amyloid drugs in Alzheimer's disease (31 trials with MRI volumes; n = 8,062–10,279 depending on the analysis)"
+    },
+    "smith2010": {
+      "id": "smith2010",
+      "cite": "VITACOG · Smith 2010",
+      "title": "Homocysteine-lowering by B vitamins slows the rate of accelerated brain atrophy in mild cognitive impairment: a randomized controlled trial",
+      "journal": "PLoS ONE 5:e12244",
+      "doi": "10.1371/journal.pone.0012244",
+      "studyType": "rct",
+      "n": 168,
+      "durationMonths": 24,
+      "population": "People over 70 with mild cognitive impairment, 168 of 271 randomised had serial MRI; whole-brain atrophy rate, not Alzheimer's dementia"
+    },
+    "jerneren2015": {
+      "id": "jerneren2015",
+      "cite": "Jernerén 2015",
+      "title": "Brain atrophy in cognitively impaired elderly: the importance of long-chain ω-3 fatty acids and B vitamin status in a randomized controlled trial",
+      "journal": "Am J Clin Nutr 102:215–21",
+      "doi": "10.3945/ajcn.114.103283",
+      "studyType": "rct",
+      "n": 168,
+      "durationMonths": 24,
+      "population": "Retrospective subgroup analysis of VITACOG by baseline plasma omega-3: no significant effect of B vitamins when omega-3 was low"
+    },
+    "swanson2021": {
+      "id": "swanson2021",
+      "cite": "Swanson 2021",
+      "title": "A randomized, double-blind, phase 2b proof-of-concept clinical trial in early Alzheimer's disease with lecanemab, an anti-Aβ protofibril antibody",
+      "journal": "Alzheimers Res Ther 13:80",
+      "doi": "10.1186/s13195-021-00813-8",
+      "studyType": "rct",
+      "n": 854,
+      "durationMonths": 18,
+      "population": "Early Alzheimer's disease (MCI due to AD and mild dementia), 18-month analyses; used here only for the length of a typical antibody trial"
     }
   },
   "entries": [
@@ -339,13 +372,40 @@
       "condition": "ad",
       "kind": "treatment",
       "label": "Anti-amyloid antibody",
-      "why": "Anti-amyloid antibodies slow cognitive decline in early Alzheimer's disease, but pooled trials show more ventricular enlargement, not less brain loss.",
-      "caveat": "A meta-analysis of randomised trials (Alves 2023) found that antibodies which cause amyloid-related imaging abnormalities (ARIA) enlarged the ventricles by 2.1 mL more than placebo (38.7% more; 95% CI 1.5 to 2.8), and the amount tracked ARIA frequency (r=0.86). The same paper reports faster hippocampal and whole-brain loss for secretase inhibitors, not for antibodies. Abushakra 2025 relates slower hippocampal atrophy to slower cognitive decline across anti-amyloid trials, but it is not a pooled volume estimate. The ventricle effect is relative to each trial's placebo and has no per-year rate here, so the button does not change the model.",
+      "why": "Anti-amyloid antibodies slow cognitive decline in early Alzheimer's disease, but pooled trials show the ventricles enlarging more, not less brain loss.",
+      "caveat": "A meta-analysis of randomised trials (Alves 2023) found that antibodies which cause amyloid-related imaging abnormalities (ARIA) enlarged the ventricles by 2.1 mL more than placebo (38.7% more; 95% CI 1.5 to 2.8), and the amount tracked ARIA frequency (r=0.86). This is a harm signal on the MRI, not a benefit: it is shown as extra ventricular volume, the favourable end 1.5 mL and the unfavourable end 2.8 mL. The abstract gives the end-of-trial difference but not the trial length, so it is built up over 1.5 years, the length of the 18-month lecanemab trial (Swanson 2021), and then held: that length is an assumption, the volume is Alves's. The same paper reports faster hippocampal and whole-brain loss for secretase inhibitors, not for antibodies, so only the ventricles change. Observational work (Abushakra 2025) relates slower hippocampal atrophy to slower cognitive decline across anti-amyloid trials; it is not a pooled volume estimate and is not used for the number.",
       "sources": [
         "alves2023",
-        "abushakra2025"
+        "swanson2021"
       ],
-      "group": "drug"
+      "group": "drug",
+      "effect": {
+        "quantity": "ventricles_ml",
+        "likely": 2.1,
+        "best": 1.5,
+        "worst": 2.8,
+        "evidenceYears": 1.5
+      }
+    },
+    {
+      "id": "ad-bvitamins",
+      "condition": "ad",
+      "kind": "treatment",
+      "label": "B vitamins (folate, B6, B12)",
+      "group": "supplement",
+      "why": "Homocysteine-lowering B vitamins slowed whole-brain shrinkage in people with mild cognitive impairment, most of all when homocysteine was high.",
+      "caveat": "VITACOG (randomised, 168 people with MCI who had serial MRI, 24 months): whole-brain atrophy 0.76% per year on folic acid 0.8 mg, B12 0.5 mg and B6 20 mg versus 1.08% on placebo (P=0.001), which is 29.6% slower; with homocysteine above 13 µmol/L it was 53% slower (the favourable end). Jernerén 2015 found no significant effect when plasma omega-3 was low, so the unfavourable end is held at no effect. The trial measured whole-brain atrophy; the Alzheimer's rate in this model is also a whole-brain rate (Sluimer 2008), so the slowing is applied to the cortex. Participants had mild cognitive impairment, not dementia, and cognitive benefit was seen mainly with high homocysteine. The slowing is applied to the natural loss for up to 2 years and then held, not extrapolated.",
+      "sources": [
+        "smith2010",
+        "jerneren2015"
+      ],
+      "effect": {
+        "quantity": "cortex_slowing_pct",
+        "likely": 29.6,
+        "best": 53,
+        "worst": 0,
+        "evidenceYears": 2
+      }
     }
   ]
 }

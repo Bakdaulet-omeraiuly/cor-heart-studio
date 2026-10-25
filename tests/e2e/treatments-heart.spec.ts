@@ -56,6 +56,8 @@ test("LVH: the assistant's proposal becomes a button that moves the model, and a
   await expect(page.getByTestId("treatment-explanation")).toContainText("Losartan");
   const proposal = page.getByTestId("proposal-lvh-losartan");
   await expect(proposal).toBeVisible();
+  // the label stays on one line in the narrow side panel (it used to wrap and overlap its neighbours)
+  expect((await proposal.boundingBox())!.height).toBeLessThan(40);
   await proposal.click();
   await expect(page.getByTestId("treatment-lvh-losartan")).toHaveAttribute("aria-pressed", "true");
   await expect.poll(() => lvmi(page)).toBeLessThan(natural - 10);

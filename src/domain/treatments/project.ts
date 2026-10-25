@@ -1,6 +1,6 @@
 // Projections that combine the natural course with the active treatment buttons.
 // A study's change is applied in proportion to elapsed time up to its follow-up and held after that: no extrapolation.
-import { lvMassAse, projectBrain, wallsForMass, type BrainProjection, type LvhInputs, type LvhProjection, type Pace } from "../outlook/project";
+import { compound, lvMassAse, projectBrain, wallsForMass, type BrainProjection, type LvhInputs, type LvhProjection, type Pace } from "../outlook/project";
 import type { BrainTarget } from "../outlook/evidence";
 import { entriesFor } from "./load";
 import { activeEffects, pickEffect } from "./select";
@@ -37,20 +37,43 @@ export function projectLvhTreated(inp: LvhInputs, active: string[], years: numbe
 }
 
 /**
- * Alzheimer's brain: the published natural rates, then each active hippocampal effect as a volume factor held after its
- * study duration. Only the hippocampus has a treatment effect with evidence in v1.
+ * Alzheimer's brain: the published natural rates, then each active effect, held after its study duration (no extrapolation):
+ * hippocampal volume as a factor, ventricles as extra millilitres, and the cortex as a share of the natural loss that is avoided.
  */
 export function projectBrainTreated(
   baseline: Record<BrainTarget, number>, active: string[], years: number, pace: Pace,
 ): { targets: Record<BrainTarget, BrainProjection>; heldBeyondEvidence: boolean } {
   const targets = projectBrain(baseline, "alzheimers", years, pace);
-  const effects = activeEffects(active).filter((e) => e.effect!.quantity === "hippocampus_pct");
-  const factor = (pick: (e: Effect) => number) => effects.reduce((acc, e) => acc * (1 + (pick(e.effect!) * share(years, e.effect!)) / 100), 1);
+  const all = activeEffects(active);
+  const of = (q: Effect["quantity"]) => all.filter((e) => e.effect!.quantity === q);
+
+  const hippocampus = of("hippocampus_pct");
+  const factor = (pick: (e: Effect) => number) => hippocampus.reduce((acc, e) => acc * (1 + (pick(e.effect!) * share(years, e.effect!)) / 100), 1);
   const mid = factor((e) => pickEffect(e, pace));
   const h = targets.hippocampus;
-  const projectedMl = h.projectedMl * mid;
-  const lo = h.rangeMl[0] * factor((e) => Math.min(e.best, e.worst));
-  const hi = h.rangeMl[1] * factor((e) => Math.max(e.best, e.worst));
-  targets.hippocampus = { ...h, projectedMl, ratio: projectedMl / h.baselineMl, rangeMl: [Math.min(lo, hi), Math.max(lo, hi)] };
-  return { targets, heldBeyondEvidence: effects.some((e) => years > e.effect!.evidenceYears) };
+  const hippocampusMl = h.projectedMl * mid;
+  const hLo = h.rangeMl[0] * factor((e) => Math.min(e.best, e.worst));
+  const hHi = h.rangeMl[1] * factor((e) => Math.max(e.best, e.worst));
+  targets.hippocampus = { ...h, projectedMl: hippocampusMl, ratio: hippocampusMl / h.baselineMl, rangeMl: [Math.min(hLo, hHi), Math.max(hLo, hHi)] };
+
+  const ventricles = of("ventricles_ml");
+  const addedMl = (pick: (e: Effect) => number) => ventricles.reduce((acc, e) => acc + pick(e.effect!) * share(years, e.effect!), 0);
+  const v = targets.ventricles;
+  const ventriclesMl = v.projectedMl + addedMl((e) => pickEffect(e, pace));
+  targets.ventricles = {
+    ...v, projectedMl: ventriclesMl, ratio: ventriclesMl / v.baselineMl,
+    rangeMl: [v.rangeMl[0] + addedMl((e) => Math.min(e.best, e.worst)), v.rangeMl[1] + addedMl((e) => Math.max(e.best, e.worst))],
+  };
+
+  const slowing = of("cortex_slowing_pct");
+  const c = targets.cortex;
+  // millilitres of natural loss avoided: the share of the loss over the study's years, then held
+  const avoidedMl = (pctOf: (e: Effect) => number, ratePct: number) =>
+    slowing.reduce((acc, e) => acc + (pctOf(e.effect!) / 100) * (c.baselineMl - compound(c.baselineMl, ratePct, Math.min(years, e.effect!.evidenceYears))), 0);
+  const cortexMl = c.projectedMl + avoidedMl((e) => pickEffect(e, pace), c.ratePct);
+  const cLo = c.rangeMl[0] + avoidedMl((e) => Math.min(e.best, e.worst), c.rate.fast);
+  const cHi = c.rangeMl[1] + avoidedMl((e) => Math.max(e.best, e.worst), c.rate.slow);
+  targets.cortex = { ...c, projectedMl: cortexMl, ratio: cortexMl / c.baselineMl, rangeMl: [Math.min(cLo, cHi), Math.max(cLo, cHi)] };
+
+  return { targets, heldBeyondEvidence: [...hippocampus, ...ventricles, ...slowing].some((e) => years > e.effect!.evidenceYears) };
 }

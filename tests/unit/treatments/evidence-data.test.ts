@@ -39,15 +39,27 @@ describe("treatment evidence data", () => {
     expect(eff.best).toBeCloseTo(3.46, 2);
   });
 
-  it("ad-antiamyloid is listed without an effect", () => {
-    expect(byId("ad-antiamyloid").effect).toBeUndefined();
+  it("ad-antiamyloid enlarges the ventricles by the Alves 2023 difference, 2.1 mL (95% CI 1.5 to 2.8)", () => {
+    const eff = byId("ad-antiamyloid").effect!;
+    expect(eff.quantity).toBe("ventricles_ml");
+    expect([eff.best, eff.likely, eff.worst]).toEqual([1.5, 2.1, 2.8]);
+    expect(byId("ad-antiamyloid").sources).toContain("alves2023");
+  });
+
+  it("ad-bvitamins slows the loss by the VITACOG difference: (1.08 - 0.76) / 1.08 = 29.6%, 53% with high homocysteine, 0 when omega-3 is low", () => {
+    const eff = byId("ad-bvitamins").effect!;
+    expect(eff.quantity).toBe("cortex_slowing_pct");
+    expect(eff.likely).toBeCloseTo((100 * (1.08 - 0.76)) / 1.08, 1);
+    expect([eff.best, eff.worst, eff.evidenceYears]).toEqual([53, 0, 2]);
+    expect(byId("ad-bvitamins").sources).toEqual(["smith2010", "jerneren2015"]);
   });
 
   it("every entry with an effect has likely, best and worst ordered best <= likely <= worst for LVH and worst <= likely <= best for the brain", () => {
     for (const e of EVIDENCE.entries) {
       if (!e.effect) continue;
       const { likely, best, worst, quantity } = e.effect;
-      const [low, high] = quantity === "lvmi_gm2" ? [best, worst] : [worst, best];
+      // for LV mass and added ventricular volume the favourable end is the lowest value
+      const [low, high] = quantity === "lvmi_gm2" || quantity === "ventricles_ml" ? [best, worst] : [worst, best];
       expect(low).toBeLessThanOrEqual(likely);
       expect(likely).toBeLessThanOrEqual(high);
     }

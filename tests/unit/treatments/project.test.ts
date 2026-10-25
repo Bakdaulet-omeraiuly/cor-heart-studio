@@ -29,7 +29,7 @@ describe("toggleTreatment", () => {
 
 describe("activeEffects and pickEffect", () => {
   it("keeps only entries that carry an effect", () => {
-    expect(activeEffects(["ad-antiamyloid", "ad-exercise"]).map((e) => e.id)).toEqual(["ad-exercise"]);
+    expect(activeEffects(["as-statin", "ad-exercise"]).map((e) => e.id)).toEqual(["ad-exercise"]);
   });
 
   it("maps pace to likely, best and worst", () => {
@@ -97,7 +97,7 @@ describe("projectBrainTreated", () => {
 
   it("a button without an effect changes nothing", () => {
     const natural = projectBrainTreated(BRAIN, [], 5, "mean");
-    const treated = projectBrainTreated(BRAIN, ["ad-antiamyloid"], 5, "mean");
+    const treated = projectBrainTreated(BRAIN, ["as-statin"], 5, "mean");
     expect(treated.targets.hippocampus.projectedMl).toBeCloseTo(natural.targets.hippocampus.projectedMl, 9);
     expect(treated.heldBeyondEvidence).toBe(false);
   });
@@ -111,3 +111,60 @@ describe("projectBrainTreated", () => {
     expect(y5.targets.hippocampus.projectedMl / nat5.targets.hippocampus.projectedMl).toBeCloseTo(1.0346, 4);
   });
 });
+
+describe("anti-amyloid antibody: larger ventricles (Alves 2023)", () => {
+  it("adds 2.1 mL to the ventricles after the 1.5 years and leaves the other structures alone", () => {
+    const natural = projectBrainTreated(BRAIN, [], 3, "mean").targets;
+    const treated = projectBrainTreated(BRAIN, ["ad-antiamyloid"], 3, "mean").targets;
+    expect(treated.ventricles.projectedMl - natural.ventricles.projectedMl).toBeCloseTo(2.1, 9);
+    expect(treated.hippocampus.projectedMl).toBeCloseTo(natural.hippocampus.projectedMl, 9);
+    expect(treated.cortex.projectedMl).toBeCloseTo(natural.cortex.projectedMl, 9);
+  });
+
+  it("builds up in proportion to the trial length, then is held and flagged beyond the evidence", () => {
+    const half = projectBrainTreated(BRAIN, ["ad-antiamyloid"], 0.75, "mean");
+    const nat = projectBrainTreated(BRAIN, [], 0.75, "mean");
+    expect(half.targets.ventricles.projectedMl - nat.targets.ventricles.projectedMl).toBeCloseTo(1.05, 9);
+    expect(half.heldBeyondEvidence).toBe(false);
+    expect(projectBrainTreated(BRAIN, ["ad-antiamyloid"], 5, "mean").heldBeyondEvidence).toBe(true);
+  });
+
+  it("the favourable end is 1.5 mL and the unfavourable end 2.8 mL", () => {
+    const nat = (p: "slow" | "fast") => projectBrainTreated(BRAIN, [], 3, p).targets.ventricles.projectedMl;
+    expect(projectBrainTreated(BRAIN, ["ad-antiamyloid"], 3, "slow").targets.ventricles.projectedMl - nat("slow")).toBeCloseTo(1.5, 9);
+    expect(projectBrainTreated(BRAIN, ["ad-antiamyloid"], 3, "fast").targets.ventricles.projectedMl - nat("fast")).toBeCloseTo(2.8, 9);
+  });
+});
+
+describe("B vitamins: slower whole-brain loss (VITACOG, Smith 2010)", () => {
+  it("keeps 29.6% of the cortex volume the natural course loses over the 2 trial years", () => {
+    const natural = projectBrainTreated(BRAIN, [], 2, "mean").targets.cortex;
+    const treated = projectBrainTreated(BRAIN, ["ad-bvitamins"], 2, "mean").targets.cortex;
+    const lost = natural.baselineMl - natural.projectedMl;
+    expect(treated.projectedMl - natural.projectedMl).toBeCloseTo(0.296 * lost, 9);
+    expect(treated.projectedMl).toBeGreaterThan(natural.projectedMl);
+  });
+
+  it("after the 2 years the saved volume is held, not extrapolated", () => {
+    const at2 = projectBrainTreated(BRAIN, ["ad-bvitamins"], 2, "mean").targets.cortex;
+    const nat2 = projectBrainTreated(BRAIN, [], 2, "mean").targets.cortex;
+    const at6 = projectBrainTreated(BRAIN, ["ad-bvitamins"], 6, "mean");
+    const nat6 = projectBrainTreated(BRAIN, [], 6, "mean").targets.cortex;
+    expect(at6.targets.cortex.projectedMl - nat6.projectedMl).toBeCloseTo(at2.projectedMl - nat2.projectedMl, 9);
+    expect(at6.heldBeyondEvidence).toBe(true);
+  });
+
+  it("the favourable end (high homocysteine) saves more than the likely value, the unfavourable end nothing", () => {
+    const saved = (p: "slow" | "mean" | "fast") =>
+      projectBrainTreated(BRAIN, ["ad-bvitamins"], 2, p).targets.cortex.projectedMl - projectBrainTreated(BRAIN, [], 2, p).targets.cortex.projectedMl;
+    expect(saved("fast")).toBeCloseTo(0, 9);
+    expect(saved("slow") / (BRAIN.cortex - projectBrainTreated(BRAIN, [], 2, "slow").targets.cortex.projectedMl)).toBeCloseTo(0.53, 9);
+  });
+
+  it("does not combine with the hippocampal effect of exercise: each moves its own structure", () => {
+    const both = projectBrainTreated(BRAIN, ["ad-bvitamins", "ad-exercise"], 2, "slow").targets;
+    const exercise = projectBrainTreated(BRAIN, ["ad-exercise"], 2, "slow").targets;
+    expect(both.hippocampus.projectedMl).toBeCloseTo(exercise.hippocampus.projectedMl, 9);
+  });
+});
+

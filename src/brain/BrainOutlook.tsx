@@ -65,7 +65,8 @@ function TreatmentNotes() {
   const pace = useOutlook((s) => s.pace);
   const notes: string[] = [];
   if (active.includes("ad-exercise") && pace !== "slow") notes.push("Aerobic exercise: pooled randomised trials (Firth 2018, Balbim 2023) find no significant gain in hippocampal volume, so the likely and the worst case are no change. Only the favourable end (Slower), from one trial, shows a gain.");
-  if (active.includes("ad-antiamyloid")) notes.push("Anti-amyloid antibody: pooled trials (Alves 2023) show larger ventricles, relative to placebo, not less brain loss. There is no per-year rate to apply, so the model does not change.");
+  if (active.includes("ad-antiamyloid")) notes.push("Anti-amyloid antibody: pooled randomised trials (Alves 2023) show the ventricles enlarging by 2.1 mL more than on placebo (95% CI 1.5 to 2.8). This is a harm signal on the MRI, not a gain; the antibodies' cognitive benefit is not a volume effect. The 1.5-year build-up is an assumption from the 18-month lecanemab trial.");
+  if (active.includes("ad-bvitamins")) notes.push("B vitamins: VITACOG (randomised, 24 months) found whole-brain atrophy 29.6% slower, 53% slower with high homocysteine, in people with mild cognitive impairment, not dementia. It was a whole-brain measure; the model applies it to the cortex.");
   if (!notes.length) return null;
   return <ul className="space-y-1 text-[10px] leading-snug text-faint" data-testid="treatment-notes">{notes.map((n) => <li key={n}>{n}</li>)}</ul>;
 }

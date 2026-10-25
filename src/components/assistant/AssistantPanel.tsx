@@ -238,15 +238,15 @@ function OutlookAnswer({ reply }: { reply: OutlookReply }) {
           ))}
         </ol>
       )}
-      <div className="space-y-1" data-testid="treatment-proposals">
+      <div className="space-y-2" data-testid="treatment-proposals">
         {reply.proposals.length === 0 && <p className="text-[11px] text-muted">No option from the list fits this question.</p>}
         {reply.proposals.map((p) => {
           const entry = EVIDENCE.entries.find((e) => e.id === p.id);
           if (!entry) return null;
           return (
-            <div key={p.id} className="flex items-center gap-1.5">
-              <Button size="sm" pressed={active.includes(p.id)} data-testid={`proposal-${p.id}`} onClick={() => toggle(p.id)}>{entry.label}</Button>
-              <span className="min-w-0 truncate text-[11px] text-muted" title={p.reason}>{p.reason}</span>
+            <div key={p.id} className="space-y-0.5">
+              <Button size="sm" className="whitespace-nowrap" pressed={active.includes(p.id)} data-testid={`proposal-${p.id}`} onClick={() => toggle(p.id)}>{entry.label}</Button>
+              <p className="text-[11px] leading-snug text-muted">{p.reason}</p>
             </div>
           );
         })}

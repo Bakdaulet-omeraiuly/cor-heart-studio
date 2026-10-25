@@ -43,3 +43,33 @@ test("Brain: Now | In N years side by side, and the exercise button lifts the pr
   await expect(page.getByTestId("treatment-ad-exercise")).toHaveCount(0);
   expect(errors).toEqual([]);
 });
+
+test("Brain: the anti-amyloid and B-vitamin buttons each change a structure in the projected brain, and off returns it", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/");
+  await page.getByRole("tab", { name: "Brain" }).click();
+  await expect(page.getByTestId("brain-workspace")).toBeVisible({ timeout: 30_000 });
+  await page.getByTestId("outlook-toggle").click();
+  await page.getByRole("slider", { name: "Years from today" }).fill("2");
+  const row = (name: string) => page.getByTestId("brain-outlook-table").locator("tr", { hasText: name });
+  const text = async (name: string) => (await row(name).innerText()).replace(/\s+/g, " ");
+
+  const ventricles = await text("Ventricles");
+  const cortex = await text("Cortex");
+
+  // Alves 2023: larger ventricles (a harm signal), nothing else moves
+  await page.getByTestId("treatment-ad-antiamyloid").click();
+  await expect.poll(() => text("Ventricles")).not.toBe(ventricles);
+  expect(await text("Cortex")).toBe(cortex);
+  await page.getByTestId("treatment-ad-antiamyloid").click();
+  await expect.poll(() => text("Ventricles")).toBe(ventricles);
+
+  // VITACOG: the cortex loses less
+  await page.getByTestId("treatment-ad-bvitamins").click();
+  await expect.poll(() => text("Cortex")).not.toBe(cortex);
+  expect(await text("Ventricles")).toBe(ventricles);
+  await page.getByTestId("treatment-ad-bvitamins").click();
+  await expect.poll(() => text("Cortex")).toBe(cortex);
+  expect(errors).toEqual([]);
+});
