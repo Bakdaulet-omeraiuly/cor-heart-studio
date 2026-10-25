@@ -161,6 +161,37 @@
       "studyType": "observational",
       "n": 13187,
       "population": "30 observational studies plus placebo-controlled anti-amyloid trials (not a pooled trial estimate)"
+    },
+    "firth2018": {
+      "id": "firth2018",
+      "cite": "Firth 2018",
+      "title": "Effect of aerobic exercise on hippocampal volume in humans: a systematic review and meta-analysis",
+      "journal": "NeuroImage 166:230–8",
+      "doi": "10.1016/j.neuroimage.2017.11.007",
+      "studyType": "meta-analysis",
+      "n": 737,
+      "population": "14 controlled trials across the lifespan; no significant effect on total hippocampal volume, a significant effect on the left hippocampus (retention of volume)"
+    },
+    "balbim2023": {
+      "id": "balbim2023",
+      "cite": "Balbim 2023",
+      "title": "Aerobic exercise training effects on hippocampal volume in healthy older individuals: a meta-analysis of randomized controlled trials",
+      "journal": "GeroScience 46:2755–64",
+      "doi": "10.1007/s11357-023-00971-7",
+      "studyType": "meta-analysis",
+      "n": 554,
+      "population": "8 randomised trials in cognitively unimpaired older adults, 3–12 months; SMD 0.10 (95% CI −0.01 to 0.21), not significant",
+      "durationMonths": 8
+    },
+    "alves2023": {
+      "id": "alves2023",
+      "cite": "Alves 2023",
+      "title": "Accelerated brain volume loss caused by anti-β-amyloid drugs: a systematic review and meta-analysis",
+      "journal": "Neurology 100:e2114–24",
+      "doi": "10.1212/WNL.0000000000207156",
+      "studyType": "meta-analysis",
+      "n": 8062,
+      "population": "Randomised trials of anti-amyloid drugs in Alzheimer's disease (31 trials with MRI volumes; n = 8,062–10,279 depending on the analysis)"
     }
   },
   "entries": [
@@ -285,9 +316,11 @@
       "condition": "ad",
       "kind": "treatment",
       "label": "Aerobic exercise",
-      "why": "Aerobic exercise enlarged the hippocampus in one randomised trial, but larger trials in people with memory problems did not confirm it.",
-      "caveat": "Contested. Erickson 2011 (n=120 healthy older adults, 1 year): hippocampus +2.12% and +1.97% (left, right) on aerobic exercise vs −1.40% and −1.43% on stretching, a difference of about 3.46 points; this is the favourable end. ten Brinke 2014 (n=86, MCI, 6 months) found a significant gain vs control without a figure in the abstract. EXERT 2025 (n=296, MCI, 18 months) found no group difference. The likely value is therefore held at no effect and the unfavourable end at no effect. The trials did not include people with Alzheimer's dementia.",
+      "why": "Pooled randomised trials find no clear gain in hippocampal volume from aerobic exercise; one trial found a gain, so the gain is shown only as the favourable end.",
+      "caveat": "Contested. Two meta-analyses of randomised trials find no significant effect on total hippocampal volume: Firth 2018 (14 trials, n=737; only the left hippocampus was significant, driven by less loss) and Balbim 2023 (8 trials, n=554, healthy older adults, SMD 0.10, 95% CI −0.01 to 0.21). Erickson 2011 (n=120, 1 year) found +2.12% and +1.97% (left, right) on exercise vs −1.40% and −1.43% on stretching, a difference of about 3.46 points: this is the favourable end only. ten Brinke 2014 (n=86, MCI, 6 months) found a gain without a figure in the abstract; EXERT 2025 (n=296, MCI, 18 months) found no group difference. So the likely value and the unfavourable end are held at no effect. None of these trials enrolled people with Alzheimer's dementia.",
       "sources": [
+        "firth2018",
+        "balbim2023",
         "erickson2011",
         "tenbrinke2014",
         "baker2025"
@@ -306,9 +339,10 @@
       "condition": "ad",
       "kind": "treatment",
       "label": "Anti-amyloid antibody",
-      "why": "Anti-amyloid antibodies slow cognitive decline in early Alzheimer's disease, but their effect on brain volume is not yet entered here.",
-      "caveat": "A synthesis (Abushakra 2025) relates slower hippocampal atrophy to slower cognitive decline across placebo-controlled anti-amyloid trials, but it is not a pooled volume estimate. Per-trial hippocampal and whole-brain volume numbers have not yet been read from the primary papers, so this button does not change the model.",
+      "why": "Anti-amyloid antibodies slow cognitive decline in early Alzheimer's disease, but pooled trials show more ventricular enlargement, not less brain loss.",
+      "caveat": "A meta-analysis of randomised trials (Alves 2023) found that antibodies which cause amyloid-related imaging abnormalities (ARIA) enlarged the ventricles by 2.1 mL more than placebo (38.7% more; 95% CI 1.5 to 2.8), and the amount tracked ARIA frequency (r=0.86). The same paper reports faster hippocampal and whole-brain loss for secretase inhibitors, not for antibodies. Abushakra 2025 relates slower hippocampal atrophy to slower cognitive decline across anti-amyloid trials, but it is not a pooled volume estimate. The ventricle effect is relative to each trial's placebo and has no per-year rate here, so the button does not change the model.",
       "sources": [
+        "alves2023",
         "abushakra2025"
       ],
       "group": "drug"

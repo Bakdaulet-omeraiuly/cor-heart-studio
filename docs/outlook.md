@@ -106,7 +106,8 @@ labelled. Observational findings are never used to move a model. Every entry car
 * Aerobic exercise and the hippocampus is contested: one trial in healthy older adults found about +3.5 points against controls, two later trials in
   people with memory problems found no volumetric difference. The likely value is therefore no effect; the favourable end is Erickson 2011.
   None of the trials included people with Alzheimer's dementia.
-* Anti-amyloid antibodies are listed without a volumetric effect until the per-trial volume numbers are read from the primary papers.
+* Anti-amyloid antibodies are listed without a volumetric effect: the pooled randomised evidence (Alves 2023, Neurology) shows larger ventricles on ARIA-inducing antibodies, relative to each trial's placebo, with no per-year rate to drive the model.
+* Aerobic exercise: two meta-analyses of randomised trials (Firth 2018, Balbim 2023) find no significant pooled effect on total hippocampal volume, so likely and worst stay at no effect; Erickson 2011 stays as the favourable end.
 * LVH natural course: one small placebo arm (12 patients, normal office blood pressure, 1 year).
 
 **Adding evidence.** Edit `src/domain/treatments/evidence.json` (sources and entries); the schema and `tests/unit/treatments/evidence*.test.ts`
@@ -121,8 +122,8 @@ reject missing DOIs, empty caveats and non-randomised effects. Regenerate the ta
 | `as-natural` | natural | Natural course | no effect on the model | [Otto 1997](https://doi.org/10.1161/01.cir.95.9.2262) (prospective-cohort, n=123) |
 | `as-statin` | treatment | Statin | no effect on the model | [ASTRONOMER · Chan 2010](https://doi.org/10.1161/CIRCULATIONAHA.109.900027) (rct, n=269); [SALTIRE · Cowell 2005](https://doi.org/10.1056/NEJMoa043876) (rct, n=155); [SEAS · Rossebø 2008](https://doi.org/10.1056/NEJMoa0804602) (rct, n=1873) |
 | `ad-natural` | natural | Natural course | no effect on the model | [Barnes 2009](https://doi.org/10.1016/j.neurobiolaging.2008.01.010) (meta-analysis, n=807); [de Leon 1989](https://doi.org/10.2214/ajr.152.6.1257) (prospective-cohort, n=95); [Fjell 2009](https://doi.org/10.1523/JNEUROSCI.3252-09.2009) (prospective-cohort, n=142); [Sluimer 2008](https://doi.org/10.1212/01.wnl.0000311446.61861.e3) (prospective-cohort, n=65) |
-| `ad-exercise` | treatment | Aerobic exercise | 0 (best 3.46, worst 0) % hippocampus over 1 y | [Erickson 2011](https://doi.org/10.1073/pnas.1015950108) (rct, n=120); [ten Brinke 2014](https://doi.org/10.1136/bjsports-2013-093184) (rct, n=86); [EXERT · Baker 2025](https://doi.org/10.1002/alz.14586) (rct, n=296) |
-| `ad-antiamyloid` | treatment | Anti-amyloid antibody | no effect on the model | [Abushakra 2026](https://doi.org/10.1007/s40263-025-01251-y) (observational, n=13187) |
+| `ad-exercise` | treatment | Aerobic exercise | 0 (best 3.46, worst 0) % hippocampus over 1 y | [Firth 2018](https://doi.org/10.1016/j.neuroimage.2017.11.007) (meta-analysis, n=737); [Balbim 2023](https://doi.org/10.1007/s11357-023-00971-7) (meta-analysis, n=554); [Erickson 2011](https://doi.org/10.1073/pnas.1015950108) (rct, n=120); [ten Brinke 2014](https://doi.org/10.1136/bjsports-2013-093184) (rct, n=86); [EXERT · Baker 2025](https://doi.org/10.1002/alz.14586) (rct, n=296) |
+| `ad-antiamyloid` | treatment | Anti-amyloid antibody | no effect on the model | [Alves 2023](https://doi.org/10.1212/WNL.0000000000207156) (meta-analysis, n=8062); [Abushakra 2026](https://doi.org/10.1007/s40263-025-01251-y) (observational, n=13187) |
 
 ## Next candidates (not built)
 

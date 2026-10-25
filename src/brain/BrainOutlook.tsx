@@ -64,8 +64,8 @@ function TreatmentNotes() {
   const active = useOutlook((s) => s.active);
   const pace = useOutlook((s) => s.pace);
   const notes: string[] = [];
-  if (active.includes("ad-exercise") && pace !== "slow") notes.push("Aerobic exercise: the trials conflict, so the likely and the worst case are no change in hippocampal volume. Only the favourable end (Slower) shows a gain.");
-  if (active.includes("ad-antiamyloid")) notes.push("Anti-amyloid antibody: no measured effect on brain volume in the sources used here, so it does not change the model.");
+  if (active.includes("ad-exercise") && pace !== "slow") notes.push("Aerobic exercise: pooled randomised trials (Firth 2018, Balbim 2023) find no significant gain in hippocampal volume, so the likely and the worst case are no change. Only the favourable end (Slower), from one trial, shows a gain.");
+  if (active.includes("ad-antiamyloid")) notes.push("Anti-amyloid antibody: pooled trials (Alves 2023) show larger ventricles, relative to placebo, not less brain loss. There is no per-year rate to apply, so the model does not change.");
   if (!notes.length) return null;
   return <ul className="space-y-1 text-[10px] leading-snug text-faint" data-testid="treatment-notes">{notes.map((n) => <li key={n}>{n}</li>)}</ul>;
 }
