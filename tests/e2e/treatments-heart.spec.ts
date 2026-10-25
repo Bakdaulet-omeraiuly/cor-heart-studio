@@ -61,6 +61,34 @@ test("LVH: the drug-class and weight-loss buttons each lower the projected LV ma
   expect(errors).toEqual([]);
 });
 
+test("AS: the valve-replacement buttons replace the stenosis in the projected heart, and off returns the progression", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/");
+  await page.getByText("Open CT · s0270").first().click();
+  await page.getByTestId("outlook-toggle").click();
+  await expect(page.getByTestId("heart-outlook")).toBeVisible();
+  await page.getByRole("slider", { name: "Years from today" }).fill("5");
+  const later = () => page.getByTestId("outlook-state").nth(1);
+  await expect(later()).not.toContainText("Valve replaced");
+  const native = await later().innerText();
+
+  await page.getByTestId("treatment-as-tavr").click();
+  await expect(later()).toContainText("Valve replaced");
+  await expect(later()).toContainText("AVA 1.72 cm²");
+  await expect(page.getByTestId("as-replacement-note")).toBeVisible();
+
+  // surgery is the alternative: it replaces TAVR rather than adding to it
+  await page.getByTestId("treatment-as-savr").click();
+  await expect(page.getByTestId("treatment-as-tavr")).toHaveAttribute("aria-pressed", "false");
+  await expect(later()).toContainText("AVA 1.76 cm²");
+
+  await page.getByTestId("treatment-as-savr").click();
+  await expect(later()).not.toContainText("Valve replaced");
+  expect(await later().innerText()).toBe(native);
+  expect(errors).toEqual([]);
+});
+
 test("LVH: the evidence for a button sits behind its info tip", async ({ page }) => {
   await openLvhOutlook(page);
   const tip = page.getByRole("button", { name: "Evidence for Losartan-based regimen" });

@@ -7,9 +7,9 @@ export type StudyType = "rct" | "meta-analysis" | "placebo-arm" | "prospective-c
 
 /**
  * What an effect is measured in: LV mass index change (g/m²), its relative change (%) or the change in LV mass (g),
- * hippocampal volume change (%), extra ventricular volume (mL), or the share (%) of the natural cortical/whole-brain loss that is avoided.
+ * hippocampal volume change (%), extra ventricular volume (mL), the share (%) of the natural cortical/whole-brain loss that is avoided, or the aortic valve area (cm²) after a valve is replaced.
  */
-export type Quantity = "lvmi_gm2" | "lvmi_pct" | "lvm_g" | "hippocampus_pct" | "ventricles_ml" | "cortex_slowing_pct";
+export type Quantity = "lvmi_gm2" | "lvmi_pct" | "lvm_g" | "hippocampus_pct" | "ventricles_ml" | "cortex_slowing_pct" | "ava_cm2";
 
 export interface EvidenceSource {
   id: string;

@@ -257,6 +257,28 @@
       "n": 82,
       "durationMonths": 6,
       "population": "Overweight, sedentary adults with high-normal or mildly raised blood pressure (about 140/93 mmHg), echocardiography"
+    },
+    "pibarot2020": {
+      "id": "pibarot2020",
+      "cite": "PARTNER 3 echo · Pibarot 2020",
+      "title": "Echocardiographic results of transcatheter versus surgical aortic valve replacement in low-risk patients: the PARTNER 3 trial",
+      "journal": "Circulation 141:1527–37",
+      "doi": "10.1161/CIRCULATIONAHA.119.044574",
+      "studyType": "rct",
+      "n": 1000,
+      "durationMonths": 12,
+      "population": "Severe aortic stenosis at low surgical risk, randomised to SAPIEN 3 TAVR or surgery; echo core laboratories at 30 days and 1 year"
+    },
+    "notion2016": {
+      "id": "notion2016",
+      "cite": "NOTION · Søndergaard 2016",
+      "title": "Two-year outcomes in patients with severe aortic valve stenosis randomized to transcatheter versus surgical aortic valve replacement: the all-comers NOTION randomized clinical trial",
+      "journal": "Circ Cardiovasc Interv 9:e003665",
+      "doi": "10.1161/CIRCINTERVENTIONS.115.003665",
+      "studyType": "rct",
+      "n": 280,
+      "durationMonths": 24,
+      "population": "All-comers with severe aortic stenosis, CoreValve TAVR versus surgery; effective orifice area at 3 months"
     }
   },
   "entries": [
@@ -513,6 +535,46 @@
         "likely": -2.9,
         "best": -5.2,
         "worst": -0.7,
+        "evidenceYears": 1
+      }
+    },
+    {
+      "id": "as-tavr",
+      "condition": "as",
+      "kind": "treatment",
+      "label": "TAVR (transcatheter valve)",
+      "group": "valve",
+      "why": "Replacing a narrowed aortic valve through a catheter restores a valve area close to a normal prosthesis and stops the stenosis progressing.",
+      "caveat": "PARTNER 3 (randomised, n=1000, low surgical risk, core-laboratory echo): aortic valve area 1.72 ± 0.37 cm² at 1 year after this procedure, mean gradient 13.7 mmHg; the range drawn is ±1 SD between patients, not a confidence interval. NOTION (randomised, n=280, CoreValve) found a different split at 3 months, effective orifice area 1.7 cm² after TAVR and 1.4 cm² after surgery, so the area depends on the valve and the patient. The procedure is shown as immediate and the native stenosis stops progressing; the valve is held at its 1-year area (hemodynamics were stable from 30 days to 1 year in the randomised echo studies), and long-term durability is not modelled. It is the guideline treatment for severe symptomatic stenosis, so a mild or moderate valve is shown for comparison only. Peak velocity after the procedure is not drawn, because the cited abstracts report the mean gradient, not the peak velocity. Procedure risks (death, stroke, pacemaker, valve regurgitation) are not part of this model; the 3D valve is drawn as a normally opening valve, not as a prosthesis.",
+      "sources": [
+        "pibarot2020",
+        "notion2016"
+      ],
+      "effect": {
+        "quantity": "ava_cm2",
+        "likely": 1.72,
+        "best": 2.09,
+        "worst": 1.35,
+        "evidenceYears": 1
+      }
+    },
+    {
+      "id": "as-savr",
+      "condition": "as",
+      "kind": "treatment",
+      "label": "Surgical valve replacement",
+      "group": "valve",
+      "why": "Replacing a narrowed aortic valve by open-heart surgery restores a valve area close to a normal prosthesis and stops the stenosis progressing.",
+      "caveat": "PARTNER 3 (randomised, n=1000, low surgical risk, core-laboratory echo): aortic valve area 1.76 ± 0.42 cm² at 1 year after this procedure, mean gradient 11.6 mmHg; the range drawn is ±1 SD between patients, not a confidence interval. NOTION (randomised, n=280, CoreValve) found a different split at 3 months, effective orifice area 1.7 cm² after TAVR and 1.4 cm² after surgery, so the area depends on the valve and the patient. The procedure is shown as immediate and the native stenosis stops progressing; the valve is held at its 1-year area (hemodynamics were stable from 30 days to 1 year in the randomised echo studies), and long-term durability is not modelled. It is the guideline treatment for severe symptomatic stenosis, so a mild or moderate valve is shown for comparison only. Peak velocity after the procedure is not drawn, because the cited abstracts report the mean gradient, not the peak velocity. Procedure risks (death, stroke, pacemaker, valve regurgitation) are not part of this model; the 3D valve is drawn as a normally opening valve, not as a prosthesis.",
+      "sources": [
+        "pibarot2020",
+        "notion2016"
+      ],
+      "effect": {
+        "quantity": "ava_cm2",
+        "likely": 1.76,
+        "best": 2.18,
+        "worst": 1.34,
         "evidenceYears": 1
       }
     }

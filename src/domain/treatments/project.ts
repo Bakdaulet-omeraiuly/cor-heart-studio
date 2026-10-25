@@ -83,3 +83,30 @@ export function projectBrainTreated(
 
   return { targets, heldBeyondEvidence: [...hippocampus, ...ventricles, ...slowing].some((e) => years > e.effect!.evidenceYears) };
 }
+
+export interface AsReplacement {
+  id: string;
+  label: string;
+  years: number;
+  /** Valve area after the procedure (cm²) at the chosen end of the spread, and its ±1 SD range between patients. */
+  avaCm2: number;
+  avaRangeCm2: [number, number];
+  heldBeyondEvidence: boolean;
+}
+
+/**
+ * Aortic stenosis: a valve replacement is immediate and stops the native progression, so from the first day after "today" the valve
+ * has the area the randomised echo studies report. Pace picks the end of the spread between patients. Null when no replacement is on.
+ */
+export function projectAsReplacement(active: string[], years: number, pace: Pace): AsReplacement | null {
+  if (years <= 0) return null;
+  const entry = activeEffects(active).find((e) => e.effect!.quantity === "ava_cm2");
+  if (!entry) return null;
+  const eff = entry.effect!;
+  return {
+    id: entry.id, label: entry.label, years,
+    avaCm2: pickEffect(eff, pace),
+    avaRangeCm2: [Math.min(eff.best, eff.worst), Math.max(eff.best, eff.worst)],
+    heldBeyondEvidence: years > eff.evidenceYears,
+  };
+}

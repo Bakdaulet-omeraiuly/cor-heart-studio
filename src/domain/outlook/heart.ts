@@ -44,6 +44,16 @@ export function withProjectedAorticStenosis(p: NormalizedPatient, proj: AsProjec
   };
 }
 
+/** A copy of the record whose aortic stenosis is gone because the valve was replaced; the mapping engine then draws a normally opening valve. */
+export function withReplacedAorticValve(p: NormalizedPatient, years: number, label: string, keySuffix: string): NormalizedPatient {
+  return {
+    ...p,
+    key: `${p.key}${keySuffix}`,
+    displayName: `${p.displayName ?? p.patientId} · +${years} y (${label})`,
+    valveFindings: p.valveFindings.filter((v) => !(v.valve === "aortic_valve" && v.condition === "stenosis")),
+  };
+}
+
 export interface LvhBaseline {
   ivsMm: number | null;
   pwMm: number | null;

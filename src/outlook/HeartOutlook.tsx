@@ -6,9 +6,9 @@ import dynamic from "next/dynamic";
 import { useEffect, useMemo, type ReactNode } from "react";
 import { Focus, ScanEye } from "lucide-react";
 import { AS_EVENT_FREE_2Y, AS_PROGRESSION, LVH_CLASS_EFFECT, LVMI_UPPER_NORMAL } from "@/domain/outlook/evidence";
-import { readAsBaseline, readLvhBaseline, withProjectedAorticStenosis, withProjectedWalls } from "@/domain/outlook/heart";
+import { readAsBaseline, readLvhBaseline, withProjectedAorticStenosis, withProjectedWalls, withReplacedAorticValve } from "@/domain/outlook/heart";
 import { projectAorticStenosis, type AsGrade, type AsProjection, type LvhProjection } from "@/domain/outlook/project";
-import { projectLvhTreated } from "@/domain/treatments/project";
+import { projectAsReplacement, projectLvhTreated, type AsReplacement } from "@/domain/treatments/project";
 import type { NormalizedPatient } from "@/domain/types";
 import { entryFromNormalized, patientTitle, type PatientEntry } from "@/lib/patients";
 import { useApp } from "@/state/store";
@@ -96,7 +96,7 @@ const DEFAULT_VMAX = 3.2;
 const GRADE_TONE: Record<AsGrade, string> = { none: "text-muted", mild: "text-ink", moderate: "text-warn", severe: "text-error" };
 
 function AorticStenosisOutlook({ entry }: { entry: PatientEntry }) {
-  const { years, pace, avaOverride, vmaxOverride, set } = useOutlook();
+  const { years, pace, avaOverride, vmaxOverride, active, set } = useOutlook();
   const setApp = useApp((s) => s.set);
   const requestCamera = useApp((s) => s.requestCamera);
   const recorded = useMemo(() => readAsBaseline(entry.patient), [entry]);
@@ -105,7 +105,11 @@ function AorticStenosisOutlook({ entry }: { entry: PatientEntry }) {
   const now = useMemo(() => projectAorticStenosis(ava0, vmax0, 0, "mean"), [ava0, vmax0]);
   const later = useMemo(() => projectAorticStenosis(ava0, vmax0, years, pace), [ava0, vmax0, years, pace]);
   const today = useMemo(() => withProjectedAorticStenosis(entry.patient, now, "::outlook-today"), [entry, now]);
-  const projected = useMemo(() => withProjectedAorticStenosis(entry.patient, later, "::outlook-later"), [entry, later]);
+  const replaced = useMemo(() => projectAsReplacement(active, years, pace), [active, years, pace]);
+  const projected = useMemo(
+    () => (replaced ? withReplacedAorticValve(entry.patient, years, "valve replaced", "::outlook-later") : withProjectedAorticStenosis(entry.patient, later, "::outlook-later")),
+    [entry, later, replaced, years],
+  );
   const entries = useOutlookEntries(entry, today, projected);
 
   // the aortic valve is open only during ejection: freeze both hearts at mid-ejection so the opening can be compared
@@ -118,7 +122,7 @@ function AorticStenosisOutlook({ entry }: { entry: PatientEntry }) {
   return (
     <OutlookLayout entry={entry} entries={entries}
       toolbar={<Button size="sm" title="Close-up of the aortic valve, frozen at peak ejection with the outer wall see-through" onClick={showValve}><Focus className="h-3.5 w-3.5" /> Aortic valve</Button>}
-      cards={[<AsCard key="t" title="Today" p={now} />, <AsCard key="l" title={yearsLabel(years, pace)} p={later} />]}>
+      cards={[<AsCard key="t" title="Today" p={now} />, replaced ? <ReplacedCard key="l" title={yearsLabel(years, pace)} r={replaced} /> : <AsCard key="l" title={yearsLabel(years, pace)} p={later} />]}>
       <p className="text-[11px] text-faint">Average haemodynamic progression in adults with asymptomatic aortic stenosis.</p>
       <div className="mt-2"><TreatmentButtons condition="as" /></div>
 
@@ -144,7 +148,7 @@ function AorticStenosisOutlook({ entry }: { entry: PatientEntry }) {
       <table className="w-full text-[11px]">
         <tbody className="divide-y divide-line">
           {AS_EVENT_FREE_2Y.map((b) => (
-            <tr key={b.label} className={b === later.eventFree2y ? "bg-panel-3" : ""}>
+            <tr key={b.label} className={!replaced && b === later.eventFree2y ? "bg-panel-3" : ""}>
               <td className="py-1 pl-1 text-muted">Jet velocity {b.label}</td>
               <td className="num py-1 pr-1 text-right text-ink">{b.percent} ± {b.pm} %</td>
             </tr>
@@ -165,6 +169,7 @@ function AorticStenosisOutlook({ entry }: { entry: PatientEntry }) {
 
       <H3>Sources</H3>
       <SourceList ids={["otto1997", "acc2020"]} />
+      {replaced && <p className="mt-2 text-[10px] leading-snug text-faint" data-testid="as-replacement-note">Valve replaced: the native stenosis no longer progresses. The area is the randomised-trial mean ± 1 SD between patients at 1 year (PARTNER 3), held after that; peak velocity is not shown because the trial abstracts report the mean gradient. The 3D valve is drawn as normally opening, not as a prosthesis.</p>}
     </OutlookLayout>
   );
 }
@@ -181,6 +186,22 @@ function OrificeGauge({ ava }: { ava: number }) {
       <circle cx="25" cy="25" r={R} fill="none" stroke="var(--border-strong)" strokeDasharray="2 2" />
       <circle cx="25" cy="25" r={r} fill="var(--accent)" fillOpacity="0.85" />
     </svg>
+  );
+}
+
+function ReplacedCard({ title, r }: { title: string; r: AsReplacement }) {
+  return (
+    <div className="flex min-w-0 items-center gap-3 px-3 py-2" data-testid="outlook-state">
+      <OrificeGauge ava={r.avaCm2} />
+      <div className="min-w-0">
+        <p className="truncate text-[11px] text-faint">{title}</p>
+        <p className="text-[17px] font-medium leading-tight text-ok">Valve replaced</p>
+        <p className="num text-[11px] text-muted">
+          {r.label} · AVA {r.avaCm2.toFixed(2)} cm²
+          <span className="text-faint"> (range {r.avaRangeCm2[0].toFixed(2)}–{r.avaRangeCm2[1].toFixed(2)} cm²)</span>
+        </p>
+      </div>
+    </div>
   );
 }
 

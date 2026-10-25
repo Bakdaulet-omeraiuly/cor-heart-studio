@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { projectBrain } from "@/domain/outlook/project";
 import { activeEffects, pickEffect, toggleTreatment } from "@/domain/treatments/select";
-import { projectBrainTreated, projectLvhTreated } from "@/domain/treatments/project";
+import { projectAsReplacement, projectBrainTreated, projectLvhTreated } from "@/domain/treatments/project";
 import { EVIDENCE } from "@/domain/treatments/load";
 
 const LVH = { ivsMm: 14, pwMm: 14, lvidMm: 50, bsaM2: 1.9 };
@@ -106,6 +106,33 @@ describe("projectLvhTreated: drug classes and weight loss", () => {
   it("the favourable end of a class is its upper confidence bound, 12% for an ACE inhibitor", () => {
     const slow = projectLvhTreated(LVH, ["lvh-ace"], 0.5, "slow");
     expect(slow.lvmiChange).toBeCloseTo(-0.12 * lvmi0(LVH), 2);
+  });
+});
+
+describe("projectAsReplacement: TAVR and surgical valve replacement (PARTNER 3)", () => {
+  it("is null with no valve button on, and still null today (years 0)", () => {
+    expect(projectAsReplacement([], 5, "mean")).toBeNull();
+    expect(projectAsReplacement(["as-statin"], 5, "mean")).toBeNull();
+    expect(projectAsReplacement(["as-tavr"], 0, "mean")).toBeNull();
+  });
+
+  it("gives the trial's valve area at once, then holds it and flags it beyond the one-year evidence", () => {
+    const early = projectAsReplacement(["as-tavr"], 0.5, "mean")!;
+    const late = projectAsReplacement(["as-tavr"], 8, "mean")!;
+    expect(early.avaCm2).toBe(1.72);
+    expect(late.avaCm2).toBe(1.72);
+    expect(early.heldBeyondEvidence).toBe(false);
+    expect(late.heldBeyondEvidence).toBe(true);
+  });
+
+  it("pace picks the end of the spread between patients: slower = larger area, faster = smaller", () => {
+    expect(projectAsReplacement(["as-savr"], 3, "slow")!.avaCm2).toBe(2.18);
+    expect(projectAsReplacement(["as-savr"], 3, "fast")!.avaCm2).toBe(1.34);
+    expect(projectAsReplacement(["as-savr"], 3, "mean")!.avaRangeCm2).toEqual([1.34, 2.18]);
+  });
+
+  it("TAVR and surgery are alternatives: the second switches the first off", () => {
+    expect(toggleTreatment(["as-tavr"], "as-savr")).toEqual(["as-savr"]);
   });
 });
 

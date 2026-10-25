@@ -13,7 +13,7 @@ const Source = z.object({
 });
 
 const Effect = z.object({
-  quantity: z.enum(["lvmi_gm2", "lvmi_pct", "lvm_g", "hippocampus_pct", "ventricles_ml", "cortex_slowing_pct"]),
+  quantity: z.enum(["lvmi_gm2", "lvmi_pct", "lvm_g", "hippocampus_pct", "ventricles_ml", "cortex_slowing_pct", "ava_cm2"]),
   likely: z.number(),
   best: z.number(),
   worst: z.number(),

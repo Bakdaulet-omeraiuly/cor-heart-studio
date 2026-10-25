@@ -70,6 +70,14 @@ describe("treatment evidence data", () => {
     expect(e.group).toBe("lifestyle");
   });
 
+  it("the valve buttons carry the PARTNER 3 one-year valve areas, 1.72 ± 0.37 (TAVR) and 1.76 ± 0.42 cm² (surgery), and exclude each other", () => {
+    const tavr = byId("as-tavr"), savr = byId("as-savr");
+    expect(tavr.effect).toMatchObject({ quantity: "ava_cm2", likely: 1.72, best: 2.09, worst: 1.35, evidenceYears: 1 });
+    expect(savr.effect).toMatchObject({ quantity: "ava_cm2", likely: 1.76, best: 2.18, worst: 1.34, evidenceYears: 1 });
+    expect(tavr.group).toBe(savr.group);
+    expect(tavr.sources).toContain("pibarot2020");
+  });
+
   it("every entry with an effect has likely, best and worst ordered best <= likely <= worst for LVH and worst <= likely <= best for the brain", () => {
     for (const e of EVIDENCE.entries) {
       if (!e.effect) continue;
