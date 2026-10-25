@@ -1,14 +1,19 @@
 "use client";
-import { useMemo, useState } from "react";
-import { Columns2, FlaskConical, Pencil, Plus, Search, Trash2, Upload } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { Columns2, FlaskConical, Loader2, Pencil, Plus, ScanHeart, Search, Trash2, Upload } from "lucide-react";
 import { useApp } from "@/state/store";
 import { patientTitle } from "@/lib/patients";
 import { loadSamples } from "@/lib/session";
 import { Button, IconButton, PanelHeader, Pill, cx } from "../ui/primitives";
+import { identifyOpenCtDemo } from "@/domain/import/dicomDemo";
+import { useOutlook } from "@/outlook/outlookStore";
 
 export function PatientLibrary() {
   const s = useApp();
   const [q, setQ] = useState("");
+  const dicomInput = useRef<HTMLInputElement>(null);
+  const [scanBusy, setScanBusy] = useState(false);
+  const [scanError, setScanError] = useState<string | null>(null);
   const list = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return s.order.map((k) => s.entries[k]).filter((e) => {
@@ -25,6 +30,32 @@ export function PatientLibrary() {
         <IconButton label="Import JSON / CSV" onClick={() => s.set({ dialog: { kind: "import" } })}><Upload className="h-4 w-4" /></IconButton>
         <IconButton label="New patient record" onClick={() => s.set({ dialog: { kind: "editor", key: null } })}><Plus className="h-4 w-4" /></IconButton>
       </>} className="pr-1.5 [&>div]:gap-0.5" />
+      <div className="border-b border-line p-2">
+        <input ref={dicomInput} type="file" accept=".zip,application/zip" className="sr-only" aria-label="CT DICOM ZIP" onChange={async (event) => {
+          const file = event.target.files?.[0];
+          event.target.value = "";
+          if (!file) return;
+          setScanBusy(true);
+          setScanError(null);
+          try {
+            const patientId = await identifyOpenCtDemo(file);
+            await loadSamples();
+            const state = useApp.getState();
+            const entry = Object.values(state.entries).find((candidate) => candidate.patient.patientId === patientId);
+            if (!entry) throw new Error("The matching CT heart asset could not be loaded.");
+            state.select(entry.key);
+            state.set({ uploadedDicom: { patientKey: entry.key, fileName: file.name }, workspace: "single", module: "heart" });
+            useOutlook.getState().set({ open: false });
+          } catch (error) {
+            setScanError(error instanceof Error ? error.message : "Could not identify this CT series.");
+          } finally { setScanBusy(false); }
+        }} />
+        <Button variant="primary" className="w-full" disabled={scanBusy} onClick={() => dicomInput.current?.click()}><ScanHeart className="h-4 w-4" /> {scanBusy ? "Opening CT heart…" : "Upload CT DICOM ZIP"}</Button>
+        <p className="mt-1 text-[11px] leading-4 text-muted">Open CT demo · the matching scan-derived 3D heart opens in this session</p>
+        <a className="mt-1 block text-[11px] text-info underline underline-offset-2" href="/samples/open-ct-s0270-dicom.zip" download>Download the open CT demo ZIP (10 MB)</a>
+        {scanBusy && <p role="status" className="mt-2 flex items-center gap-1.5 text-[11px] text-info"><Loader2 className="h-3 w-3 animate-spin" /> Matching the CT to its 3D asset…</p>}
+        {scanError && <p role="alert" className="mt-1 text-[11px] text-error">{scanError}</p>}
+      </div>
       <div className="flex items-center gap-1.5 border-b border-line px-3 py-2">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-faint" />

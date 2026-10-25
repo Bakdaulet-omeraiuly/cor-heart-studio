@@ -44,6 +44,8 @@ next-env.d.ts
 /playwright-report
 
 /data
+/pipeline/.venv-seg*/
+/pipeline/.tools/
 
 # superpowers scratch (brainstorm mockups, execution ledger)
 .superpowers/

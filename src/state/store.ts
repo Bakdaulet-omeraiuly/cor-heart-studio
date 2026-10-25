@@ -36,6 +36,7 @@ export interface AppState {
   selectedKey: string | null;
   compareKeys: string[];
   workspace: "single" | "compare";
+  uploadedDicom: { patientKey: string; fileName: string } | null;
   // scene
   mode: DisplayMode;
   layers: Layers;
@@ -82,6 +83,7 @@ export const useApp = create<AppState>((set, get) => ({
   selectedKey: null,
   compareKeys: [],
   workspace: "single",
+  uploadedDicom: null,
   mode: "natural",
   layers: { outer: true, chambers: true, vessels: true, coronary: true, valves: true, labels: false, highlights: true, flow: false },
   hidden: {},
@@ -128,7 +130,7 @@ export const useApp = create<AppState>((set, get) => ({
     const order = s.order.filter((k) => k !== key);
     return { entries, order, selectedKey: s.selectedKey === key ? order[0] ?? null : s.selectedKey, compareKeys: s.compareKeys.filter((k) => k !== key) };
   }),
-  select: (key) => set({ selectedKey: key, selectedStructure: null, selectedSegment: null, focusChangeId: null }),
+  select: (key) => set({ selectedKey: key, uploadedDicom: null, selectedStructure: null, selectedSegment: null, focusChangeId: null }),
   toggleCompare: (key) => {
     const cur = get().compareKeys;
     if (cur.includes(key)) set({ compareKeys: cur.filter((k) => k !== key) });

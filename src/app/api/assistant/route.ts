@@ -45,8 +45,8 @@
 //     trips the limiter on step 2. (A 413/400 body never reaches step 2, so a
 //     malformed request never consumes a rate-limit slot.)
 
-import Anthropic from "@anthropic-ai/sdk";
-import { APIUserAbortError, RateLimitError } from "@anthropic-ai/sdk";
+import Anthropic, { APIUserAbortError, RateLimitError } from "@anthropic-ai/sdk";
+import { createAssistantClient } from "./clientFactory";
 import { normalizeRecord } from "@/domain/normalization/normalize";
 import { parseRequest } from "./request";
 import { assess } from "./engine";
@@ -128,23 +128,6 @@ export type AssistantResponse =
 //
 // Either way the client is only ever BUILT when `ANTHROPIC_API_KEY` is set, so the
 // "503 without key" test needs no client at all.
-type ClientFactory = (apiKey: string) => Pick<Anthropic, "messages">;
-
-/** The default factory builds the real SDK client. Replaced only by tests. */
-const defaultClientFactory: ClientFactory = (apiKey) => new Anthropic({ apiKey });
-
-/** Current factory; module-level `let` so a test can swap it (seam B). */
-let clientFactory: ClientFactory = defaultClientFactory;
-
-/** TEST ONLY: install a fake client factory (see seam B above). */
-export function __setClientFactoryForTests(factory: ClientFactory): void {
-  clientFactory = factory;
-}
-
-/** TEST ONLY: restore the real client factory. Call in `afterEach`. */
-export function __resetClientFactoryForTests(): void {
-  clientFactory = defaultClientFactory;
-}
 
 // ---------------------------------------------------------------------------
 // Response helper
@@ -327,7 +310,7 @@ export async function POST(req: Request): Promise<Response> {
   // tool loop (`tool_choice: auto` on every call), and bound the whole loop with a 45 s abort signal. The
   // history is forwarded as-is: it already holds only user turns and the
   // assistant's already-guarded texts from the client (design.md "Request").
-  const client = clientFactory(apiKey);
+  const client = createAssistantClient(apiKey);
   const maxTokens = DEFAULT_MAX_TOKENS;
 
   let chatResult: Awaited<ReturnType<typeof runChat>>;

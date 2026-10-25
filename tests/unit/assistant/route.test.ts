@@ -3,10 +3,9 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { APIUserAbortError, RateLimitError } from "@anthropic-ai/sdk";
 import {
   POST,
-  __resetClientFactoryForTests,
-  __setClientFactoryForTests,
   type AssistantResponse,
 } from "@/app/api/assistant/route";
+import { __resetClientFactoryForTests, __setClientFactoryForTests } from "@/app/api/assistant/clientFactory";
 import { LIMIT, resetRateLimit } from "@/app/api/assistant/rateLimit";
 import { assess } from "@/app/api/assistant/engine";
 import { withIds } from "@/app/api/assistant/ids";
@@ -460,16 +459,17 @@ describe("POST /api/assistant — model id", () => {
   async function modelSent(): Promise<string> {
     vi.resetModules();
     const route = await import("@/app/api/assistant/route");
+    const factory = await import("@/app/api/assistant/clientFactory");
     const { create, client } = makeClient();
     seedOneQuestion(create, guardSafeText(RECORD));
-    route.__setClientFactoryForTests(() => client);
+    factory.__setClientFactoryForTests(() => client);
     try {
       const res = await route.POST(
         buildRequest({ question: "Grade?", record: RECORD, sessionId: "s-model" }),
       );
       expect(res.status).toBe(200);
     } finally {
-      route.__resetClientFactoryForTests();
+      factory.__resetClientFactoryForTests();
     }
     return create.mock.calls[0][0].model;
   }

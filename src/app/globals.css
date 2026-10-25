@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import "tailwindcss" source("../");
 
 /* Design tokens. Dark is the default; light is opt-in via [data-theme="light"]. */
 :root {
