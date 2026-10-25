@@ -59,6 +59,17 @@ export function useBrainProjection(m: BrainManifest): Record<BrainTarget, BrainP
   return useBrainProjectionResult(m)?.targets ?? null;
 }
 
+/** Explains why a button that is on may change nothing: the evidence, not the model, decides. */
+function TreatmentNotes() {
+  const active = useOutlook((s) => s.active);
+  const pace = useOutlook((s) => s.pace);
+  const notes: string[] = [];
+  if (active.includes("ad-exercise") && pace !== "slow") notes.push("Aerobic exercise: the trials conflict, so the likely and the worst case are no change in hippocampal volume. Only the favourable end (Slower) shows a gain.");
+  if (active.includes("ad-antiamyloid")) notes.push("Anti-amyloid antibody: no measured effect on brain volume in the sources used here, so it does not change the model.");
+  if (!notes.length) return null;
+  return <ul className="space-y-1 text-[10px] leading-snug text-faint" data-testid="treatment-notes">{notes.map((n) => <li key={n}>{n}</li>)}</ul>;
+}
+
 export function BrainOutlookPanel({ manifest }: { manifest: BrainManifest }) {
   const scenario = useOutlook((s) => s.brainScenario);
   const years = useOutlook((s) => s.years);
@@ -79,6 +90,7 @@ export function BrainOutlookPanel({ manifest }: { manifest: BrainManifest }) {
         </div>
         {scenario === "alzheimers" && <div className="space-y-2"><TreatmentChat condition="ad" /><TreatmentButtons condition="ad" /></div>}
         <HorizonControls paceHint="Slower and faster ends of each source's reported spread (see the column note)." />
+        <TreatmentNotes />
 
         <table className="w-full text-[12px]" data-testid="brain-outlook-table">
           <thead className="text-left text-[10px] uppercase tracking-wider text-faint">
