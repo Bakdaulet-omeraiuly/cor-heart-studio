@@ -4,6 +4,7 @@ import { create } from "zustand";
 import type { Vec3 } from "@/imaging/sliceGeometry";
 
 export interface BrainState {
+  uploadedScan: { name: string; kind: "dicom" | "mri" | "segmentation" } | null;
   /** Crosshair in voxel indices (shared by the three slice views and the 3D marker). */
   crosshair: Vec3 | null;
   selected: number; // structure index, 0 = none
@@ -22,6 +23,7 @@ export interface BrainState {
 }
 
 export const useBrain = create<BrainState>((set) => ({
+  uploadedScan: null,
   crosshair: null,
   selected: 0,
   hover: 0,

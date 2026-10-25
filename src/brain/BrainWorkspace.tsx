@@ -10,12 +10,14 @@ import { SliceView } from "@/imaging/SliceView";
 import { StructurePanel } from "./StructurePanel";
 import { BRAIN_SUBJECTS, useBrainData, type BrainData } from "./useBrainData";
 import { BrainOutlookPanel } from "./BrainOutlook";
+import { BrainUpload } from "./BrainUpload";
 import { useOutlook } from "@/outlook/outlookStore";
 
 const BrainCanvas = dynamic(() => import("./BrainCanvas"), { ssr: false });
 
 export function BrainWorkspace() {
   const { data, error } = useBrainData(BRAIN_SUBJECTS[0].base);
+  const uploadedScan = useBrain((s) => s.uploadedScan);
   const webgl = useWebgl();
   const outlook = useOutlook((s) => s.open);
   if (error) return <div className="p-6 text-[13px] text-muted" role="alert">The brain dataset failed to load: {error}</div>;
@@ -28,13 +30,18 @@ export function BrainWorkspace() {
   }
   return (
     <div className="grid h-full min-h-0 grid-cols-1 overflow-y-auto lg:grid-cols-[280px_minmax(0,1fr)_minmax(300px,30%)] lg:overflow-hidden" data-testid="brain-workspace">
-      <div className="order-3 min-h-[360px] border-line bg-panel lg:order-1 lg:min-h-0 lg:border-r"><StructurePanel data={data} /></div>
+      <div className="order-3 flex min-h-[360px] flex-col border-line bg-panel lg:order-1 lg:min-h-0 lg:border-r"><BrainUpload /><div className="min-h-0 flex-1"><StructurePanel data={data} /></div></div>
       <section className="order-1 flex min-h-[520px] flex-col lg:order-2 lg:min-h-0" aria-label="3D brain model">
         <PanelHeader title="3D model" aside={<ModelControls />} />
         <div className="relative min-h-0 flex-1 bg-[#07090c]">
           {!webgl ? <p className="p-6 text-[13px] text-muted">WebGL 2 is not available: the MRI slices on the right still show the full segmentation.</p>
             : outlook ? <CompareBrains data={data} />
             : <BrainCanvas data={data} />}
+          {uploadedScan && <div data-testid="brain-import-success" className="pointer-events-none absolute right-3 top-3 z-20 max-w-[min(380px,65%)] rounded-lg border border-ok/40 bg-panel/90 px-3 py-2 text-[12px] text-ink shadow">
+            <p className="font-medium">Brain MRI imported · matching 3D model</p>
+            <p className="mt-0.5 truncate text-muted">{uploadedScan.name} · geometry from this open MRI&apos;s segmentation</p>
+            <p className="mt-0.5 text-[11px] text-faint">Labels are manual DKT31 cortex plus automatic FreeSurfer deep structures.</p>
+          </div>}
           <Selection data={data} />
         </div>
         <Summary data={data} />
