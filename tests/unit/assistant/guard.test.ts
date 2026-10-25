@@ -633,7 +633,7 @@ describe("guard — clinical terms need a citation", () => {
 
 describe("guard — real engine on the SYN-004 sample", () => {
   const samples = (
-    JSON.parse(readFileSync(resolve(process.cwd(), "public/samples/synthetic-patients.json"), "utf8")) as {
+    JSON.parse(readFileSync(resolve(process.cwd(), "tests/fixtures/synthetic-patients.full.json"), "utf8")) as {
       patients: { patientId?: string }[];
     }
   ).patients;
@@ -673,7 +673,7 @@ describe("guard — real engine on the SYN-004 sample", () => {
 describe("guard — referral terms need a citation", () => {
   const syn004 = (() => {
     const samples = (
-      JSON.parse(readFileSync(resolve(process.cwd(), "public/samples/synthetic-patients.json"), "utf8")) as {
+      JSON.parse(readFileSync(resolve(process.cwd(), "tests/fixtures/synthetic-patients.full.json"), "utf8")) as {
         patients: { patientId?: string }[];
       }
     ).patients;
@@ -768,7 +768,7 @@ function realEngine(record: unknown): { ided: ReturnType<typeof withIds>; patien
 const readJson = (path: string): unknown => JSON.parse(readFileSync(resolve(process.cwd(), path), "utf8"));
 
 const SYN004 = realEngine(
-  (readJson("public/samples/synthetic-patients.json") as { patients: { patientId?: string }[] }).patients.find(
+  (readJson("tests/fixtures/synthetic-patients.full.json") as { patients: { patientId?: string }[] }).patients.find(
     (p) => p.patientId === "SYN-004",
   ),
 );
