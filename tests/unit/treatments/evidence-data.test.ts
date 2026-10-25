@@ -54,12 +54,28 @@ describe("treatment evidence data", () => {
     expect(byId("ad-bvitamins").sources).toEqual(["smith2010", "jerneren2015"]);
   });
 
+  it("the drug-class buttons carry the Klingbeil 2003 LV mass index changes with their 95% confidence intervals", () => {
+    const want: Record<string, [number, number, number]> = { "lvh-ace": [-10, -12, -8], "lvh-ccb": [-11, -13, -9], "lvh-diuretic": [-8, -10, -5] };
+    for (const [id, [likely, best, worst]] of Object.entries(want)) {
+      const e = byId(id);
+      expect(e.group).toBe("bp-regimen");
+      expect(e.effect).toMatchObject({ quantity: "lvmi_pct", likely, best, worst });
+      expect(e.sources).toEqual(["klingbeil2003"]);
+    }
+  });
+
+  it("lvh-weightloss is the diet-only arm of the Heart Health Study: -2.9 g (95% CI -5.2 to -0.7) over 12 months", () => {
+    const e = byId("lvh-weightloss");
+    expect(e.effect).toMatchObject({ quantity: "lvm_g", likely: -2.9, best: -5.2, worst: -0.7, evidenceYears: 1 });
+    expect(e.group).toBe("lifestyle");
+  });
+
   it("every entry with an effect has likely, best and worst ordered best <= likely <= worst for LVH and worst <= likely <= best for the brain", () => {
     for (const e of EVIDENCE.entries) {
       if (!e.effect) continue;
       const { likely, best, worst, quantity } = e.effect;
       // for LV mass and added ventricular volume the favourable end is the lowest value
-      const [low, high] = quantity === "lvmi_gm2" || quantity === "ventricles_ml" ? [best, worst] : [worst, best];
+      const [low, high] = ["lvmi_gm2", "lvmi_pct", "lvm_g", "ventricles_ml"].includes(quantity) ? [best, worst] : [worst, best];
       expect(low).toBeLessThanOrEqual(likely);
       expect(likely).toBeLessThanOrEqual(high);
     }

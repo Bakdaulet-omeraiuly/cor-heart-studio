@@ -6,7 +6,7 @@ const why = (id: string) => EVIDENCE.entries.find((e) => e.id === id)!.why;
 
 describe("allowedIds", () => {
   it("lists every treatment entry of the condition and nothing else", () => {
-    expect(allowedIds("lvh").sort()).toEqual(["lvh-atenolol", "lvh-bp-control", "lvh-losartan"]);
+    expect(allowedIds("lvh").sort()).toEqual(["lvh-ace", "lvh-atenolol", "lvh-bp-control", "lvh-ccb", "lvh-diuretic", "lvh-losartan", "lvh-weightloss"]);
     expect(allowedIds("ad").sort()).toEqual(["ad-antiamyloid", "ad-bvitamins", "ad-exercise"]);
   });
 });

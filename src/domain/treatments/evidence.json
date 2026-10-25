@@ -225,6 +225,38 @@
       "n": 854,
       "durationMonths": 18,
       "population": "Early Alzheimer's disease (MCI due to AD and mild dementia), 18-month analyses; used here only for the length of a typical antibody trial"
+    },
+    "klingbeil2003": {
+      "id": "klingbeil2003",
+      "cite": "Klingbeil 2003",
+      "title": "A meta-analysis of the effects of treatment on left ventricular mass in essential hypertension",
+      "journal": "Am J Med 115:41–6",
+      "doi": "10.1016/s0002-9343(03)00158-x",
+      "studyType": "meta-analysis",
+      "n": 3767,
+      "population": "80 double-blind randomised trials in essential hypertension, 146 active treatment arms (n = 3,767) and 17 placebo arms; echocardiographic LV mass index, adjusted for treatment duration and change in diastolic pressure"
+    },
+    "jakicic2022": {
+      "id": "jakicic2022",
+      "cite": "Heart Health Study · Jakicic 2022",
+      "title": "Impact of weight loss with diet or diet plus physical activity on cardiac magnetic resonance imaging and cardiovascular disease risk factors: Heart Health Study randomized trial",
+      "journal": "Obesity 30:1039–56",
+      "doi": "10.1002/oby.23412",
+      "studyType": "rct",
+      "n": 383,
+      "durationMonths": 12,
+      "population": "Adults with overweight or obesity (not selected for hypertrophy), cardiac MRI; diet-only arm lost 10.2% of body weight"
+    },
+    "hinderliter2002": {
+      "id": "hinderliter2002",
+      "cite": "Hinderliter 2002",
+      "title": "Reduction of left ventricular hypertrophy after exercise and weight loss in overweight patients with mild hypertension",
+      "journal": "Arch Intern Med 162:1333–9",
+      "doi": "10.1001/archinte.162.12.1333",
+      "studyType": "rct",
+      "n": 82,
+      "durationMonths": 6,
+      "population": "Overweight, sedentary adults with high-normal or mildly raised blood pressure (about 140/93 mmHg), echocardiography"
     }
   },
   "entries": [
@@ -405,6 +437,83 @@
         "best": 53,
         "worst": 0,
         "evidenceYears": 2
+      }
+    },
+    {
+      "id": "lvh-ace",
+      "condition": "lvh",
+      "kind": "treatment",
+      "label": "ACE inhibitor",
+      "group": "bp-regimen",
+      "why": "ACE inhibitors lower blood pressure and regress left ventricular mass about as much as calcium channel blockers, more than beta-blockers.",
+      "caveat": "Klingbeil 2003, a meta-analysis of 80 double-blind randomised trials (146 active arms, n=3,767): LV mass index fell by 10% (95% CI 8% to 12%) on this class. Pooled change from baseline in the active arms, as for the LIFE regimens: there is no placebo-corrected figure, so the change replaces the natural course. Klingbeil's abstract gives no single treatment length; 0.5 years is an assumption (about 25 weeks was the mean in the earlier Schmieder 1996 double-blind meta-analysis), and the change is held after that, not extrapolated. Applied to this patient's own LV mass index. The class shows the blood-pressure lowering as well; it is not a placebo-corrected effect, and whether a larger regression improves outcomes is not shown.",
+      "sources": [
+        "klingbeil2003"
+      ],
+      "effect": {
+        "quantity": "lvmi_pct",
+        "likely": -10,
+        "best": -12,
+        "worst": -8,
+        "evidenceYears": 0.5
+      }
+    },
+    {
+      "id": "lvh-ccb",
+      "condition": "lvh",
+      "kind": "treatment",
+      "label": "Calcium channel blocker",
+      "group": "bp-regimen",
+      "why": "Calcium channel blockers lower blood pressure and regress left ventricular mass, more than beta-blockers.",
+      "caveat": "Klingbeil 2003, a meta-analysis of 80 double-blind randomised trials (146 active arms, n=3,767): LV mass index fell by 11% (95% CI 9% to 13%) on this class. Pooled change from baseline in the active arms, as for the LIFE regimens: there is no placebo-corrected figure, so the change replaces the natural course. Klingbeil's abstract gives no single treatment length; 0.5 years is an assumption (about 25 weeks was the mean in the earlier Schmieder 1996 double-blind meta-analysis), and the change is held after that, not extrapolated. Applied to this patient's own LV mass index. The class shows the blood-pressure lowering as well; it is not a placebo-corrected effect, and whether a larger regression improves outcomes is not shown.",
+      "sources": [
+        "klingbeil2003"
+      ],
+      "effect": {
+        "quantity": "lvmi_pct",
+        "likely": -11,
+        "best": -13,
+        "worst": -9,
+        "evidenceYears": 0.5
+      }
+    },
+    {
+      "id": "lvh-diuretic",
+      "condition": "lvh",
+      "kind": "treatment",
+      "label": "Diuretic",
+      "group": "bp-regimen",
+      "why": "Diuretics lower blood pressure and regress left ventricular mass somewhat less than ACE inhibitors or calcium channel blockers.",
+      "caveat": "Klingbeil 2003, a meta-analysis of 80 double-blind randomised trials (146 active arms, n=3,767): LV mass index fell by 8% (95% CI 5% to 10%) on this class. Pooled change from baseline in the active arms, as for the LIFE regimens: there is no placebo-corrected figure, so the change replaces the natural course. Klingbeil's abstract gives no single treatment length; 0.5 years is an assumption (about 25 weeks was the mean in the earlier Schmieder 1996 double-blind meta-analysis), and the change is held after that, not extrapolated. Applied to this patient's own LV mass index. The class shows the blood-pressure lowering as well; it is not a placebo-corrected effect, and whether a larger regression improves outcomes is not shown.",
+      "sources": [
+        "klingbeil2003"
+      ],
+      "effect": {
+        "quantity": "lvmi_pct",
+        "likely": -8,
+        "best": -10,
+        "worst": -5,
+        "evidenceYears": 0.5
+      }
+    },
+    {
+      "id": "lvh-weightloss",
+      "condition": "lvh",
+      "kind": "treatment",
+      "label": "Weight loss (diet)",
+      "group": "lifestyle",
+      "why": "Losing weight by diet lowers left ventricular mass a little, and lowers blood pressure and wall thickness in overweight people with raised blood pressure.",
+      "caveat": "Heart Health Study (randomised, n=383 adults with overweight or obesity, cardiac MRI, 12 months): diet alone, with 10.2% weight loss, lowered LV mass by 2.9 g (95% CI 0.7 to 5.2); with at least 150 min/week of exercise on top the mass was preserved rather than lowered (−0.8 g and −1.1 g, not significant). Hinderliter 2002 (randomised, n=82, 6 months, mildly raised blood pressure) found thinner septal and posterior walls on exercise and weight management, with only a trend in LV mass index (P=0.08). Participants were not selected for hypertrophy, so this is a small effect; the unfavourable end is the 0.7 g bound of the confidence interval.",
+      "sources": [
+        "jakicic2022",
+        "hinderliter2002"
+      ],
+      "effect": {
+        "quantity": "lvm_g",
+        "likely": -2.9,
+        "best": -5.2,
+        "worst": -0.7,
+        "evidenceYears": 1
       }
     }
   ]

@@ -8,25 +8,31 @@ import type { Effect } from "./types";
 
 const share = (years: number, e: Effect) => Math.min(1, years / e.evidenceYears);
 
+/** An effect's value as a change in this patient's LV mass index (g/m²); percentages apply to today's LVMI, grams to today's body surface area. */
+const toLvmi = (e: Effect, v: number, lvmi0: number, bsaM2: number) =>
+  e.quantity === "lvmi_pct" ? (v / 100) * lvmi0 : e.quantity === "lvm_g" ? v / bsaM2 : v;
+
 /**
- * LVH: the LV mass index change comes from the active blood-pressure regimen, or from the natural course when none is on
- * (with several, the one with the greatest regression: they are not summed).
+ * LVH: the LV mass index change comes from the active treatment buttons, or from the natural course when none is on.
+ * No trial combines them, so with several on the one with the greatest regression is shown, not their sum.
  */
 export function projectLvhTreated(inp: LvhInputs, active: string[], years: number, pace: Pace): LvhProjection & { heldBeyondEvidence: boolean } {
+  const lvm0 = lvMassAse(inp.ivsMm, inp.lvidMm, inp.pwMm);
+  const lvmi0 = lvm0 / inp.bsaM2;
+  const delta = (e: Effect, v: number) => toLvmi(e, v, lvmi0, inp.bsaM2);
   const regimens = activeEffects(active).filter((e) => e.condition === "lvh");
   const entry = regimens.length
-    ? regimens.reduce((a, b) => (b.effect!.likely < a.effect!.likely ? b : a))
+    ? regimens.reduce((a, b) => (delta(b.effect!, b.effect!.likely) < delta(a.effect!, a.effect!.likely) ? b : a))
     : entriesFor("lvh", "natural").find((e) => e.effect)!;
   const eff = entry.effect!;
   const f = share(years, eff);
-  const lvm0 = lvMassAse(inp.ivsMm, inp.lvidMm, inp.pwMm);
   const solve = (dLvmi: number) => {
     const w = wallsForMass(inp.ivsMm, inp.lvidMm, inp.pwMm, lvm0 + dLvmi * inp.bsaM2);
     return { ...w, lvm: lvMassAse(w.ivsMm, inp.lvidMm, w.pwMm) };
   };
-  const mid = solve(pickEffect(eff, pace) * f);
-  const best = solve(eff.best * f);
-  const worst = solve(eff.worst * f);
+  const mid = solve(delta(eff, pickEffect(eff, pace)) * f);
+  const best = solve(delta(eff, eff.best) * f);
+  const worst = solve(delta(eff, eff.worst) * f);
   return {
     years, ivsMm: mid.ivsMm, pwMm: mid.pwMm, lvmG: mid.lvm, lvmiGm2: mid.lvm / inp.bsaM2,
     lvmiChange: (mid.lvm - lvm0) / inp.bsaM2,

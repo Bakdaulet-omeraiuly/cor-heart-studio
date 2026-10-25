@@ -205,6 +205,13 @@ function AsCard({ title, p }: { title: string; p: AsProjection }) {
 /** Example values when the record lacks them (a concentric LVH and an average adult body surface area). */
 const LVH_DEFAULTS = { ivsMm: 14, pwMm: 13, lvidMm: 46, bsaM2: 1.9 };
 
+/** Two buttons on: no trial combined them, so the model shows the larger regression, not the sum. */
+function LvhCombinationNote() {
+  const on = useOutlook((s) => s.active.filter((id) => id.startsWith("lvh-")).length);
+  if (on < 2) return null;
+  return <p className="text-[10px] leading-snug text-faint" data-testid="lvh-combination-note">Two options are on. No trial combined them, so the model shows the one with the larger regression, not their sum.</p>;
+}
+
 function LvhOutlook({ entry }: { entry: PatientEntry }) {
   const { years, pace, active, lvhOverrides, set } = useOutlook();
   const recorded = useMemo(() => readLvhBaseline(entry.patient), [entry]);
@@ -230,7 +237,7 @@ function LvhOutlook({ entry }: { entry: PatientEntry }) {
       cards={[<LvhCard key="t" title="Today" p={now} lvidMm={inp.lvidMm} />, <LvhCard key="l" title={lvhYearsLabel(years, pace)} p={later} lvidMm={inp.lvidMm} />]}>
       <p className="text-[11px] text-faint">Left ventricular mass in hypertrophy: natural course, or on the treatment buttons below.</p>
 
-      <div className="mt-3"><TreatmentButtons condition="lvh" /></div>
+      <div className="mt-3 space-y-2"><TreatmentButtons condition="lvh" /><LvhCombinationNote /></div>
 
       <H3>Wall thickness</H3>
       <WallMap today={now} later={later} lvidMm={inp.lvidMm} years={years} />

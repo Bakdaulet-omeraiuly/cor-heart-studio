@@ -75,6 +75,40 @@ describe("projectLvhTreated", () => {
   });
 });
 
+describe("projectLvhTreated: drug classes and weight loss", () => {
+  const lvmi0 = (inp: typeof LVH) => (0.8 * 1.04 * ((inp.ivsMm / 10 + inp.lvidMm / 10 + inp.pwMm / 10) ** 3 - (inp.lvidMm / 10) ** 3) + 0.6) / inp.bsaM2;
+
+  it("an ACE inhibitor lowers today's LV mass index by 10% after the study length and holds it", () => {
+    const p = projectLvhTreated(LVH, ["lvh-ace"], 0.5, "mean");
+    expect(p.lvmiChange).toBeCloseTo(-0.1 * lvmi0(LVH), 2);
+    expect(projectLvhTreated(LVH, ["lvh-ace"], 5, "mean").lvmiChange).toBeCloseTo(p.lvmiChange, 6);
+  });
+
+  it("the classes rank as in Klingbeil 2003: calcium channel blocker > ACE inhibitor > diuretic", () => {
+    const at = (id: string) => projectLvhTreated(LVH, [id], 1, "mean").lvmiChange;
+    expect(at("lvh-ccb")).toBeLessThan(at("lvh-ace"));
+    expect(at("lvh-ace")).toBeLessThan(at("lvh-diuretic"));
+    expect(at("lvh-diuretic")).toBeLessThan(0);
+  });
+
+  it("weight loss lowers LV mass by 2.9 g, which is 2.9 / BSA in g/m² after a year", () => {
+    const p = projectLvhTreated(LVH, ["lvh-weightloss"], 1, "mean");
+    expect(p.lvmiChange).toBeCloseTo(-2.9 / LVH.bsaM2, 1);
+    expect(p.lvmiGm2).toBeLessThan(projectLvhTreated(LVH, [], 1, "mean").lvmiGm2);
+  });
+
+  it("a drug and weight loss are not summed: the larger regression is shown", () => {
+    const both = projectLvhTreated(LVH, ["lvh-ace", "lvh-weightloss"], 1, "mean");
+    const drug = projectLvhTreated(LVH, ["lvh-ace"], 1, "mean");
+    expect(both.lvmiChange).toBeCloseTo(drug.lvmiChange, 9);
+  });
+
+  it("the favourable end of a class is its upper confidence bound, 12% for an ACE inhibitor", () => {
+    const slow = projectLvhTreated(LVH, ["lvh-ace"], 0.5, "slow");
+    expect(slow.lvmiChange).toBeCloseTo(-0.12 * lvmi0(LVH), 2);
+  });
+});
+
 describe("projectBrainTreated", () => {
   it("with no buttons equals projectBrain for Alzheimer's", () => {
     const { targets } = projectBrainTreated(BRAIN, [], 5, "mean");

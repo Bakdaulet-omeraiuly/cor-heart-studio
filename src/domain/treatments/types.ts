@@ -6,10 +6,10 @@ export type ConditionId = "lvh" | "as" | "ad";
 export type StudyType = "rct" | "meta-analysis" | "placebo-arm" | "prospective-cohort" | "observational" | "guideline";
 
 /**
- * What an effect is measured in: LV mass index change (g/m²), hippocampal volume change (%), extra ventricular volume (mL),
- * or the share (%) of the natural cortical/whole-brain loss that is avoided.
+ * What an effect is measured in: LV mass index change (g/m²), its relative change (%) or the change in LV mass (g),
+ * hippocampal volume change (%), extra ventricular volume (mL), or the share (%) of the natural cortical/whole-brain loss that is avoided.
  */
-export type Quantity = "lvmi_gm2" | "hippocampus_pct" | "ventricles_ml" | "cortex_slowing_pct";
+export type Quantity = "lvmi_gm2" | "lvmi_pct" | "lvm_g" | "hippocampus_pct" | "ventricles_ml" | "cortex_slowing_pct";
 
 export interface EvidenceSource {
   id: string;

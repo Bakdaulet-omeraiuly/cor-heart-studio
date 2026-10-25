@@ -36,6 +36,31 @@ test("LVH: the losartan button lowers the projected LV mass on the right card, a
   expect(errors).toEqual([]);
 });
 
+test("LVH: the drug-class and weight-loss buttons each lower the projected LV mass, and two on show the larger one, not the sum", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await openLvhOutlook(page);
+  const natural = await lvmi(page);
+
+  for (const id of ["lvh-ace", "lvh-ccb", "lvh-diuretic", "lvh-weightloss"]) {
+    const button = page.getByTestId(`treatment-${id}`);
+    await button.click();
+    await expect(button).toHaveAttribute("aria-pressed", "true");
+    await expect.poll(() => lvmi(page)).toBeLessThan(natural);
+    await button.click();
+    await expect.poll(() => lvmi(page)).toBe(natural);
+  }
+
+  // a drug (Klingbeil, -10%) and weight loss (-2.9 g) are not added: the larger regression is shown
+  await page.getByTestId("treatment-lvh-ace").click();
+  await expect.poll(() => lvmi(page)).toBeLessThan(natural - 8);
+  const drugOnly = await lvmi(page);
+  await page.getByTestId("treatment-lvh-weightloss").click();
+  await expect(page.getByTestId("lvh-combination-note")).toBeVisible();
+  expect(await lvmi(page)).toBe(drugOnly);
+  expect(errors).toEqual([]);
+});
+
 test("LVH: the evidence for a button sits behind its info tip", async ({ page }) => {
   await openLvhOutlook(page);
   const tip = page.getByRole("button", { name: "Evidence for Losartan-based regimen" });
