@@ -31,28 +31,28 @@ export function PatientLibrary() {
         <IconButton label="New patient record" onClick={() => s.set({ dialog: { kind: "editor", key: null } })}><Plus className="h-4 w-4" /></IconButton>
       </>} className="pr-1.5 [&>div]:gap-0.5" />
       <div className="border-b border-line p-2">
-        <input ref={dicomInput} type="file" accept=".zip,application/zip" className="sr-only" aria-label="CT DICOM ZIP" onChange={async (event) => {
+        <input ref={dicomInput} type="file" accept=".zip,.nii,.nii.gz,application/zip" className="sr-only" aria-label="CT DICOM ZIP or NIfTI" onChange={async (event) => {
           const file = event.target.files?.[0];
           event.target.value = "";
           if (!file) return;
           setScanBusy(true);
           setScanError(null);
           try {
-            const patientId = await identifyOpenCtDemo(file);
+            const { patientId, kind } = await identifyOpenCtDemo(file);
             await loadSamples();
             const state = useApp.getState();
             const entry = Object.values(state.entries).find((candidate) => candidate.patient.patientId === patientId);
             if (!entry) throw new Error("The matching CT heart asset could not be loaded.");
             state.select(entry.key);
-            state.set({ uploadedDicom: { patientKey: entry.key, fileName: file.name }, workspace: "single", module: "heart" });
+            state.set({ uploadedDicom: { patientKey: entry.key, fileName: file.name, kind }, workspace: "single", module: "heart" });
             useOutlook.getState().set({ open: false });
           } catch (error) {
             setScanError(error instanceof Error ? error.message : "Could not identify this CT series.");
           } finally { setScanBusy(false); }
         }} />
-        <Button variant="primary" className="w-full" disabled={scanBusy} onClick={() => dicomInput.current?.click()}><ScanHeart className="h-4 w-4" /> {scanBusy ? "Opening CT heart…" : "Upload CT DICOM ZIP"}</Button>
-        <p className="mt-1 text-[11px] leading-4 text-muted">Open CT demo · the matching scan-derived 3D heart opens in this session</p>
-        <a className="mt-1 block text-[11px] text-info underline underline-offset-2" href="/samples/open-ct-s0270-dicom.zip" download>Download the open CT demo ZIP (10 MB)</a>
+        <Button variant="primary" className="w-full" disabled={scanBusy} onClick={() => dicomInput.current?.click()}><ScanHeart className="h-4 w-4" /> {scanBusy ? "Opening CT heart…" : "Upload DICOM ZIP or NIfTI"}</Button>
+        <p className="mt-1 text-[11px] leading-4 text-muted">Open CT demo · choose either matching scan file to open its 3D heart</p>
+        <div className="mt-1 flex flex-wrap gap-x-3 text-[11px] text-info underline underline-offset-2"><a href="/samples/open-ct-s0270-dicom.zip" download>Download DICOM ZIP (10 MB)</a><a href="/samples/open-ct-s0270-heart-labels.nii.gz" download>Download NIfTI (.nii.gz)</a></div>
         {scanBusy && <p role="status" className="mt-2 flex items-center gap-1.5 text-[11px] text-info"><Loader2 className="h-3 w-3 animate-spin" /> Matching the CT to its 3D asset…</p>}
         {scanError && <p role="alert" className="mt-1 text-[11px] text-error">{scanError}</p>}
       </div>

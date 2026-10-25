@@ -36,7 +36,7 @@ export interface AppState {
   selectedKey: string | null;
   compareKeys: string[];
   workspace: "single" | "compare";
-  uploadedDicom: { patientKey: string; fileName: string } | null;
+  uploadedDicom: { patientKey: string; fileName: string; kind: "dicom" | "nifti" } | null;
   // scene
   mode: DisplayMode;
   layers: Layers;

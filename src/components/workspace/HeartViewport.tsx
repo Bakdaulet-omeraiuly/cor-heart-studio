@@ -59,7 +59,7 @@ export function HeartViewport() {
         <div className="relative min-h-0 flex-1 overflow-hidden bg-[#050608]">
           {uploadedDicom?.patientKey === entry.key && (
             <div data-testid="dicom-import-success" className="pointer-events-none absolute left-3 top-3 z-20 max-w-[min(420px,70%)] rounded-lg border border-ok/40 bg-panel/90 px-3 py-2 text-[12px] text-ink shadow">
-              <p className="font-medium">CT imported · patient-specific 3D heart</p>
+              <p className="font-medium">{uploadedDicom.kind === "nifti" ? "NIfTI segmentation" : "CT DICOM"} imported · patient-specific 3D heart</p>
               <p className="mt-0.5 truncate text-muted">{uploadedDicom.fileName} · geometry from this open CT&apos;s segmentation</p>
               <p className="mt-0.5 text-[11px] text-faint">Motion and structures beyond the source labels are illustrative.</p>
             </div>
