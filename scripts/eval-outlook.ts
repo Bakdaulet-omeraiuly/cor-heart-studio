@@ -60,7 +60,13 @@ async function post(path: string, body: object): Promise<Resp> {
     const wait = Math.max(0, last + 6500 - Date.now()); // stay under 10 requests a minute
     await sleep(wait); last = Date.now();
     const t0 = Date.now();
-    const res = await fetch(`${BASE}${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...body, sessionId }) });
+    let res: Response;
+    try {
+      res = await fetch(`${BASE}${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...body, sessionId }) });
+    } catch {
+      await sleep(5_000); // a dropped connection on this machine is not a finding about the server: try again
+      continue;
+    }
     const json = (await res.json().catch(() => ({}))) as Json;
     if (res.status === 429) { await sleep(20_000); continue; }
     return { status: res.status, json, ms: Date.now() - t0 };
