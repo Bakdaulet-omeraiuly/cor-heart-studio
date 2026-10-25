@@ -50,7 +50,8 @@ describe("CSV parsing", () => {
   it("the downloadable CSV sample matches the JSON sample", () => {
     const fromFile = parseCsv(readText("public/samples/synthetic-patients.csv"));
     expect(fromFile.fileIssues.filter((i) => i.severity === "error")).toEqual([]);
-    expect(fromFile.rows.map((r) => r.record?.patientId)).toEqual(samplePatients().map((p) => p.patientId));
+    const shipped = JSON.parse(readText("public/samples/synthetic-patients.json")).patients as { patientId: string }[];
+    expect(fromFile.rows.map((r) => r.record?.patientId)).toEqual(shipped.map((p) => p.patientId));
   });
 });
 
@@ -67,6 +68,13 @@ describe("export safety", () => {
 describe("import preview", () => {
   it("previews the bundled JSON sample as all valid", () => {
     const p = buildImportPreview("synthetic-patients.json", readText("public/samples/synthetic-patients.json"), none);
+    expect(p.fileIssues.filter((i) => i.severity === "error")).toEqual([]);
+    expect(p.counts.rejected).toBe(0);
+    expect(p.rows).toHaveLength(1);
+  });
+
+  it("previews the full eight-patient fixture as all valid", () => {
+    const p = buildImportPreview("synthetic-patients.full.json", readText("tests/fixtures/synthetic-patients.full.json"), none);
     expect(p.fileIssues.filter((i) => i.severity === "error")).toEqual([]);
     expect(p.counts.rejected).toBe(0);
     expect(p.rows).toHaveLength(8);

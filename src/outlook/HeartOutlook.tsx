@@ -3,11 +3,12 @@
 // aortic stenosis progression (Otto 1997) and hypertensive LVH on treatment (LIFE, Devereux 2004).
 // Both hearts are ordinary records run through the mapping engine, so they follow the same rules as imported data.
 import dynamic from "next/dynamic";
-import { useMemo, type ReactNode } from "react";
+import { useEffect, useMemo, type ReactNode } from "react";
 import { Focus, ScanEye } from "lucide-react";
-import { AS_EVENT_FREE_2Y, AS_PROGRESSION, LVH_CLASS_EFFECT, LVH_FOLLOW_UP_YEARS, LVH_TREATMENT, LVMI_UPPER_NORMAL, type LvhArm } from "@/domain/outlook/evidence";
+import { AS_EVENT_FREE_2Y, AS_PROGRESSION, LVH_CLASS_EFFECT, LVMI_UPPER_NORMAL } from "@/domain/outlook/evidence";
 import { readAsBaseline, readLvhBaseline, withProjectedAorticStenosis, withProjectedWalls } from "@/domain/outlook/heart";
-import { projectAorticStenosis, projectLvh, type AsGrade, type AsProjection, type LvhProjection } from "@/domain/outlook/project";
+import { projectAorticStenosis, type AsGrade, type AsProjection, type LvhProjection } from "@/domain/outlook/project";
+import { projectLvhTreated } from "@/domain/treatments/project";
 import type { NormalizedPatient } from "@/domain/types";
 import { entryFromNormalized, patientTitle, type PatientEntry } from "@/lib/patients";
 import { useApp } from "@/state/store";
@@ -17,15 +18,24 @@ import { Button, PanelHeader, Segmented } from "@/components/ui/primitives";
 import { useWebgl } from "@/components/workspace/HeartViewport";
 import { useOutlook, type HeartScenario } from "./outlookStore";
 import { HorizonControls, OutlookCaveat, SourceList, fmtSigned } from "./shared";
+import { TreatmentButtons } from "./TreatmentButtons";
+import { TreatmentChat } from "./TreatmentChat";
+import { WallMap } from "./WallMap";
 
 const CompareCanvas = dynamic(() => import("@/scene/CompareCanvas"), { ssr: false });
 
 const yearsLabel = (years: number, pace: string) => (years ? `+${years} year${years > 1 ? "s" : ""} · ${pace === "mean" ? "average" : pace} pace` : "Today (move the slider)");
+/** LVH: the three ends of the study's spread, not a speed. Worst case = the treatment does nothing, never harm. */
+const LVH_RANGE_LABEL = { slow: "Best case", mean: "Likely", fast: "Worst case" } as const;
+const lvhYearsLabel = (years: number, pace: "slow" | "mean" | "fast") => (years ? `+${years} year${years > 1 ? "s" : ""} · ${LVH_RANGE_LABEL[pace].toLowerCase()}` : "Today (move the slider)");
 const sourceHint = (recorded: number | null, typed: number | undefined | null) => (typed != null ? "entered" : recorded != null ? "from record" : "example value");
 
 export function HeartOutlook() {
   const entry = useApp((s) => (s.selectedKey ? s.entries[s.selectedKey] : null));
   const scenario = useOutlook((s) => s.heartScenario);
+  const selectedKey = useApp((s) => s.selectedKey);
+  // buttons belong to one patient: another record starts with every treatment off
+  useEffect(() => { useOutlook.getState().set({ active: [] }); }, [selectedKey]);
   if (!entry) return <p className="p-6 text-[13px] text-muted">Select a record in the patient panel to open its outlook.</p>;
   return scenario === "as" ? <AorticStenosisOutlook entry={entry} /> : <LvhOutlook entry={entry} />;
 }
@@ -107,6 +117,7 @@ function AorticStenosisOutlook({ entry }: { entry: PatientEntry }) {
       toolbar={<Button size="sm" title="Close-up of the aortic valve, frozen at peak ejection with the outer wall see-through" onClick={showValve}><Focus className="h-3.5 w-3.5" /> Aortic valve</Button>}
       cards={[<AsCard key="t" title="Today" p={now} />, <AsCard key="l" title={yearsLabel(years, pace)} p={later} />]}>
       <p className="text-[11px] text-faint">Average haemodynamic progression in adults with asymptomatic aortic stenosis.</p>
+      <div className="mt-2 space-y-2"><TreatmentChat condition="as" record={entry.patient.record} /><TreatmentButtons condition="as" /></div>
 
       <div className="mt-3 grid grid-cols-2 gap-2">
         <NumberField label="Valve area today" unit="cm²" value={ava0} step={0.05} min={0.3} max={4} hint={sourceHint(recorded.ava, avaOverride)}
@@ -192,7 +203,7 @@ function AsCard({ title, p }: { title: string; p: AsProjection }) {
 const LVH_DEFAULTS = { ivsMm: 14, pwMm: 13, lvidMm: 46, bsaM2: 1.9 };
 
 function LvhOutlook({ entry }: { entry: PatientEntry }) {
-  const { years, pace, lvhArm, lvhOverrides, set } = useOutlook();
+  const { years, pace, active, lvhOverrides, set } = useOutlook();
   const recorded = useMemo(() => readLvhBaseline(entry.patient), [entry]);
   const inp = {
     ivsMm: lvhOverrides.ivsMm ?? recorded.ivsMm ?? LVH_DEFAULTS.ivsMm,
@@ -202,25 +213,24 @@ function LvhOutlook({ entry }: { entry: PatientEntry }) {
   };
   const key = `${inp.ivsMm}|${inp.pwMm}|${inp.lvidMm}|${inp.bsaM2}`;
   // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed by the four input values
-  const now = useMemo(() => projectLvh(inp, lvhArm, 0, "mean"), [key, lvhArm]);
+  const now = useMemo(() => projectLvhTreated(inp, [], 0, "mean"), [key]);
   // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed by the four input values
-  const later = useMemo(() => projectLvh(inp, lvhArm, years, pace), [key, lvhArm, years, pace]);
+  const later = useMemo(() => projectLvhTreated(inp, active, years, pace), [key, active, years, pace]);
   const today = useMemo(() => withProjectedWalls(entry.patient, now.ivsMm, now.pwMm, "::outlook-today", "today"), [entry, now]);
   const projected = useMemo(() => withProjectedWalls(entry.patient, later.ivsMm, later.pwMm, "::outlook-later", years ? `+${years} y (projected)` : "today"), [entry, later, years]);
   const entries = useOutlookEntries(entry, today, projected);
-  const arm = LVH_TREATMENT[lvhArm];
   const field = (k: keyof typeof LVH_DEFAULTS) => sourceHint(recorded[k], lvhOverrides[k]);
 
   return (
     <OutlookLayout entry={entry} entries={entries}
       toolbar={null}
-      cards={[<LvhCard key="t" title="Today" p={now} lvidMm={inp.lvidMm} />, <LvhCard key="l" title={yearsLabel(years, pace)} p={later} lvidMm={inp.lvidMm} />]}>
-      <p className="text-[11px] text-faint">LV mass regression on antihypertensive treatment in hypertension with ECG LVH.</p>
+      cards={[<LvhCard key="t" title="Today" p={now} lvidMm={inp.lvidMm} />, <LvhCard key="l" title={lvhYearsLabel(years, pace)} p={later} lvidMm={inp.lvidMm} />]}>
+      <p className="text-[11px] text-faint">Left ventricular mass in hypertrophy: natural course, or on the treatment buttons below.</p>
 
-      <div className="mt-3">
-        <Segmented<LvhArm> label="Treatment" value={lvhArm} onChange={(v) => set({ lvhArm: v })}
-          options={(Object.keys(LVH_TREATMENT) as LvhArm[]).map((a) => ({ value: a, label: LVH_TREATMENT[a].label }))} />
-      </div>
+      <div className="mt-3 space-y-2"><TreatmentChat condition="lvh" record={entry.patient.record} /><TreatmentButtons condition="lvh" /></div>
+
+      <H3>Wall thickness</H3>
+      <WallMap today={now} later={later} lvidMm={inp.lvidMm} years={years} />
 
       <div className="mt-3 grid grid-cols-2 gap-2">
         <NumberField label="IVSd today" unit="mm" value={inp.ivsMm} step={0.5} min={5} max={35} hint={field("ivsMm")} onChange={(v) => set({ lvhOverrides: { ...lvhOverrides, ivsMm: v } })} />
@@ -232,14 +242,14 @@ function LvhOutlook({ entry }: { entry: PatientEntry }) {
         <button className="mt-1 text-[11px] text-muted underline hover:text-ink" onClick={() => set({ lvhOverrides: {} })}>Use the record&apos;s values</button>
       )}
 
-      <div className="mt-4"><HorizonControls paceHint="Average = LIFE mean LVMI change; slower/faster = mean ∓ 1 SD between patients (slower end clamped at no regression)." /></div>
+      <div className="mt-4"><HorizonControls labels={LVH_RANGE_LABEL} paceHint="Likely = the study's mean LVMI change; best / worst case = the favourable / unfavourable end of its spread (±1 SD between patients, never past no change)." />
+        {pace === "fast" && years > 0 && active.length > 0 && <p className="mt-1 text-[10px] text-faint" data-testid="lvh-worst-note">Worst case: at the unfavourable end of the study&apos;s spread the treatment has no effect on LV mass. It is never shown as harm.</p>}</div>
 
       <dl className="mt-4 grid grid-cols-[1fr_auto] gap-y-1 text-[11px]">
-        <dt className="text-faint">{arm.label} (LIFE)</dt><dd className="num">{arm.lvmiChange} ± {arm.sd} g/m²</dd>
-        <dt className="text-faint">Reached at</dt><dd className="num">{LVH_FOLLOW_UP_YEARS} years</dd>
-        <dt className="text-faint">Now applied</dt><dd className="num">{Math.round(later.fractionOfFollowUp * 100)} % of it</dd>
+        <dt className="text-faint">{active.length ? "On treatment" : "Natural course"}</dt><dd className="num">{fmtSigned(later.lvmiChange, 1)} g/m²</dd>
+        <dt className="text-faint">Share of the study&apos;s follow-up reached</dt><dd className="num">{Math.round(later.fractionOfFollowUp * 100)} %</dd>
       </dl>
-      <p className="mt-1 text-[10px] leading-snug text-faint">LIFE reports baseline and the last study; the years between are a linear interpolation (assumption), and the change is held after {LVH_FOLLOW_UP_YEARS} years because there are no trial data beyond.</p>
+      <p className="mt-1 text-[10px] leading-snug text-faint">Between today and the end of a study the change is interpolated linearly (assumption). {later.heldBeyondEvidence ? "Now past the study's follow-up, so the change is held at its last measured value: there are no trial data beyond." : "After the study's follow-up the change is held: there are no trial data beyond."}</p>
 
       <H3>LV mass index change by drug class</H3>
       <table className="w-full text-[11px]">
@@ -268,7 +278,8 @@ function LvhOutlook({ entry }: { entry: PatientEntry }) {
       </p>
 
       <H3>Sources</H3>
-      <SourceList ids={["devereux2004", "gerdts2009", "klingbeil2003", "devereux1986", "lang2015"]} />
+      <SourceList ids={["klingbeil2003", "devereux1986", "lang2015"]} />
+      <p className="mt-1 text-[10px] text-faint">Evidence for each button is behind its ⓘ.</p>
     </OutlookLayout>
   );
 }

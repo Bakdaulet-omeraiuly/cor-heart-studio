@@ -1,4 +1,5 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
+import { loadFullSamples } from "./support";
 
 // Assistant chat panel (Requirements 12.2, 12.3). `/api/assistant` is intercepted in the browser with canned
 // responses shaped like the route's `AssistantResponse`, so these tests need no API key and no network.
@@ -62,6 +63,7 @@ const json = (route: Route, status: number, body: unknown) =>
 /** Open the app, select Synthetic 04 (aortic stenosis) and wait until the 3D view renders. */
 async function ready(page: Page) {
   await page.goto("/");
+  await loadFullSamples(page);
   await page.getByRole("button", { name: /^Synthetic 04/ }).click();
   const vp = page.getByTestId("viewport");
   await expect.poll(async () => Number(await vp.locator("[data-frames]").getAttribute("data-frames").catch(() => "0")), { timeout: 30_000 }).toBeGreaterThan(60);

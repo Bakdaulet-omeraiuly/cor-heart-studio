@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { loadFullSamples } from "./support";
 import path from "node:path";
 
 const shots = path.resolve(__dirname, "../../docs/visual-review");
@@ -6,6 +7,7 @@ const viewport = (page: Page) => page.getByTestId("viewport");
 
 async function ready(page: Page) {
   await page.goto("/");
+  await loadFullSamples(page);
   await expect(page.getByTestId("patient-list").getByRole("button", { name: /^Synthetic 01/ })).toBeVisible();
   // the render loop is running (frame counter advances) — proves WebGL initialised, not just that a canvas exists
   await expect.poll(async () => Number(await viewport(page).locator("[data-frames]").getAttribute("data-frames").catch(() => "0")), { timeout: 30_000 }).toBeGreaterThan(60);
@@ -44,7 +46,7 @@ test("import → select → render → explanation (complete user flow)", async 
 test("rejected and duplicate rows require an explicit decision", async ({ page }) => {
   await ready(page);
   await page.getByRole("button", { name: "Import JSON / CSV" }).click();
-  await page.getByTestId("file-input").setInputFiles(path.resolve(__dirname, "../../public/samples/synthetic-patients.json"));
+  await page.getByTestId("file-input").setInputFiles(path.resolve(__dirname, "../fixtures/synthetic-patients.full.json"));
   await expect(page.locator("tbody tr[data-status=duplicate_existing]")).toHaveCount(8);
   await expect(page.getByTestId("commit-import")).toBeDisabled();
   await page.getByRole("button", { name: "Skip all" }).click();
@@ -105,6 +107,9 @@ test("cutaway, overlay, playback controls and keyboard", async ({ page }) => {
 test("comparison of two and four records with a difference table", async ({ page }) => {
   await ready(page);
   await page.getByRole("button", { name: "Compare patients" }).click();
+  // the view starts with the first two records in the session; pick the pair this test is about (01 and 02)
+  for (const cb of await page.getByRole("checkbox", { name: /^Compare / }).all()) await cb.setChecked(false);
+  for (const n of ["Synthetic 01", "Synthetic 02"]) await page.getByRole("checkbox", { name: new RegExp(`Compare ${n}`) }).setChecked(true);
   await expect(page.getByTestId("compare-view")).toHaveCount(2);
   for (const n of ["Synthetic 03", "Synthetic 04"]) await page.getByRole("checkbox", { name: new RegExp(`Compare ${n}`) }).check();
   await expect(page.getByTestId("compare-view")).toHaveCount(4);

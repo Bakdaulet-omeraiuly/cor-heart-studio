@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { loadFullSamples } from "./support";
 import path from "node:path";
 
 const shots = path.resolve(__dirname, "../../docs/visual-review");
@@ -69,6 +70,7 @@ test("switching between a procedural and a CT heart keeps rendering", async ({ p
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await openCtCase(page, "s0338");
+  await loadFullSamples(page);
   await page.getByTestId("patient-list").getByRole("button", { name: /^Synthetic 01/ }).click();
   await expect(page.getByTestId("geometry-badge")).toContainText("Tier A");
   const start = await frames(page);
@@ -85,8 +87,8 @@ test("comparison mixes a procedural and a CT heart", async ({ page }) => {
   page.on("pageerror", (e) => errors.push(e.message));
   await openCtCase(page, "s0270");
   await page.getByRole("button", { name: "Compare patients" }).click();
-  // the compare view starts with the first two records (synthetic); add the CT case as the third
-  await page.getByRole("checkbox", { name: /Compare Open CT · s0270/ }).check();
+  // the compare view starts with the first two records (the shipped synthetic one and CT s0270); add the second CT case as the third
+  await page.getByRole("checkbox", { name: /Compare Open CT · s0338/ }).check();
   await expect(page.getByTestId("compare-view")).toHaveCount(3);
   await expect(page.getByText("Loading anatomical asset…")).toHaveCount(0);
   await page.waitForTimeout(1500);

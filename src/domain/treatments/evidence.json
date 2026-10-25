@@ -1,0 +1,351 @@
+{
+  "sources": {
+    "simpson2009": {
+      "id": "simpson2009",
+      "cite": "Simpson 2009",
+      "title": "Left ventricular hypertrophy: reduction of blood pressure already in the normal range further regresses left ventricular mass",
+      "journal": "Heart 96:148–52",
+      "doi": "10.1136/hrt.2009.177238",
+      "studyType": "rct",
+      "n": 35,
+      "population": "Adults with echocardiographic LVH and normal office blood pressure; 23 active and 12 placebo completed, cardiac MRI",
+      "durationMonths": 12
+    },
+    "devereux2004": {
+      "id": "devereux2004",
+      "cite": "LIFE · Devereux 2004",
+      "title": "Regression of hypertensive left ventricular hypertrophy by losartan compared with atenolol: the LIFE trial",
+      "journal": "Circulation 110:1456–62",
+      "doi": "10.1161/01.CIR.0000141573.44737.5A",
+      "studyType": "rct",
+      "n": 916,
+      "population": "Hypertension with ECG LVH, echo substudy, 457 losartan and 459 atenolol",
+      "durationMonths": 58
+    },
+    "gerdts2009": {
+      "id": "gerdts2009",
+      "cite": "Gerdts 2009",
+      "title": "Pulse pressure, left ventricular function and cardiovascular events during antihypertensive treatment (the LIFE study)",
+      "journal": "Blood Press 18:180–6",
+      "doi": "10.1080/08037050903047202",
+      "studyType": "rct",
+      "n": 883,
+      "population": "LIFE echo substudy, 4.8 years of treatment",
+      "durationMonths": 58
+    },
+    "chan2010": {
+      "id": "chan2010",
+      "cite": "ASTRONOMER · Chan 2010",
+      "title": "Effect of lipid lowering with rosuvastatin on progression of aortic stenosis: results of the ASTRONOMER trial",
+      "journal": "Circulation 121:306–14",
+      "doi": "10.1161/CIRCULATIONAHA.109.900027",
+      "studyType": "rct",
+      "n": 269,
+      "population": "Asymptomatic mild to moderate aortic stenosis, rosuvastatin 40 mg vs placebo, median follow-up 3.5 years",
+      "durationMonths": 42
+    },
+    "cowell2005": {
+      "id": "cowell2005",
+      "cite": "SALTIRE · Cowell 2005",
+      "title": "A randomized trial of intensive lipid-lowering therapy in calcific aortic stenosis",
+      "journal": "N Engl J Med 352:2389–97",
+      "doi": "10.1056/NEJMoa043876",
+      "studyType": "rct",
+      "n": 155,
+      "population": "Calcific aortic stenosis, atorvastatin 80 mg vs placebo, median follow-up 25 months",
+      "durationMonths": 25
+    },
+    "rossebo2008": {
+      "id": "rossebo2008",
+      "cite": "SEAS · Rossebø 2008",
+      "title": "Intensive lipid lowering with simvastatin and ezetimibe in aortic stenosis",
+      "journal": "N Engl J Med 359:1343–56",
+      "doi": "10.1056/NEJMoa0804602",
+      "studyType": "rct",
+      "n": 1873,
+      "population": "Mild to moderate asymptomatic aortic stenosis, simvastatin plus ezetimibe vs placebo, median follow-up 52.2 months",
+      "durationMonths": 52
+    },
+    "otto1997": {
+      "id": "otto1997",
+      "cite": "Otto 1997",
+      "title": "Prospective study of asymptomatic valvular aortic stenosis",
+      "journal": "Circulation 95:2262–70",
+      "doi": "10.1161/01.cir.95.9.2262",
+      "studyType": "prospective-cohort",
+      "n": 123,
+      "population": "Asymptomatic adults with valvular aortic stenosis, echo, 2.5 ± 1.4 years",
+      "durationMonths": 30
+    },
+    "barnes2009": {
+      "id": "barnes2009",
+      "cite": "Barnes 2009",
+      "title": "A meta-analysis of hippocampal atrophy rates in Alzheimer's disease",
+      "journal": "Neurobiol Aging 30:1711–23",
+      "doi": "10.1016/j.neurobiolaging.2008.01.010",
+      "studyType": "meta-analysis",
+      "n": 807,
+      "population": "9 MRI studies, 595 Alzheimer's patients and 212 controls"
+    },
+    "deleon1989": {
+      "id": "deleon1989",
+      "cite": "de Leon 1989",
+      "title": "Alzheimer's disease: longitudinal CT studies of ventricular change",
+      "journal": "AJR 152:1257–62",
+      "doi": "10.2214/ajr.152.6.1257",
+      "studyType": "prospective-cohort",
+      "n": 95,
+      "population": "50 Alzheimer's patients and 45 controls, CT",
+      "durationMonths": 36
+    },
+    "fjell2009": {
+      "id": "fjell2009",
+      "cite": "Fjell 2009",
+      "title": "One-year brain atrophy evident in healthy aging",
+      "journal": "J Neurosci 29:15223–31",
+      "doi": "10.1523/JNEUROSCI.3252-09.2009",
+      "studyType": "prospective-cohort",
+      "n": 142,
+      "population": "Healthy adults aged 60–91, MRI",
+      "durationMonths": 12
+    },
+    "sluimer2008": {
+      "id": "sluimer2008",
+      "cite": "Sluimer 2008",
+      "title": "Whole-brain atrophy rate in Alzheimer disease: identifying fast progressors",
+      "journal": "Neurology 70:1836–41",
+      "doi": "10.1212/01.wnl.0000311446.61861.e3",
+      "studyType": "prospective-cohort",
+      "n": 65,
+      "population": "Alzheimer's patients, mean age 70, serial MRI"
+    },
+    "erickson2011": {
+      "id": "erickson2011",
+      "cite": "Erickson 2011",
+      "title": "Exercise training increases size of hippocampus and improves memory",
+      "journal": "PNAS 108:3017–22",
+      "doi": "10.1073/pnas.1015950108",
+      "studyType": "rct",
+      "n": 120,
+      "population": "Healthy older adults, aerobic exercise vs stretching, 60 per group",
+      "durationMonths": 12
+    },
+    "tenbrinke2014": {
+      "id": "tenbrinke2014",
+      "cite": "ten Brinke 2014",
+      "title": "Aerobic exercise increases hippocampal volume in older women with probable mild cognitive impairment",
+      "journal": "Br J Sports Med 49:248–54",
+      "doi": "10.1136/bjsports-2013-093184",
+      "studyType": "rct",
+      "n": 86,
+      "population": "Women aged 70–80 with probable MCI, aerobic vs balance-and-tone control",
+      "durationMonths": 6
+    },
+    "baker2025": {
+      "id": "baker2025",
+      "cite": "EXERT · Baker 2025",
+      "title": "Effects of exercise on cognition and Alzheimer's biomarkers in a randomized controlled trial of adults with mild cognitive impairment: the EXERT study",
+      "journal": "Alzheimers Dement 21:e14586",
+      "doi": "10.1002/alz.14586",
+      "studyType": "rct",
+      "n": 296,
+      "population": "Sedentary adults with amnestic MCI, aerobic vs stretching/balance",
+      "durationMonths": 18
+    },
+    "abushakra2025": {
+      "id": "abushakra2025",
+      "cite": "Abushakra 2026",
+      "title": "Hippocampal atrophy on MRI as a surrogate marker for clinical benefit in early symptomatic Alzheimer's disease: synthesis of observational and interventional trials",
+      "journal": "CNS Drugs",
+      "doi": "10.1007/s40263-025-01251-y",
+      "studyType": "observational",
+      "n": 13187,
+      "population": "30 observational studies plus placebo-controlled anti-amyloid trials (not a pooled trial estimate)"
+    },
+    "firth2018": {
+      "id": "firth2018",
+      "cite": "Firth 2018",
+      "title": "Effect of aerobic exercise on hippocampal volume in humans: a systematic review and meta-analysis",
+      "journal": "NeuroImage 166:230–8",
+      "doi": "10.1016/j.neuroimage.2017.11.007",
+      "studyType": "meta-analysis",
+      "n": 737,
+      "population": "14 controlled trials across the lifespan; no significant effect on total hippocampal volume, a significant effect on the left hippocampus (retention of volume)"
+    },
+    "balbim2023": {
+      "id": "balbim2023",
+      "cite": "Balbim 2023",
+      "title": "Aerobic exercise training effects on hippocampal volume in healthy older individuals: a meta-analysis of randomized controlled trials",
+      "journal": "GeroScience 46:2755–64",
+      "doi": "10.1007/s11357-023-00971-7",
+      "studyType": "meta-analysis",
+      "n": 554,
+      "population": "8 randomised trials in cognitively unimpaired older adults, 3–12 months; SMD 0.10 (95% CI −0.01 to 0.21), not significant",
+      "durationMonths": 8
+    },
+    "alves2023": {
+      "id": "alves2023",
+      "cite": "Alves 2023",
+      "title": "Accelerated brain volume loss caused by anti-β-amyloid drugs: a systematic review and meta-analysis",
+      "journal": "Neurology 100:e2114–24",
+      "doi": "10.1212/WNL.0000000000207156",
+      "studyType": "meta-analysis",
+      "n": 8062,
+      "population": "Randomised trials of anti-amyloid drugs in Alzheimer's disease (31 trials with MRI volumes; n = 8,062–10,279 depending on the analysis)"
+    }
+  },
+  "entries": [
+    {
+      "id": "lvh-natural",
+      "condition": "lvh",
+      "kind": "natural",
+      "label": "Natural course",
+      "why": "Without added treatment the heart muscle mass of a hypertrophied ventricle changed little in the one trial that had a placebo arm.",
+      "caveat": "Simpson 2009 placebo arm: LVMI +1.97 ± 6.68 g/m² over 12 months, 12 patients with normal office blood pressure. Small, short, normotensive. The favourable end is held at no regression. Beyond one year the change is held, not extrapolated.",
+      "sources": [
+        "simpson2009"
+      ],
+      "effect": {
+        "quantity": "lvmi_gm2",
+        "likely": 1.97,
+        "best": 0,
+        "worst": 8.65,
+        "evidenceYears": 1
+      }
+    },
+    {
+      "id": "lvh-bp-control",
+      "condition": "lvh",
+      "kind": "treatment",
+      "label": "Lower blood pressure",
+      "why": "Lowering blood pressure a little, even from a normal level, reduced left ventricular mass in a randomised trial.",
+      "caveat": "Simpson 2009 active arm: LVMI −4.68 ± 7.31 g/m² over 12 months with about 9 mmHg lower systolic pressure, 23 patients with normal office blood pressure. The unfavourable end is held at no regression.",
+      "sources": [
+        "simpson2009"
+      ],
+      "group": "bp-regimen",
+      "effect": {
+        "quantity": "lvmi_gm2",
+        "likely": -4.68,
+        "best": -11.99,
+        "worst": 0,
+        "evidenceYears": 1
+      }
+    },
+    {
+      "id": "lvh-losartan",
+      "condition": "lvh",
+      "kind": "treatment",
+      "label": "Losartan-based regimen",
+      "why": "In hypertensive patients with LVH, a losartan-based regimen regressed left ventricular mass more than an atenolol-based one.",
+      "caveat": "LIFE echo substudy: LVMI −21.7 ± 21.8 g/m² from baseline to the last study (mean 4.8 years), 457 patients, ECG LVH with hypertension. No placebo arm; the change replaces the natural course. The unfavourable end is held at no regression. Held after 4.8 years.",
+      "sources": [
+        "devereux2004",
+        "gerdts2009"
+      ],
+      "group": "bp-regimen",
+      "effect": {
+        "quantity": "lvmi_gm2",
+        "likely": -21.7,
+        "best": -43.5,
+        "worst": 0,
+        "evidenceYears": 4.8
+      }
+    },
+    {
+      "id": "lvh-atenolol",
+      "condition": "lvh",
+      "kind": "treatment",
+      "label": "Atenolol-based regimen",
+      "why": "An atenolol-based regimen also regressed left ventricular mass in hypertensive patients with LVH, a little less than losartan.",
+      "caveat": "LIFE echo substudy: LVMI −17.7 ± 19.6 g/m² from baseline to the last study (mean 4.8 years), 459 patients. No placebo arm; the change replaces the natural course. The unfavourable end is held at no regression. Held after 4.8 years.",
+      "sources": [
+        "devereux2004",
+        "gerdts2009"
+      ],
+      "group": "bp-regimen",
+      "effect": {
+        "quantity": "lvmi_gm2",
+        "likely": -17.7,
+        "best": -37.3,
+        "worst": 0,
+        "evidenceYears": 4.8
+      }
+    },
+    {
+      "id": "as-natural",
+      "condition": "as",
+      "kind": "natural",
+      "label": "Natural course",
+      "why": "Aortic stenosis narrows steadily when nothing opens the valve.",
+      "caveat": "Otto 1997 prospective cohort, 123 adults, mean follow-up 2.5 years: valve area −0.12 ± 0.19 cm² per year, peak velocity +0.32 ± 0.34 m/s per year. Cohort average, not a forecast for one valve.",
+      "sources": [
+        "otto1997"
+      ]
+    },
+    {
+      "id": "as-statin",
+      "condition": "as",
+      "kind": "treatment",
+      "label": "Statin",
+      "why": "Lowering cholesterol with a statin did not slow the narrowing of the valve in randomised trials.",
+      "caveat": "ASTRONOMER (n=269, 3.5 years): peak gradient +6.3 vs +6.1 mmHg per year, p=0.83. SALTIRE (n=155): jet velocity +0.199 vs +0.203 m/s per year. SEAS (n=1873): no difference in valve replacement. A statin may still be indicated for other reasons; it does not change this valve model.",
+      "sources": [
+        "chan2010",
+        "cowell2005",
+        "rossebo2008"
+      ],
+      "group": "drug"
+    },
+    {
+      "id": "ad-natural",
+      "condition": "ad",
+      "kind": "natural",
+      "label": "Natural course",
+      "why": "Without treatment, Alzheimer's disease shrinks the hippocampi and cortex and enlarges the ventricles at the published average rates.",
+      "caveat": "Rates from a meta-analysis and older cohorts, applied to one healthy adult volunteer's anatomy. See docs/outlook.md for the per-structure approximations.",
+      "sources": [
+        "barnes2009",
+        "deleon1989",
+        "fjell2009",
+        "sluimer2008"
+      ]
+    },
+    {
+      "id": "ad-exercise",
+      "condition": "ad",
+      "kind": "treatment",
+      "label": "Aerobic exercise",
+      "why": "Pooled randomised trials find no clear gain in hippocampal volume from aerobic exercise; one trial found a gain, so the gain is shown only as the favourable end.",
+      "caveat": "Contested. Two meta-analyses of randomised trials find no significant effect on total hippocampal volume: Firth 2018 (14 trials, n=737; only the left hippocampus was significant, driven by less loss) and Balbim 2023 (8 trials, n=554, healthy older adults, SMD 0.10, 95% CI −0.01 to 0.21). Erickson 2011 (n=120, 1 year) found +2.12% and +1.97% (left, right) on exercise vs −1.40% and −1.43% on stretching, a difference of about 3.46 points: this is the favourable end only. ten Brinke 2014 (n=86, MCI, 6 months) found a gain without a figure in the abstract; EXERT 2025 (n=296, MCI, 18 months) found no group difference. So the likely value and the unfavourable end are held at no effect. None of these trials enrolled people with Alzheimer's dementia.",
+      "sources": [
+        "firth2018",
+        "balbim2023",
+        "erickson2011",
+        "tenbrinke2014",
+        "baker2025"
+      ],
+      "group": "lifestyle",
+      "effect": {
+        "quantity": "hippocampus_pct",
+        "likely": 0,
+        "best": 3.46,
+        "worst": 0,
+        "evidenceYears": 1
+      }
+    },
+    {
+      "id": "ad-antiamyloid",
+      "condition": "ad",
+      "kind": "treatment",
+      "label": "Anti-amyloid antibody",
+      "why": "Anti-amyloid antibodies slow cognitive decline in early Alzheimer's disease, but pooled trials show more ventricular enlargement, not less brain loss.",
+      "caveat": "A meta-analysis of randomised trials (Alves 2023) found that antibodies which cause amyloid-related imaging abnormalities (ARIA) enlarged the ventricles by 2.1 mL more than placebo (38.7% more; 95% CI 1.5 to 2.8), and the amount tracked ARIA frequency (r=0.86). The same paper reports faster hippocampal and whole-brain loss for secretase inhibitors, not for antibodies. Abushakra 2025 relates slower hippocampal atrophy to slower cognitive decline across anti-amyloid trials, but it is not a pooled volume estimate. The ventricle effect is relative to each trial's placebo and has no per-year rate here, so the button does not change the model.",
+      "sources": [
+        "alves2023",
+        "abushakra2025"
+      ],
+      "group": "drug"
+    }
+  ]
+}

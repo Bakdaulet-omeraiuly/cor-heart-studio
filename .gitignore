@@ -44,3 +44,6 @@ next-env.d.ts
 /playwright-report
 
 /data
+
+# superpowers scratch (brainstorm mockups, execution ledger)
+.superpowers/

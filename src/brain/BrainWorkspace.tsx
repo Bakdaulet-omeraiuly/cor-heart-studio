@@ -32,7 +32,9 @@ export function BrainWorkspace() {
       <section className="order-1 flex min-h-[520px] flex-col lg:order-2 lg:min-h-0" aria-label="3D brain model">
         <PanelHeader title="3D model" aside={<ModelControls />} />
         <div className="relative min-h-0 flex-1 bg-[#07090c]">
-          {webgl ? <BrainCanvas data={data} /> : <p className="p-6 text-[13px] text-muted">WebGL 2 is not available: the MRI slices on the right still show the full segmentation.</p>}
+          {!webgl ? <p className="p-6 text-[13px] text-muted">WebGL 2 is not available: the MRI slices on the right still show the full segmentation.</p>
+            : outlook ? <CompareBrains data={data} />
+            : <BrainCanvas data={data} />}
           <Selection data={data} />
         </div>
         <Summary data={data} />
@@ -53,6 +55,18 @@ export function BrainWorkspace() {
   );
 }
 
+
+/** Outlook open: today's anatomy on the left, the projected anatomy on the right, one shared camera. */
+function CompareBrains({ data }: { data: BrainData }) {
+  const years = useOutlook((s) => s.years);
+  const label = "pointer-events-none absolute bottom-2 left-3 z-10 rounded-md bg-panel/85 px-2 py-0.5 text-[11px] text-muted backdrop-blur";
+  return (
+    <div className="grid h-full grid-cols-2 divide-x divide-line" data-testid="brain-compare">
+      <div className="relative min-h-0"><BrainCanvas data={data} mode="today" /><span className={label} data-testid="brain-compare-now">Now</span></div>
+      <div className="relative min-h-0"><BrainCanvas data={data} mode="projected" /><span className={label} data-testid="brain-compare-later">{years ? `In ${years} year${years > 1 ? "s" : ""}` : "In 0 years"}</span></div>
+    </div>
+  );
+}
 
 function ModelControls() {
   const s = useBrain();

@@ -7,8 +7,10 @@ import { PatientRecordSchema, type PatientRecord } from "@/domain/schema/record"
 
 const ROOT = resolve(__dirname, "../../..");
 const samples = (file: string) => (JSON.parse(readFileSync(resolve(ROOT, "public/samples", file), "utf8")).patients as Record<string, unknown>[]);
+/** SYN-001…008: the shipped sample file keeps only SYN-008, the full set lives in the test fixtures. */
+const fixtureSamples = () => (JSON.parse(readFileSync(resolve(ROOT, "tests/fixtures/synthetic-patients.full.json"), "utf8")).patients as Record<string, unknown>[]);
 const parse = (r: unknown) => PatientRecordSchema.parse(r);
-const all = [...samples("synthetic-patients.json"), ...samples("comprehensive-example.json"), ...samples("open-ct-patients.json")].map(parse);
+const all = [...fixtureSamples(), ...samples("comprehensive-example.json"), ...samples("open-ct-patients.json")].map(parse);
 
 describe("assess() contract", () => {
   const record = parse({ patientId: "T-1", studyId: "S-1" });
@@ -77,7 +79,7 @@ function inject(v: unknown, key = ""): unknown {
 }
 
 describe("prompt injection in record text", () => {
-  const raws = [...samples("synthetic-patients.json"), ...samples("comprehensive-example.json")];
+  const raws = [...fixtureSamples(), ...samples("comprehensive-example.json")];
 
   it("injected free text does not change the Assessment", () => {
     for (const raw of raws) {

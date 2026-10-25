@@ -1,0 +1,784 @@
+{
+  "schemaVersion": "1.0.0",
+  "patients": [
+    {
+      "patientId": "SYN-001",
+      "studyId": "STUDY-001-A",
+      "displayName": "Synthetic 01 · Reference findings",
+      "synthetic": true,
+      "studyDate": "2026-03-02",
+      "diagnoses": [
+        {
+          "text": "No structural abnormality reported",
+          "source": "synthetic clinician assessment"
+        }
+      ],
+      "observations": {
+        "heartRate": {
+          "value": 68,
+          "unit": "bpm",
+          "source": "synthetic measurement",
+          "observedAt": "2026-03-02"
+        },
+        "systolicBP": {
+          "value": 118,
+          "unit": "mmHg",
+          "source": "synthetic measurement",
+          "observedAt": "2026-03-02"
+        },
+        "diastolicBP": {
+          "value": 76,
+          "unit": "mmHg",
+          "source": "synthetic measurement",
+          "observedAt": "2026-03-02"
+        },
+        "spo2": {
+          "value": 98,
+          "unit": "%",
+          "source": "synthetic measurement",
+          "observedAt": "2026-03-02"
+        },
+        "lvEndDiastolicDiameter": {
+          "value": 46,
+          "unit": "mm",
+          "source": "synthetic echo report",
+          "observedAt": "2026-03-02",
+          "phase": "end_diastole",
+          "method": "2D linear, parasternal long axis"
+        },
+        "lvEndDiastolicVolume": {
+          "value": 108,
+          "unit": "mL",
+          "source": "synthetic echo report",
+          "observedAt": "2026-03-02",
+          "method": "biplane Simpson"
+        },
+        "lvEndSystolicVolume": {
+          "value": 44,
+          "unit": "mL",
+          "source": "synthetic echo report",
+          "observedAt": "2026-03-02",
+          "method": "biplane Simpson"
+        },
+        "lvEjectionFraction": {
+          "value": 59,
+          "unit": "%",
+          "source": "synthetic echo report",
+          "observedAt": "2026-03-02",
+          "method": "biplane Simpson"
+        },
+        "ivsThickness": {
+          "value": 9,
+          "unit": "mm",
+          "source": "synthetic echo report",
+          "observedAt": "2026-03-02",
+          "phase": "end_diastole"
+        },
+        "lvPosteriorWallThickness": {
+          "value": 9,
+          "unit": "mm",
+          "source": "synthetic echo report",
+          "observedAt": "2026-03-02",
+          "phase": "end_diastole"
+        },
+        "laVolume": {
+          "value": 32,
+          "unit": "mL",
+          "source": "synthetic echo report",
+          "observedAt": "2026-03-02",
+          "method": "biplane area-length"
+        }
+      },
+      "valveFindings": [],
+      "echo": {
+        "regionalWallMotion": [
+          {
+            "segment": 1,
+            "motion": "normal"
+          },
+          {
+            "segment": 2,
+            "motion": "normal"
+          },
+          {
+            "segment": 3,
+            "motion": "normal"
+          },
+          {
+            "segment": 4,
+            "motion": "normal"
+          },
+          {
+            "segment": 5,
+            "motion": "normal"
+          },
+          {
+            "segment": 6,
+            "motion": "normal"
+          },
+          {
+            "segment": 7,
+            "motion": "normal"
+          },
+          {
+            "segment": 8,
+            "motion": "normal"
+          },
+          {
+            "segment": 9,
+            "motion": "normal"
+          },
+          {
+            "segment": 10,
+            "motion": "normal"
+          },
+          {
+            "segment": 11,
+            "motion": "normal"
+          },
+          {
+            "segment": 12,
+            "motion": "normal"
+          },
+          {
+            "segment": 13,
+            "motion": "normal"
+          },
+          {
+            "segment": 14,
+            "motion": "normal"
+          },
+          {
+            "segment": 15,
+            "motion": "normal"
+          },
+          {
+            "segment": 16,
+            "motion": "normal"
+          },
+          {
+            "segment": 17,
+            "motion": "normal"
+          }
+        ]
+      },
+      "symptoms": [],
+      "clinicianNotes": "Fictional demonstration record with explicitly supplied findings. Not a reference range.",
+      "ecg": {
+        "rhythm": "Sinus rhythm",
+        "prInterval": {
+          "value": 160,
+          "unit": "ms",
+          "source": "synthetic ECG report"
+        },
+        "qrsDuration": {
+          "value": 92,
+          "unit": "ms",
+          "source": "synthetic ECG report"
+        },
+        "qtInterval": {
+          "value": 392,
+          "unit": "ms",
+          "source": "synthetic ECG report"
+        }
+      }
+    },
+    {
+      "patientId": "SYN-002",
+      "studyId": "STUDY-002-A",
+      "displayName": "Synthetic 02 · LV enlargement, reduced EF",
+      "synthetic": true,
+      "studyDate": "2026-03-05",
+      "diagnoses": [
+        {
+          "text": "Dilated cardiomyopathy",
+          "source": "synthetic clinician assessment"
+        }
+      ],
+      "observations": {
+        "heartRate": {
+          "value": 92,
+          "unit": "bpm",
+          "source": "synthetic measurement"
+        },
+        "systolicBP": {
+          "value": 110,
+          "unit": "mmHg",
+          "source": "synthetic measurement"
+        },
+        "diastolicBP": {
+          "value": 72,
+          "unit": "mmHg",
+          "source": "synthetic measurement"
+        },
+        "lvEjectionFraction": {
+          "value": 32,
+          "unit": "%",
+          "source": "synthetic echo report"
+        },
+        "lvEndDiastolicVolume": {
+          "value": 180,
+          "unit": "mL",
+          "source": "synthetic echo report"
+        },
+        "lvEndSystolicVolume": {
+          "value": 122.4,
+          "unit": "mL",
+          "source": "synthetic echo report"
+        },
+        "lvEndDiastolicDiameter": {
+          "value": 65,
+          "unit": "mm",
+          "source": "synthetic echo report",
+          "phase": "end_diastole",
+          "method": "reported linear dimension"
+        },
+        "ivsThickness": {
+          "value": 8,
+          "unit": "mm",
+          "source": "synthetic echo report"
+        },
+        "lvPosteriorWallThickness": {
+          "value": 8,
+          "unit": "mm",
+          "source": "synthetic echo report"
+        },
+        "laVolume": {
+          "value": 64,
+          "unit": "mL",
+          "source": "synthetic echo report"
+        }
+      },
+      "valveFindings": [
+        {
+          "valve": "mitral_valve",
+          "condition": "regurgitation",
+          "severity": "moderate",
+          "source": "synthetic clinician assessment"
+        }
+      ],
+      "symptoms": [
+        "Exertional breathlessness"
+      ],
+      "clinicianNotes": "Fictional demonstration record. No imaging is supplied."
+    },
+    {
+      "patientId": "SYN-003",
+      "studyId": "STUDY-003-A",
+      "displayName": "Synthetic 03 · Concentric wall thickening",
+      "synthetic": true,
+      "studyDate": "2026-03-09",
+      "diagnoses": [
+        {
+          "text": "Concentric left ventricular hypertrophy",
+          "source": "synthetic clinician assessment"
+        },
+        {
+          "text": "Hypertension",
+          "source": "synthetic history"
+        }
+      ],
+      "observations": {
+        "heartRate": {
+          "value": 64,
+          "unit": "bpm",
+          "source": "synthetic measurement"
+        },
+        "systolicBP": {
+          "value": 162,
+          "unit": "mmHg",
+          "source": "synthetic measurement"
+        },
+        "diastolicBP": {
+          "value": 94,
+          "unit": "mmHg",
+          "source": "synthetic measurement"
+        },
+        "lvEndDiastolicDiameter": {
+          "value": 44,
+          "unit": "mm",
+          "source": "synthetic echo report",
+          "phase": "end_diastole"
+        },
+        "lvEndDiastolicVolume": {
+          "value": 95,
+          "unit": "mL",
+          "source": "synthetic echo report"
+        },
+        "lvEndSystolicVolume": {
+          "value": 32,
+          "unit": "mL",
+          "source": "synthetic echo report"
+        },
+        "lvEjectionFraction": {
+          "value": 66,
+          "unit": "%",
+          "source": "synthetic echo report"
+        },
+        "ivsThickness": {
+          "value": 15,
+          "unit": "mm",
+          "source": "synthetic echo report",
+          "phase": "end_diastole"
+        },
+        "lvPosteriorWallThickness": {
+          "value": 14,
+          "unit": "mm",
+          "source": "synthetic echo report",
+          "phase": "end_diastole"
+        },
+        "laVolume": {
+          "value": 52,
+          "unit": "mL",
+          "source": "synthetic echo report"
+        }
+      },
+      "echo": {
+        "wallThickness": [
+          {
+            "region": "anterior",
+            "value": 14,
+            "unit": "mm",
+            "phase": "end_diastole",
+            "method": "2D",
+            "source": "synthetic echo report"
+          },
+          {
+            "region": "lateral",
+            "value": 14,
+            "unit": "mm",
+            "phase": "end_diastole",
+            "method": "2D",
+            "source": "synthetic echo report"
+          },
+          {
+            "region": "inferior",
+            "value": 14,
+            "unit": "mm",
+            "phase": "end_diastole",
+            "method": "2D",
+            "source": "synthetic echo report"
+          }
+        ],
+        "diastolicFunction": {
+          "grade": "II",
+          "description": "Pseudonormal filling pattern (synthetic)",
+          "source": "synthetic echo report"
+        }
+      },
+      "ecg": {
+        "rhythm": "Sinus rhythm",
+        "stChanges": [
+          {
+            "leads": [
+              "V5",
+              "V6"
+            ],
+            "description": "Lateral ST-T changes (synthetic text only)"
+          }
+        ],
+        "prInterval": {
+          "value": 172,
+          "unit": "ms",
+          "source": "synthetic ECG report"
+        },
+        "qrsDuration": {
+          "value": 104,
+          "unit": "ms",
+          "source": "synthetic ECG report"
+        },
+        "qtInterval": {
+          "value": 420,
+          "unit": "ms",
+          "source": "synthetic ECG report"
+        }
+      },
+      "symptoms": [
+        "Occasional headaches"
+      ],
+      "clinicianNotes": "Fictional demonstration record. Blood pressure is displayed only and does not change geometry."
+    },
+    {
+      "patientId": "SYN-004",
+      "studyId": "STUDY-004-A",
+      "displayName": "Synthetic 04 · Aortic valve stenosis",
+      "synthetic": true,
+      "studyDate": "2026-03-12",
+      "diagnoses": [
+        {
+          "text": "Severe aortic stenosis",
+          "source": "synthetic clinician assessment"
+        }
+      ],
+      "observations": {
+        "heartRate": {
+          "value": 72,
+          "unit": "bpm",
+          "source": "synthetic measurement"
+        },
+        "systolicBP": {
+          "value": 128,
+          "unit": "mmHg",
+          "source": "synthetic measurement"
+        },
+        "diastolicBP": {
+          "value": 80,
+          "unit": "mmHg",
+          "source": "synthetic measurement"
+        },
+        "lvEndDiastolicDiameter": {
+          "value": 47,
+          "unit": "mm",
+          "source": "synthetic echo report"
+        },
+        "lvEjectionFraction": {
+          "value": 58,
+          "unit": "%",
+          "source": "synthetic echo report"
+        },
+        "ivsThickness": {
+          "value": 13,
+          "unit": "mm",
+          "source": "synthetic echo report"
+        },
+        "lvPosteriorWallThickness": {
+          "value": 12,
+          "unit": "mm",
+          "source": "synthetic echo report"
+        }
+      },
+      "valveFindings": [
+        {
+          "valve": "aortic_valve",
+          "condition": "stenosis",
+          "severity": "severe",
+          "source": "synthetic clinician assessment",
+          "valveArea": {
+            "value": 0.8,
+            "unit": "cm2",
+            "method": "continuity equation"
+          },
+          "meanGradient": {
+            "value": 48,
+            "unit": "mmHg"
+          },
+          "peakVelocity": {
+            "value": 4.3,
+            "unit": "m/s"
+          }
+        }
+      ],
+      "doppler": [
+        {
+          "measurement": "peak velocity",
+          "value": 4.3,
+          "unit": "m/s",
+          "valve": "aortic_valve",
+          "sampleLocation": "aortic valve (CW)",
+          "referenceDirection": "toward the ascending aorta",
+          "phase": "systole",
+          "method": "continuous-wave Doppler",
+          "source": "synthetic echo report"
+        }
+      ],
+      "symptoms": [
+        "Exertional chest tightness"
+      ],
+      "clinicianNotes": "Fictional demonstration record. The valve opening fraction is illustrative; the reported area is displayed, not converted."
+    },
+    {
+      "patientId": "SYN-005",
+      "studyId": "STUDY-005-A",
+      "displayName": "Synthetic 05 · Mitral regurgitation (prolapse)",
+      "synthetic": true,
+      "studyDate": "2026-03-15",
+      "diagnoses": [
+        {
+          "text": "Severe primary mitral regurgitation with posterior leaflet prolapse",
+          "source": "synthetic clinician assessment"
+        }
+      ],
+      "observations": {
+        "heartRate": {
+          "value": 78,
+          "unit": "bpm",
+          "source": "synthetic measurement"
+        },
+        "systolicBP": {
+          "value": 124,
+          "unit": "mmHg",
+          "source": "synthetic measurement"
+        },
+        "diastolicBP": {
+          "value": 70,
+          "unit": "mmHg",
+          "source": "synthetic measurement"
+        },
+        "lvEndDiastolicDiameter": {
+          "value": 58,
+          "unit": "mm",
+          "source": "synthetic echo report"
+        },
+        "lvEndDiastolicVolume": {
+          "value": 160,
+          "unit": "mL",
+          "source": "synthetic echo report"
+        },
+        "lvEndSystolicVolume": {
+          "value": 61,
+          "unit": "mL",
+          "source": "synthetic echo report"
+        },
+        "lvEjectionFraction": {
+          "value": 62,
+          "unit": "%",
+          "source": "synthetic echo report"
+        },
+        "laVolume": {
+          "value": 85,
+          "unit": "mL",
+          "source": "synthetic echo report"
+        }
+      },
+      "valveFindings": [
+        {
+          "valve": "mitral_valve",
+          "condition": "regurgitation",
+          "severity": "severe",
+          "source": "synthetic clinician assessment"
+        },
+        {
+          "valve": "mitral_valve",
+          "condition": "prolapse",
+          "source": "synthetic clinician assessment",
+          "note": "posterior leaflet (P2)"
+        },
+        {
+          "valve": "tricuspid_valve",
+          "condition": "regurgitation",
+          "severity": "mild",
+          "source": "synthetic clinician assessment"
+        }
+      ],
+      "symptoms": [
+        "Palpitations",
+        "Fatigue"
+      ],
+      "clinicianNotes": "Fictional demonstration record. Reverse-flow particles are an illustrative cue, not measured flow."
+    },
+    {
+      "patientId": "SYN-006",
+      "studyId": "STUDY-006-A",
+      "displayName": "Synthetic 06 · Sparse record",
+      "synthetic": true,
+      "diagnoses": [
+        {
+          "text": "Palpitations under evaluation",
+          "source": "synthetic referral note"
+        }
+      ],
+      "observations": {
+        "heartRate": {
+          "value": 104,
+          "unit": "bpm",
+          "source": "synthetic measurement"
+        }
+      },
+      "symptoms": [
+        "Palpitations",
+        "Dizziness"
+      ],
+      "clinicianNotes": "Fictional sparse record: no dimensions, volumes or valve data. Everything else is shown as unknown."
+    },
+    {
+      "patientId": "SYN-007",
+      "studyId": "STUDY-007-A",
+      "displayName": "Synthetic 07 · Regional wall-motion abnormality",
+      "synthetic": true,
+      "studyDate": "2026-03-20",
+      "diagnoses": [
+        {
+          "text": "Prior anterior myocardial infarction",
+          "source": "synthetic clinician assessment"
+        }
+      ],
+      "observations": {
+        "heartRate": {
+          "value": 76,
+          "unit": "bpm",
+          "source": "synthetic measurement"
+        },
+        "lvEndDiastolicVolume": {
+          "value": 150,
+          "unit": "mL",
+          "source": "synthetic echo report"
+        },
+        "lvEndSystolicVolume": {
+          "value": 93,
+          "unit": "mL",
+          "source": "synthetic echo report"
+        },
+        "lvEjectionFraction": {
+          "value": 38,
+          "unit": "%",
+          "source": "synthetic echo report"
+        },
+        "lvEndDiastolicDiameter": {
+          "value": 56,
+          "unit": "mm",
+          "source": "synthetic echo report"
+        }
+      },
+      "echo": {
+        "regionalWallMotion": [
+          {
+            "segment": 1,
+            "motion": "akinetic",
+            "source": "synthetic echo report"
+          },
+          {
+            "segment": 2,
+            "motion": "hypokinetic",
+            "source": "synthetic echo report"
+          },
+          {
+            "segment": 7,
+            "motion": "akinetic",
+            "source": "synthetic echo report"
+          },
+          {
+            "segment": 8,
+            "motion": "hypokinetic",
+            "source": "synthetic echo report"
+          },
+          {
+            "segment": 13,
+            "motion": "akinetic",
+            "source": "synthetic echo report"
+          },
+          {
+            "segment": 14,
+            "motion": "dyskinetic",
+            "source": "synthetic echo report"
+          },
+          {
+            "segment": 17,
+            "motion": "akinetic",
+            "source": "synthetic echo report"
+          }
+        ]
+      },
+      "imaging": {
+        "findings": [
+          {
+            "modality": "MRI",
+            "category": "fibrosis_scar",
+            "finding": "Transmural late gadolinium enhancement",
+            "segment": 7,
+            "source": "synthetic MRI report"
+          },
+          {
+            "modality": "MRI",
+            "category": "fibrosis_scar",
+            "finding": "Transmural late gadolinium enhancement",
+            "segment": 13,
+            "source": "synthetic MRI report"
+          }
+        ]
+      },
+      "symptoms": [
+        "Exertional breathlessness"
+      ],
+      "clinicianNotes": "Fictional demonstration record. Segment convention: AHA 17-segment."
+    },
+    {
+      "patientId": "SYN-008",
+      "studyId": "STUDY-008-A",
+      "displayName": "Synthetic 08 · Coronary artery disease",
+      "synthetic": true,
+      "studyDate": "2026-03-20",
+      "diagnoses": [
+        {
+          "text": "Obstructive coronary artery disease (coronary CT angiography)",
+          "source": "synthetic clinician assessment"
+        }
+      ],
+      "observations": {
+        "heartRate": {
+          "value": 74,
+          "unit": "bpm",
+          "source": "synthetic measurement"
+        },
+        "systolicBP": {
+          "value": 142,
+          "unit": "mmHg",
+          "source": "synthetic measurement"
+        },
+        "diastolicBP": {
+          "value": 86,
+          "unit": "mmHg",
+          "source": "synthetic measurement"
+        },
+        "lvEjectionFraction": {
+          "value": 55,
+          "unit": "%",
+          "source": "synthetic echo report"
+        },
+        "lvEndDiastolicDiameter": {
+          "value": 49,
+          "unit": "mm",
+          "source": "synthetic echo report"
+        }
+      },
+      "coronaryFindings": [
+        {
+          "vessel": "LAD",
+          "segment": "proximal",
+          "stenosisPercent": 75,
+          "plaque": "noncalcified",
+          "source": "synthetic coronary CTA report",
+          "method": "visual diameter stenosis"
+        },
+        {
+          "vessel": "RCA",
+          "segment": "mid",
+          "stenosisPercent": 40,
+          "plaque": "partially_calcified",
+          "source": "synthetic coronary CTA report",
+          "method": "visual diameter stenosis"
+        },
+        {
+          "vessel": "LCx",
+          "segment": "distal",
+          "stenosisPercent": 20,
+          "plaque": "calcified",
+          "source": "synthetic coronary CTA report",
+          "method": "visual diameter stenosis"
+        }
+      ],
+      "valveFindings": [],
+      "symptoms": [
+        "Exertional chest pressure"
+      ],
+      "clinicianNotes": "Fictional demonstration record. Lesion positions are the proximal / mid / distal thirds of the template's modelled vessels.",
+      "ecg": {
+        "rhythm": "Sinus rhythm",
+        "prInterval": {
+          "value": 164,
+          "unit": "ms",
+          "source": "synthetic ECG report"
+        },
+        "qrsDuration": {
+          "value": 98,
+          "unit": "ms",
+          "source": "synthetic ECG report"
+        },
+        "qtInterval": {
+          "value": 388,
+          "unit": "ms",
+          "source": "synthetic ECG report"
+        }
+      }
+    }
+  ]
+}

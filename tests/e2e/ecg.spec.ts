@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { loadFullSamples } from "./support";
 import path from "node:path";
 
 const shots = path.resolve(__dirname, "../../docs/visual-review");
@@ -7,6 +8,7 @@ test("ECG strip: intervals with their provenance, rate-corrected QT, locked to t
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/");
+  await loadFullSamples(page);
   await page.getByRole("button", { name: /^Synthetic 01/ }).click();
   const strip = page.getByTestId("ecg-strip");
   await expect(strip).toContainText("PR 160 ms reported");
@@ -25,6 +27,7 @@ test("ECG strip: intervals with their provenance, rate-corrected QT, locked to t
 
 test("details sit behind ⓘ: hidden at rest, shown on hover and keyboard focus", async ({ page }) => {
   await page.goto("/");
+  await loadFullSamples(page);
   await page.getByRole("button", { name: /^Synthetic 01/ }).click();
   const strip = page.getByTestId("ecg-strip");
   await expect(strip.getByText("ms (Fridericia)")).toBeVisible();
