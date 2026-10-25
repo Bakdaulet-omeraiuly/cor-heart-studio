@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { rateLimit, rateLimitKey } from "@/app/api/assistant/rateLimit";
 import { MAX_BODY_BYTES } from "@/app/api/assistant/request";
-import { evidenceBrief, sanitizeAnswer, type CitedSource } from "@/domain/treatments/explain";
+import { evidenceBrief, inventedNumbers, sanitizeAnswer, withheldAnswer, type CitedSource } from "@/domain/treatments/explain";
 import type { TreatmentsDeps } from "../handler";
 
 const CONDITION_LABEL = { lvh: "hypertensive left ventricular hypertrophy", as: "aortic stenosis", ad: "Alzheimer's disease" } as const;
@@ -15,7 +15,7 @@ const Body = z.object({
 });
 
 export type ExplainResponse =
-  | { ok: true; answer: string; sources: CitedSource[]; note: string }
+  | { ok: true; answer: string; sources: CitedSource[]; note: string; /** True when the reply held a number that is not in the evidence and was replaced by a sentence written by code. */ withheld?: boolean }
   | { ok: false; code: "bad_request" | "too_large" | "rate_limited" | "not_configured" | "model_error" | "timeout" };
 
 const NOTE = "Explains the cited studies only. Clinician decision support, not a diagnosis or a treatment order.";
@@ -56,6 +56,12 @@ export async function handleExplain(req: Request, deps: TreatmentsDeps): Promise
     const raw = msg.content.map((b) => (b.type === "text" ? b.text : "")).join("");
     const { answer, sources } = sanitizeAnswer(raw, body.condition);
     if (!answer) return respond(502, { ok: false, code: "model_error" });
+    // exact-value number guard: the model may restate numbers from the evidence, never produce its own (count only, never the text, is logged)
+    const invented = inventedNumbers(raw, body.condition, body.question);
+    if (invented.length) {
+      console.error("explain reply withheld: numbers not in the evidence", invented.length);
+      return respond(200, { ok: true, ...withheldAnswer(body.condition), note: NOTE, withheld: true });
+    }
     return respond(200, { ok: true, answer, sources, note: NOTE });
   } catch (e) {
     console.error("explain model error", (e as { status?: number }).status, e instanceof Error ? e.message.slice(0, 300) : "unknown");

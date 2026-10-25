@@ -132,6 +132,34 @@ reject missing DOIs, empty caveats and non-randomised effects. Regenerate the ta
 | `ad-antiamyloid` | treatment | Anti-amyloid antibody | +2.1 (best 1.5, worst 2.8) mL ventricles over 1.5 y; the length is an assumption from the 18-month lecanemab trial | [Alves 2023](https://doi.org/10.1212/WNL.0000000000207156) (meta-analysis, n=8062); [Swanson 2021](https://doi.org/10.1186/s13195-021-00813-8) (rct, n=854) |
 | `ad-bvitamins` | treatment | B vitamins (folate, B6, B12) | 29.6 (best 53, worst 0) % of the natural cortex loss avoided over 2 y; whole-brain measure applied to the cortex | [VITACOG · Smith 2010](https://doi.org/10.1371/journal.pone.0012244) (rct, n=168); [Jernerén 2015](https://doi.org/10.3945/ajcn.114.103283) (rct, n=168) |
 
+## Uncertainty (Monte Carlo)
+
+The screen shows two different 95 % intervals and never mixes them. **Average effect**: how sure we are of the cohort-average effect, drawn
+from the study's confidence interval. **Between patients**: how far one patient may differ, drawn from the SD between patients where the
+study reported it. A value with no reported spread is not drawn at all. Code: `src/domain/treatments/uncertainty.ts` (2,000 draws, fixed
+seed, the ordinary projections are called again with the drawn values, no formula is repeated). Checks: `tests/unit/treatments/uncertainty.test.ts`
+and [validation.md](validation.md) (the Monte Carlo interval reproduces each study's published interval).
+
+`se` (standard error of the average effect) and `sd` (SD between patients) are stored on each effect in `evidence.json`:
+
+| button | se | sd | how |
+|---|---|---|---|
+| `lvh-bp-control` | 1.52 g/m² | 7.31 g/m² | Simpson 2009: SD 7.31 over 23 patients, SE = SD / √23 |
+| `lvh-losartan` | 1.02 g/m² | 21.8 g/m² | LIFE echo: SD 21.8, n = 457, SE = SD / √n |
+| `lvh-atenolol` | 0.92 g/m² | 19.6 g/m² | LIFE echo: SD 19.6, n = 459 |
+| `lvh-ace`, `lvh-ccb` | 1.02 % | not reported | Klingbeil 2003: 95 % CI 8–12 % and 9–13 %, SE = width / 3.92 |
+| `lvh-diuretic` | 1.28 % | not reported | Klingbeil 2003: 95 % CI 5–10 % |
+| `lvh-weightloss` | 1.15 g | not reported | Heart Health Study: 95 % CI −5.2 to −0.7 g |
+| `ad-antiamyloid` | 0.33 mL | not reported | Alves 2023: 95 % CI 1.5–2.8 mL |
+| `ad-bvitamins` | 7.9 percentage points | not reported | VITACOG: annual atrophy 0.76 % (0.63–0.90) and 1.08 % (0.94–1.22); delta method on s = 1 − a/b with SE(a) = 0.069, SE(b) = 0.071 |
+| `as-tavr`, `as-savr` | not reported | 0.37, 0.42 cm² | PARTNER 3: 1.72 ± 0.37 and 1.76 ± 0.42 cm² (SD between patients; arm sizes not in the abstract) |
+
+Natural rates use the spread their source reported: hippocampus (Barnes 2009, 95 % CI of the mean) in "average"; cortex (Sluimer 2008, SD
+between patients) in "between patients"; the ventricle rate (de Leon 1989) reported none, so it is not drawn.
+
+**Limits.** Normal approximation to every interval; independent draws for the natural rate and the treatment effect; a between-trial
+heterogeneity term is not available from the abstracts; the exercise button has no reported spread, so it has no band.
+
 ## Next candidates (not built)
 
 * Age-matched normative centiles (Brain Charts for the Human Lifespan, Bethlehem 2022) in place of fixed rates.

@@ -73,3 +73,17 @@ test("Brain: the anti-amyloid and B-vitamin buttons each change a structure in t
   await expect.poll(() => text("Cortex")).toBe(cortex);
   expect(errors).toEqual([]);
 });
+
+test("Brain: the 95 % intervals list the structures that have a reported spread, and anti-amyloid adds the ventricles", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("tab", { name: "Brain" }).click();
+  await expect(page.getByTestId("brain-workspace")).toBeVisible({ timeout: 30_000 });
+  await page.getByTestId("outlook-toggle").click();
+  await page.getByRole("slider", { name: "Years from today" }).fill("3");
+  const band = page.getByTestId("uncertainty-brain");
+  await expect(band).toContainText("Hippocampi");   // Barnes 2009: 95 % CI of the cohort mean
+  await expect(band).toContainText("Cortex");       // Sluimer 2008: SD between patients
+  await expect(band).not.toContainText("Ventricles"); // de Leon 1989 reported no spread
+  await page.getByTestId("treatment-ad-antiamyloid").click();
+  await expect(band).toContainText("Ventricles");   // Alves 2023: 95 % CI of the +2.1 mL
+});

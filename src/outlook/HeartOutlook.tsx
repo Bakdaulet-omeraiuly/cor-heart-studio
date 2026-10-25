@@ -19,6 +19,7 @@ import { useWebgl } from "@/components/workspace/HeartViewport";
 import { useOutlook, type HeartScenario } from "./outlookStore";
 import { HorizonControls, OutlookCaveat, SourceList, fmtSigned } from "./shared";
 import { TreatmentButtons } from "./TreatmentButtons";
+import { AsUncertainty, LvhUncertainty } from "./UncertaintyNote";
 import { AssistantPanel } from "@/components/assistant/AssistantPanel";
 import { WallMap } from "./WallMap";
 
@@ -124,7 +125,7 @@ function AorticStenosisOutlook({ entry }: { entry: PatientEntry }) {
       toolbar={<Button size="sm" title="Close-up of the aortic valve, frozen at peak ejection with the outer wall see-through" onClick={showValve}><Focus className="h-3.5 w-3.5" /> Aortic valve</Button>}
       cards={[<AsCard key="t" title="Today" p={now} />, replaced ? <ReplacedCard key="l" title={yearsLabel(years, pace)} r={replaced} /> : <AsCard key="l" title={yearsLabel(years, pace)} p={later} />]}>
       <p className="text-[11px] text-faint">Average haemodynamic progression in adults with asymptomatic aortic stenosis.</p>
-      <div className="mt-2"><TreatmentButtons condition="as" /></div>
+      <div className="mt-2 space-y-2"><TreatmentButtons condition="as" /><AsUncertainty active={active} years={years} /></div>
 
       <div className="mt-3 grid grid-cols-2 gap-2">
         <NumberField label="Valve area today" unit="cm²" value={ava0} step={0.05} min={0.3} max={4} hint={sourceHint(recorded.ava, avaOverride)}
@@ -258,7 +259,7 @@ function LvhOutlook({ entry }: { entry: PatientEntry }) {
       cards={[<LvhCard key="t" title="Today" p={now} lvidMm={inp.lvidMm} />, <LvhCard key="l" title={lvhYearsLabel(years, pace)} p={later} lvidMm={inp.lvidMm} />]}>
       <p className="text-[11px] text-faint">Left ventricular mass in hypertrophy: natural course, or on the treatment buttons below.</p>
 
-      <div className="mt-3 space-y-2"><TreatmentButtons condition="lvh" /><LvhCombinationNote /></div>
+      <div className="mt-3 space-y-2"><TreatmentButtons condition="lvh" /><LvhCombinationNote /><LvhUncertainty inp={inp} active={active} years={years} /></div>
 
       <H3>Wall thickness</H3>
       <WallMap today={now} later={later} lvidMm={inp.lvidMm} years={years} />

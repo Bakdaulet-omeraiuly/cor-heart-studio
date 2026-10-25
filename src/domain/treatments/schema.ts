@@ -18,6 +18,8 @@ const Effect = z.object({
   best: z.number(),
   worst: z.number(),
   evidenceYears: z.number().positive(),
+  se: z.number().positive().optional(),
+  sd: z.number().positive().optional(),
 });
 
 const Entry = z.object({

@@ -89,6 +89,37 @@ test("AS: the valve-replacement buttons replace the stenosis in the projected he
   expect(errors).toEqual([]);
 });
 
+test("Uncertainty: a 95 % interval appears for the average effect, and for the spread between patients only when the study reported it", async ({ page }) => {
+  await openLvhOutlook(page);
+  await expect(page.getByTestId("uncertainty-lvh")).toHaveCount(0); // no button on: nothing to draw
+  await page.getByTestId("treatment-lvh-ace").click();
+  await expect(page.getByTestId("uncertainty-lvh-average")).toBeVisible();
+  await expect(page.getByTestId("uncertainty-lvh-patients")).toHaveCount(0); // Klingbeil reported no SD between patients
+  await page.getByTestId("treatment-lvh-losartan").click();
+  await expect(page.getByTestId("uncertainty-lvh-patients")).toBeVisible(); // LIFE: SD 21.8 g/m², n = 457
+});
+
+test("Uncertainty: the valve-replacement area is shown as the spread between patients", async ({ page }) => {
+  await page.goto("/");
+  await page.getByText("Open CT · s0270").first().click();
+  await page.getByTestId("outlook-toggle").click();
+  await page.getByRole("slider", { name: "Years from today" }).fill("5");
+  await expect(page.getByTestId("uncertainty-as")).toHaveCount(0);
+  await page.getByTestId("treatment-as-tavr").click();
+  await expect(page.getByTestId("uncertainty-as-patients")).toBeVisible();
+});
+
+test("LVH: the evidence tooltip of any button fits inside the side panel instead of running off its edge", async ({ page }) => {
+  await openLvhOutlook(page);
+  const panel = (await page.locator("aside[aria-label='Outlook settings and evidence']").boundingBox())!;
+  for (const name of ["ACE inhibitor", "Diuretic", "Lower blood pressure"]) {
+    await page.getByRole("button", { name: `Evidence for ${name}` }).focus();
+    const box = (await page.getByRole("tooltip").filter({ visible: true }).first().boundingBox())!;
+    expect(box.x, name).toBeGreaterThanOrEqual(panel.x - 1);
+    expect(box.x + box.width, name).toBeLessThanOrEqual(panel.x + panel.width + 1);
+  }
+});
+
 test("LVH: the evidence for a button sits behind its info tip", async ({ page }) => {
   await openLvhOutlook(page);
   const tip = page.getByRole("button", { name: "Evidence for Losartan-based regimen" });

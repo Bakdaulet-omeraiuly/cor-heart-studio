@@ -316,7 +316,9 @@
         "likely": -4.68,
         "best": -11.99,
         "worst": 0,
-        "evidenceYears": 1
+        "evidenceYears": 1,
+        "sd": 7.31,
+        "se": 1.524
       }
     },
     {
@@ -336,7 +338,9 @@
         "likely": -21.7,
         "best": -43.5,
         "worst": 0,
-        "evidenceYears": 4.8
+        "evidenceYears": 4.8,
+        "sd": 21.8,
+        "se": 1.02
       }
     },
     {
@@ -356,7 +360,9 @@
         "likely": -17.7,
         "best": -37.3,
         "worst": 0,
-        "evidenceYears": 4.8
+        "evidenceYears": 4.8,
+        "sd": 19.6,
+        "se": 0.915
       }
     },
     {
@@ -438,7 +444,8 @@
         "likely": 2.1,
         "best": 1.5,
         "worst": 2.8,
-        "evidenceYears": 1.5
+        "evidenceYears": 1.5,
+        "se": 0.332
       }
     },
     {
@@ -458,7 +465,8 @@
         "likely": 29.6,
         "best": 53,
         "worst": 0,
-        "evidenceYears": 2
+        "evidenceYears": 2,
+        "se": 7.9
       }
     },
     {
@@ -477,7 +485,8 @@
         "likely": -10,
         "best": -12,
         "worst": -8,
-        "evidenceYears": 0.5
+        "evidenceYears": 0.5,
+        "se": 1.02
       }
     },
     {
@@ -496,7 +505,8 @@
         "likely": -11,
         "best": -13,
         "worst": -9,
-        "evidenceYears": 0.5
+        "evidenceYears": 0.5,
+        "se": 1.02
       }
     },
     {
@@ -515,7 +525,8 @@
         "likely": -8,
         "best": -10,
         "worst": -5,
-        "evidenceYears": 0.5
+        "evidenceYears": 0.5,
+        "se": 1.276
       }
     },
     {
@@ -535,7 +546,8 @@
         "likely": -2.9,
         "best": -5.2,
         "worst": -0.7,
-        "evidenceYears": 1
+        "evidenceYears": 1,
+        "se": 1.148
       }
     },
     {
@@ -555,7 +567,8 @@
         "likely": 1.72,
         "best": 2.09,
         "worst": 1.35,
-        "evidenceYears": 1
+        "evidenceYears": 1,
+        "sd": 0.37
       }
     },
     {
@@ -575,7 +588,8 @@
         "likely": 1.76,
         "best": 2.18,
         "worst": 1.34,
-        "evidenceYears": 1
+        "evidenceYears": 1,
+        "sd": 0.42
       }
     }
   ]

@@ -9,6 +9,7 @@ import { projectBrainTreated } from "@/domain/treatments/project";
 import { useOutlook } from "@/outlook/outlookStore";
 import { HorizonControls, OutlookCaveat, SourceList, fmtSigned } from "@/outlook/shared";
 import { TreatmentButtons } from "@/outlook/TreatmentButtons";
+import { BrainUncertainty } from "@/outlook/UncertaintyNote";
 import type { BrainManifest } from "./types";
 
 /** Structure keys whose meshes each outlook target deforms. */
@@ -74,6 +75,8 @@ function TreatmentNotes() {
 export function BrainOutlookPanel({ manifest }: { manifest: BrainManifest }) {
   const scenario = useOutlook((s) => s.brainScenario);
   const years = useOutlook((s) => s.years);
+  const active = useOutlook((s) => s.active);
+  const baseline = useMemo(() => brainBaseline(manifest), [manifest]);
   const set = useOutlook((s) => s.set);
   const result = useBrainProjectionResult(manifest);
   const proj = result?.targets ?? null;
@@ -92,6 +95,7 @@ export function BrainOutlookPanel({ manifest }: { manifest: BrainManifest }) {
         {scenario === "alzheimers" && <TreatmentButtons condition="ad" />}
         <HorizonControls paceHint="Slower and faster ends of each source's reported spread (see the column note)." />
         <TreatmentNotes />
+        {scenario === "alzheimers" && <BrainUncertainty baseline={baseline} active={active} years={years} />}
 
         <table className="w-full text-[12px]" data-testid="brain-outlook-table">
           <thead className="text-left text-[10px] uppercase tracking-wider text-faint">

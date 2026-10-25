@@ -29,3 +29,31 @@ export function sanitizeAnswer(raw: unknown, condition: ConditionId): { answer: 
   const sources = cited.map((id) => { const s = EVIDENCE.sources[id]; return { id, cite: s.cite, title: s.title, journal: s.journal, doi: s.doi, studyType: s.studyType }; });
   return { answer, sources };
 }
+
+// ---------------------------------------------------------------- number guard
+
+const NUMBER = /\d+(?:[.,]\d+)?/g;
+const asNumbers = (text: string) => (text.match(NUMBER) ?? []).map((t) => Number(t.replace(",", ".")));
+
+/** Numbers the reply may use: every number in this condition's evidence brief, and any the clinician typed in the question. */
+export function allowedNumbers(condition: ConditionId, question: string): number[] {
+  return [...asNumbers(evidenceBrief(condition)), ...asNumbers(question)];
+}
+
+/**
+ * Numbers in the model's reply that appear nowhere in the evidence or the question. The exact-value rule, as for the record chat:
+ * a rounded or derived number counts as invented, because the table, not the model, decides what a study found.
+ * `[S:id]` markers are removed first (their digits are part of an id, not a claim).
+ */
+export function inventedNumbers(raw: unknown, condition: ConditionId, question: string): string[] {
+  const text = (typeof raw === "string" ? raw : "").replace(/\[S:[A-Za-z0-9_-]+\]/g, " ");
+  const allowed = allowedNumbers(condition, question);
+  return (text.match(NUMBER) ?? []).filter((t) => !allowed.some((a) => Math.abs(a - Number(t.replace(",", "."))) < 1e-9));
+}
+
+/** What the clinician sees when a reply is withheld: a sentence written by code and the studies behind the condition. */
+export function withheldAnswer(condition: ConditionId): { answer: string; sources: CitedSource[] } {
+  const ids = [...new Set(allFor(condition).flatMap((e) => e.sources))].filter((id) => EVIDENCE.sources[id]);
+  const sources = ids.map((id) => { const s = EVIDENCE.sources[id]; return { id, cite: s.cite, title: s.title, journal: s.journal, doi: s.doi, studyType: s.studyType }; });
+  return { answer: "The assistant's reply was withheld because it contained a number that is not in the cited studies. The studies behind this condition are listed below; open the info icon of a treatment button to read what each one found.", sources };
+}

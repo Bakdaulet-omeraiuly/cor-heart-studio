@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type Anthropic from "@anthropic-ai/sdk";
 import { handleExplain } from "@/app/api/treatments/explain/handler";
 import { resetRateLimit } from "@/app/api/assistant/rateLimit";
-import { evidenceBrief, sanitizeAnswer } from "@/domain/treatments/explain";
+import { allowedNumbers, evidenceBrief, inventedNumbers, sanitizeAnswer, withheldAnswer } from "@/domain/treatments/explain";
 
 const request = (over: Record<string, unknown> = {}) =>
   new Request("http://localhost/api/treatments/explain", {
@@ -27,7 +27,47 @@ describe("sanitizeAnswer", () => {
   });
 });
 
+describe("number guard", () => {
+  it("allows numbers that are in the evidence, with either sign and a decimal comma", () => {
+    expect(allowedNumbers("lvh", "")).toContain(21.7);
+    expect(inventedNumbers("Losartan lowered LVMI by 21,7 g/m² over 4.8 years [S:devereux2004].", "lvh", "")).toEqual([]);
+    expect(inventedNumbers("It changed by -21.7 g/m².", "lvh", "")).toEqual([]);
+  });
+  it("flags a number that no study reported, including a rounded or derived one", () => {
+    expect(inventedNumbers("Losartan lowers LV mass by 47% in most patients.", "lvh", "")).toEqual(["47"]);
+    expect(inventedNumbers("About 22 g/m² less.", "lvh", "")).toEqual(["22"]);
+  });
+  it("ignores the digits inside a [S:id] marker", () => {
+    expect(inventedNumbers("Seen in LIFE [S:devereux2004] and [S:gerdts2009].", "lvh", "")).toEqual([]);
+  });
+  it("allows a number the clinician typed in the question", () => {
+    expect(inventedNumbers("At 37 g/m² the answer is the same.", "lvh", "My patient has an LVMI of 37 g/m².")).toEqual([]);
+  });
+  it("withheldAnswer is written by code and lists only this condition's studies", () => {
+    const w = withheldAnswer("ad");
+    expect(w.answer).toMatch(/withheld/);
+    expect(w.answer).not.toMatch(/\d/);
+    expect(w.sources.map((s) => s.id)).toEqual(expect.arrayContaining(["alves2023", "smith2010"]));
+    expect(w.sources.map((s) => s.id)).not.toContain("devereux2004");
+  });
+});
+
 describe("handleExplain", () => {
+  it("withholds a reply that holds an invented number and answers with the studies instead", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const create = vi.fn().mockResolvedValue(reply("Losartan lowers LV mass by 47% [S:devereux2004]."));
+    const body = await (await handleExplain(request(), deps(create))).json();
+    expect(body.ok).toBe(true);
+    expect(body.withheld).toBe(true);
+    expect(body.answer).not.toContain("47");
+    expect(body.sources.length).toBeGreaterThan(1);
+  });
+  it("lets a reply through that only restates the evidence", async () => {
+    const create = vi.fn().mockResolvedValue(reply("In LIFE, losartan lowered LV mass index by 21.7 g/m² [S:devereux2004]."));
+    const body = await (await handleExplain(request(), deps(create))).json();
+    expect(body.withheld).toBeUndefined();
+    expect(body.answer).toContain("21.7");
+  });
   it("puts the condition's evidence in the system prompt and returns the cited answer", async () => {
     const create = vi.fn().mockResolvedValue(reply("Losartan lowered LV mass in an RCT [S:devereux2004]."));
     const res = await handleExplain(request(), deps(create));

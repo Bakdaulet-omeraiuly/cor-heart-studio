@@ -30,6 +30,10 @@ export interface Effect {
   best: number;
   worst: number;
   evidenceYears: number;
+  /** Standard error of `likely` (uncertainty of the cohort-average effect, from its confidence interval or SD/√n). Absent = not reported. */
+  se?: number;
+  /** SD of the effect between individual patients, in the unit of `likely`. Absent = not reported. */
+  sd?: number;
 }
 
 export interface EvidenceEntry {

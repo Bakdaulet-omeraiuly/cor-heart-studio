@@ -62,9 +62,10 @@ export function EvidenceBadge({ evidence, compact }: { evidence: EvidenceClass; 
  * ⓘ that reveals detail on hover or keyboard focus. Detail stays in the DOM (readable by screen readers
  * and tests); only the primary value sits on screen. Provenance moves here, it is never deleted.
  */
-export function InfoTip({ children, label = "Details", align = "left", side = "top", className }: { children: ReactNode; label?: string; align?: "left" | "right"; side?: "top" | "bottom"; className?: string }) {
+export function InfoTip({ children, label = "Details", align = "left", side = "top", anchor = "icon", className }: { children: ReactNode; label?: string; align?: "left" | "right"; side?: "top" | "bottom"; anchor?: "icon" | "container"; className?: string }) {
+  // anchor "container": the tip positions against the nearest positioned ancestor (a narrow panel), not against the icon, so it cannot run off the panel's edge
   return (
-    <span className={cx("group relative inline-flex align-middle", className)}>
+    <span className={cx("group inline-flex align-middle", anchor === "icon" && "relative", className)}>
       <button type="button" aria-label={label} className="inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] leading-none text-faint hover:text-ink focus-visible:text-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-accent">
         ⓘ
       </button>

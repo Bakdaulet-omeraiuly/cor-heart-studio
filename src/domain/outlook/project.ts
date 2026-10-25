@@ -28,13 +28,15 @@ export interface BrainProjection {
 
 export function projectBrain(
   baseline: Record<BrainTarget, number>, scenario: BrainScenarioId, years: number, pace: Pace,
+  /** A drawn %/year rate per structure in place of the published one (the Monte Carlo); absent = the published rate at this pace. */
+  ratePctOverride?: Partial<Record<BrainTarget, number>>,
 ): Record<BrainTarget, BrainProjection> {
   const s = BRAIN_SCENARIOS[scenario];
   const out = {} as Record<BrainTarget, BrainProjection>;
   for (const target of Object.keys(s.rates) as BrainTarget[]) {
     const rate = s.rates[target];
     const v0 = baseline[target];
-    const ratePct = rateAt(rate, pace);
+    const ratePct = ratePctOverride?.[target] ?? rateAt(rate, pace);
     const v = compound(v0, ratePct, years);
     const a = compound(v0, rate.slow, years), b = compound(v0, rate.fast, years);
     out[target] = { target, baselineMl: v0, projectedMl: v, ratio: v / v0, rangeMl: [Math.min(a, b), Math.max(a, b)], rate, ratePct };

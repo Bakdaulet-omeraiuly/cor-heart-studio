@@ -10,7 +10,7 @@ const STUDY_LABEL = { rct: "randomised trial", "meta-analysis": "meta-analysis",
 
 function EntryDetails({ entry }: { entry: EvidenceEntry }) {
   return (
-    <span className="block max-w-[20rem] space-y-1.5">
+    <span className="block max-w-[17rem] space-y-1.5">
       <span className="block text-ink">{entry.why}</span>
       {!entry.effect && <span className="block text-warn">No measured effect on the 3D model.</span>}
       <span className="block">{entry.caveat}</span>
@@ -35,13 +35,13 @@ export function TreatmentButtons({ condition }: { condition: ConditionId }) {
   const entries = entriesFor(condition, "treatment");
   if (!entries.length) return null;
   return (
-    <div className="flex flex-wrap gap-1.5" role="group" aria-label="Treatment options" data-testid="treatment-buttons">
+    <div className="relative flex flex-wrap gap-1.5" role="group" aria-label="Treatment options" data-testid="treatment-buttons">
       {entries.map((e) => (
         <span key={e.id} className="inline-flex items-center gap-0.5">
           <Button size="sm" pressed={active.includes(e.id)} aria-pressed={active.includes(e.id)} data-testid={`treatment-${e.id}`} onClick={() => toggle(e.id)}>
             {e.label}
           </Button>
-          <InfoTip label={`Evidence for ${e.label}`} side="bottom"><EntryDetails entry={e} /></InfoTip>
+          <InfoTip label={`Evidence for ${e.label}`} side="bottom" anchor="container"><EntryDetails entry={e} /></InfoTip>
         </span>
       ))}
     </div>
