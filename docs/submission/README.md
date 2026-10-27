@@ -1,6 +1,6 @@
-# Hackathon submission — COR Studio
+# COR Studio — project overview
 
-**Track:** Healthcare & Biotech
+**Domain:** Healthcare & Biotech
 
 **Short description:** Guideline-graded 3D heart & brain from patient records; AI explains, code checks every cited number.
 
