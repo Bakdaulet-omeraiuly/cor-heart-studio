@@ -1,0 +1,39 @@
+{
+  "id": "opt-04",
+  "title": "HFrEF without NYHA class → no option, NYHA asked for",
+  "category": "incomplete",
+  "source": "AHA/ACC/HFSA 2022 HF guideline §7.3.1 (ARNi, COR 1 / LOE A), doi:10.1161/CIR.0000000000001063",
+  "record": {
+    "patientId": "CASE-opt-04",
+    "studyId": "CASE-opt-04-A",
+    "synthetic": true,
+    "observations": {
+      "lvEjectionFraction": {
+        "value": 35,
+        "unit": "%"
+      }
+    },
+    "symptoms": [
+      "Exertional breathlessness"
+    ]
+  },
+  "expected": {
+    "ruleDefined": [
+      {
+        "condition": "lv-ef-category",
+        "grade": "reduced"
+      },
+      {
+        "condition": "lv-systolic-dysfunction",
+        "grade": "moderately abnormal"
+      }
+    ],
+    "redFlags": 0,
+    "behavior": "state-missing",
+    "options": [],
+    "missing": [
+      "symptoms.nyhaClass"
+    ]
+  },
+  "reviewedByClinician": false
+}

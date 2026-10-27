@@ -17,7 +17,7 @@ describe("assess() contract", () => {
 
   it("returns the agreed Assessment shape with a disclaimer", () => {
     const a = assess(record);
-    expect(Object.keys(a).sort()).toEqual(["differential", "disclaimer", "findings", "missing", "redFlags"]);
+    expect(Object.keys(a).sort()).toEqual(["differential", "disclaimer", "findings", "missing", "options", "redFlags"]);
     expect(a.disclaimer).toMatch(/not a diagnosis/i);
   });
 

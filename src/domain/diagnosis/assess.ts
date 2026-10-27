@@ -8,6 +8,8 @@ import { assessCoronary } from "./coronary";
 import { assessDifferential } from "./differential";
 import { assessEcg } from "./ecg";
 import { assessLv } from "./lv";
+import { assessManagement, evaluateCatalogue } from "./management";
+import type { PatientRecord } from "../schema/record";
 import type { Assess, Assessment } from "./types";
 import { assessValves } from "./valves";
 
@@ -20,11 +22,11 @@ function hasHeartData(c: Ctx): boolean {
     !!r.ecg || !!r.echo || !!r.doppler?.length;
 }
 
-export const assess: Assess = (record): Assessment => {
+function run(record: PatientRecord, review: boolean): Assessment {
   const n = normalizeRecord(record);
   if (!n.ok) {
     return { findings: [], differential: [], missing: [{ field: "record", why: "the record does not pass schema validation, so nothing can be assessed" }],
-      redFlags: [], disclaimer: DISCLAIMER };
+      redFlags: [], disclaimer: DISCLAIMER, options: [] };
   }
   const c = new Ctx(n.patient);
   const heart = hasHeartData(c) || !hasBrainData(c);
@@ -37,5 +39,15 @@ export const assess: Assess = (record): Assessment => {
   assessBrain(c);
   // phase 2
   assessDifferential(c);
-  return { findings: c.findings, differential: c.differential, missing: c.missing, redFlags: c.redFlags, disclaimer: DISCLAIMER };
-};
+  // phase 3 — guideline management options (verified catalogue entries only)
+  const options = review ? evaluateCatalogue(c, { includeUnverified: true }).options : assessManagement(c);
+  return { findings: c.findings, differential: c.differential, missing: c.missing, redFlags: c.redFlags, disclaimer: DISCLAIMER, options };
+}
+
+export const assess: Assess = (record) => run(record, false);
+
+/**
+ * Review mode for tests and guideline reviewers ONLY: also returns options whose catalogue entry is not verified yet.
+ * Never used by the app or the chat.
+ */
+export const assessIncludingUnverifiedOptions = (record: PatientRecord): Assessment => run(record, true);

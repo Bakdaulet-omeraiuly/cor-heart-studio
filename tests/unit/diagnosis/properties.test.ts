@@ -6,6 +6,7 @@ import { assess, type Assessment } from "@/domain/diagnosis";
 import { efCategory } from "@/domain/diagnosis/lv";
 import { qtcGrade } from "@/domain/diagnosis/ecg";
 import { cadRads, CORONARY_VESSELS, type CoronaryFinding } from "@/domain/coronary";
+import { CATALOGUE } from "@/domain/diagnosis/management";
 import { PatientRecordSchema } from "@/domain/schema/record";
 import { normalizeRecord } from "@/domain/normalization/normalize";
 import { withIds } from "@/app/api/assistant/ids";
@@ -34,7 +35,7 @@ const maybe = (r: R, p = 0.5) => r() < p;
 
 const SEVERITIES = ["none", "trace", "mild", "moderate", "moderate_to_severe", "severe"] as const;
 const MOTIONS = ["normal", "hypokinetic", "akinetic", "dyskinetic", "aneurysmal"] as const;
-const SYMPTOMS = ["Exertional syncope", "Chest pain", "Shortness of breath", "Palpitations", "Fatigue", "no syncope"] as const;
+const SYMPTOMS = ["Exertional syncope", "Chest pain", "Shortness of breath", "Palpitations", "Fatigue", "no syncope", "NYHA class II", "NYHA III"] as const;
 
 /** A random, schema-valid synthetic record covering every engine module. */
 function randomRecord(r: R, i: number): Record<string, unknown> {
@@ -144,6 +145,19 @@ describe("properties: whole engine", () => {
     const ided = withIds(assess(record));
     const text = fallbackText(ided);
     expect(guard(text, ided, n.patient), text).toEqual({ ok: true });
+  });
+
+  forAll("options: only verified catalogue entries, linked to an existing finding, backed by record values", (rec) => {
+    const a = run(rec);
+    const verified = new Set(CATALOGUE.filter((e) => e.verified).map((e) => e.id));
+    const nums = numbersIn(rec);
+    for (const opt of a.options ?? []) {
+      expect(a.findings.some((f) => f.condition === opt.findingCondition), opt.label).toBe(true);
+      for (const e of opt.appliesBecause) {
+        expect(verified.has(e.rule as never), e.rule).toBe(true);
+        if (typeof e.value === "number" && !e.field.startsWith("derived.")) expect(nums.some((x) => Math.abs(x - (e.value as number)) < 1e-9)).toBe(true);
+      }
+    }
   });
 
   forAll("brain results are differential-only and never rule-defined", (rec) => {

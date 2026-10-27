@@ -336,7 +336,61 @@ In production, every chat reply about a coronary, brain or low-flow AS record wo
 
 All 94 cases now pass, and so do the assistant's own guard (48), fallback (14), ids (14) and prompt (18) tests.
 
-## 9. Open items
+## 9. Management options (proposal, branch `engine/management-options`)
+
+**Goal.** For each finding, list what the cited guideline recommends for that situation, with the guideline's own
+Class of Recommendation (COR) and Level of Evidence (LOE). The chat can then explain the options to a clinician. This
+remains decision support for clinicians:
+- options come from guideline text, never invented or individualized;
+- no doses, and no drug chosen for the patient (drug classes only, as the guideline names them);
+- no ranking beyond the COR;
+- red flags still say only "urgent specialist review".
+
+**Licensing.** ACC/AHA guideline text is copyrighted. The engine stores only a **short paraphrase**, the COR/LOE and
+the citation, never the recommendation wording.
+
+**Verification rule.** An option is emitted only when **both COR and LOE** were confirmed from the guideline's
+recommendation table: on the publisher's or society's page, or on a page reproducing that table (status A/S as in §7).
+Anything else stays in the catalogue (`src/domain/diagnosis/management.ts`) with `verified: false` and is never emitted.
+The publishers' PDFs could not be opened from the sandbox (HTTP 403), so this pass relied on search excerpts.
+
+| id | Finding (condition) | Conditions the record must meet | Option (paraphrase) | COR | LOE | Source | Verified |
+|---|---|---|---|---|---|---|---|
+| MGMT-HF-ARNI | `lv-ef-category` reduced | LVEF ≤ 40 % **and** NYHA class II–III stated in structured symptoms | ARNi to reduce morbidity and mortality | 1 | A | AHA/ACC/HFSA 2022, §7.3.1 RAS inhibition, doi:10.1161/CIR.0000000000001063 | **yes**: [ACC Key Perspectives](https://www.acc.org/Latest-in-Cardiology/ten-points-to-remember/2022/03/29/19/53/2022-AHA-ACC-HFSA-Heart-Failure-Guideline-gl-hf) (COR 1, LOE A) and the table reproduced by [Guideline Central](https://eguideline.guidelinecentral.com/i/1461930-acc-aha-heart-failure-guidelines-2022-update/24) |
+| MGMT-HF-SGLT2I-REF | `lv-ef-category` reduced | LVEF ≤ 40 % and HF symptoms | SGLT2i to reduce HF hospitalization and CV mortality | 1 | A | AHA/ACC/HFSA 2022 §7.3.4 | no: text confirmed, COR/LOE not seen in a table |
+| MGMT-HF-SGLT2I-MREF | `lv-ef-category` mildly reduced | LVEF 41–49 % and HF symptoms | SGLT2i can be beneficial | 2a | B-R | AHA/ACC/HFSA 2022 §7.7 | no: COR confirmed ([AHA top things](https://professional.heart.org/en/science-news/2022-guideline-for-the-management-of-heart-failure/top-things-to-know)), LOE not |
+| MGMT-HF-GDMT-MREF | `lv-ef-category` mildly reduced | LVEF 41–49 % and HF symptoms | evidence-based beta blockers, ARNi, ACEi or ARB, MRA may be considered | 2b | B-NR | AHA/ACC/HFSA 2022 §7.7 | no: COR confirmed, LOE not |
+| MGMT-HF-SGLT2I-PEF | `lv-ef-category` preserved | LVEF ≥ 50 % and HF symptoms | SGLT2i can be beneficial | 2a | B-R | AHA/ACC/HFSA 2022 §7.8 | no: COR confirmed, LOE not |
+| MGMT-AS-AVR-D1 | `aortic-stenosis` severe | severe high-gradient AS **and** cardinal symptoms | AVR (surgical or transcatheter, heart valve team) | 1 | A | ACC/AHA 2020 VHD §3.2.3, doi:10.1161/CIR.0000000000000923 | no: COR 1 confirmed (secondary), LOE not |
+| MGMT-AS-AVR-C2 | `aortic-stenosis` severe | severe AS, asymptomatic, LVEF < 50 % | AVR | 1 | B-NR | ACC/AHA 2020 VHD §3.2.3 | no: COR 1 confirmed ([ACC comparison](https://www.acc.org/latest-in-cardiology/ten-points-to-remember/2023/08/17/14/47/acc-aha-and-esc-eacts-guidelines)), LOE not |
+| MGMT-AS-AVR-BNP | `aortic-stenosis` severe | severe AS, asymptomatic, low surgical risk, BNP > 3× normal | AVR is reasonable | 2a | B-NR | ACC/AHA 2020 VHD §3.2.3 | no: COR 2a confirmed ([ACC what changed](https://acc.org/Latest-in-Cardiology/Articles/2021/11/08/19/06/2020-ACC-AHA-Guideline-for-the-Management-of-Patients-With-VHD)), LOE not; surgical risk not in record |
+| MGMT-AR-AVR-D | `aortic-regurgitation` severe | severe AR and symptoms | aortic valve surgery | 1 | B-NR | ACC/AHA 2020 VHD §4.3.3 | no: only 2014 wording found |
+| MGMT-AR-AVR-C2 | `aortic-regurgitation` severe | severe AR, asymptomatic, LVEF ≤ 55 % | aortic valve surgery | 1 | B-NR | ACC/AHA 2020 VHD §4.3.3 | no: threshold confirmed (ACC what changed), COR/LOE not |
+| MGMT-MR-SURG-D | `mitral-regurgitation` severe (primary) | severe primary MR and symptoms | mitral valve intervention | 1 | B-NR | ACC/AHA 2020 VHD §7.3.3 | no |
+| MGMT-CCD-STATIN | `coronary-stenosis` CAD-RADS ≥ 1 | chronic coronary disease | high-intensity statin | 1 | A | AHA/ACC 2023 chronic coronary disease, doi:10.1161/CIR.0000000000001168 | no |
+
+Section numbers (§) are from memory and must be confirmed with the PDF. They are part of the verification step.
+
+**Applicability.**
+- "Symptomatic" means a structured cardinal symptom is present.
+- "Asymptomatic" needs an explicit statement: an `asymptomatic` entry, or every cardinal symptom marked `present: false`.
+  If the symptom status is unknown, the needed fact goes to `missing[]` and the option is not shown. That happens only
+  for verified options, so unverified ones add no noise.
+- NYHA class is read with a closed keyword list (`NYHA II`, `NYHA class III`, …) from structured symptoms. Free text
+  is never read.
+
+**What is emitted today:** only `MGMT-HF-ARNI`. Every other row needs its COR and LOE checked against the PDF table. A
+reviewer with journal access changes `verified` to `true` in `management.ts` and adds the source page; the unit tests
+for each row's conditions already exist.
+
+**Outlook link (optional).** Options for a drug class that `cor-outlook-engine` models carry its intervention id:
+- SGLT2i → `sglt2_inhibitor`;
+- ACEi/ARB → `ace_inhibitor_arb`;
+- statin → `statin`.
+
+ARNi has no matching intervention (it is not the same as ACEi/ARB), so it has none.
+
+## 10. Open items
 - **Clinician review:** 20 of the cases (suggested: `as-01`, `as-10`, `as-11`, `as-12`, `mr-04`, `ar-01`, `lv-04`, `lv-06`,
   `lv-13`, `lv-15`, `lv-17`, `lv-18`, `ch-03`, `ch-05`, `cad-04`, `cad-05`, `ecg-05`, `ecg-08`, `br-01`, `br-03`) should be
   checked by a physician. **Skipped for now** (team decision): every case has `"reviewedByClinician": false`.

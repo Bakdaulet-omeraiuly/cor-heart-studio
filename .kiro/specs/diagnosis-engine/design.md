@@ -122,6 +122,40 @@ Sources (full citations in `sources.ts` and `docs/research/diagnosis-engine.md`)
 | R-DX-BRAIN-02 | `observations.ventricularVolumeChangePerYear` (%/y) | ≥ 9 → AD-type; ≤ 2 → ageing; between → both | differential only | DELEON89, NIAAA18 | — (Outlook) |
 | R-DX-DIFF-* | facts from phase 1 | see `differential.ts` and requirements 4.5 and 10.1–10.6 | differential | per item | |
 
+## Management options (phase 3)
+
+`management.ts` holds a catalogue of entries:
+`{ id, findingCondition, label, cor, loe, source, verified, verifiedBy, outlookInterventionId?, applies(ctx) }`.
+
+`applies(ctx)` returns one of:
+- `{ evidence }` — the conditions are met;
+- `{ missing: [{ field, why }] }` — a needed fact is absent;
+- `null` — the conditions are not met.
+
+`assessManagement(ctx)` runs after the differential. It evaluates **verified** entries only, emits the met ones in
+catalogue order, and adds the missing facts. `evaluateCatalogue(ctx, { includeUnverified: true })` is exported for
+tests and reviewers only.
+
+Symptom status: `symptomatic` = a cardinal symptom (syncope, angina, dyspnoea, HF symptoms) is present. `asymptomatic`
+= an explicit `asymptomatic` entry, or every cardinal symptom listed with `present: false`. Otherwise it is unknown.
+NYHA class comes from a closed keyword match on structured symptoms (`NYHA II`, `NYHA class III`, Roman or Arabic
+numerals).
+
+| id | Finding | Conditions | COR / LOE | Verified | Outlook id |
+|---|---|---|---|---|---|
+| MGMT-HF-ARNI | lv-ef-category reduced | LVEF ≤ 40 and NYHA II–III | 1 / A | yes | — |
+| MGMT-HF-SGLT2I-REF | lv-ef-category reduced | LVEF ≤ 40 and symptomatic | 1 / A | no | sglt2_inhibitor |
+| MGMT-HF-SGLT2I-MREF | lv-ef-category mildly reduced | 41 ≤ LVEF ≤ 49 and symptomatic | 2a / B-R | no | sglt2_inhibitor |
+| MGMT-HF-GDMT-MREF | lv-ef-category mildly reduced | 41 ≤ LVEF ≤ 49 and symptomatic | 2b / B-NR | no | — |
+| MGMT-HF-SGLT2I-PEF | lv-ef-category preserved | LVEF ≥ 50 and symptomatic | 2a / B-R | no | sglt2_inhibitor |
+| MGMT-AS-AVR-D1 | aortic-stenosis severe | gradient-severe and symptomatic | 1 / A | no | — |
+| MGMT-AS-AVR-C2 | aortic-stenosis severe | asymptomatic and LVEF < 50 | 1 / B-NR | no | — |
+| MGMT-AS-AVR-BNP | aortic-stenosis severe | asymptomatic, low surgical risk, BNP > 3× ULN | 2a / B-NR | no | — |
+| MGMT-AR-AVR-D | aortic-regurgitation severe | symptomatic | 1 / B-NR | no | — |
+| MGMT-AR-AVR-C2 | aortic-regurgitation severe | asymptomatic and LVEF ≤ 55 | 1 / B-NR | no | — |
+| MGMT-MR-SURG-D | mitral-regurgitation severe, prolapse (primary) | symptomatic | 1 / B-NR | no | — |
+| MGMT-CCD-STATIN | coronary-stenosis CAD-RADS ≥ 1 | — | 1 / A | no | statin |
+
 ## Ordering and determinism
 
 - Modules run in the fixed order above. Findings keep insertion order.

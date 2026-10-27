@@ -92,3 +92,18 @@ production. The engine is not imported by the UI yet, so these tasks cannot chan
         ("-4.8 %/year") and the `cm²/m²` unit. Fixed in `src/app/api/assistant/guard.ts` (agreed change to a shared file,
         see the commit message); the assistant's own guard, fallback, ids and prompt tests still pass.
   - _Requirements: 2.3, 2.4_
+
+- [ ] 14. Guideline management options (branch `engine/management-options`)
+  - [x] 14.1 Propose `ManagementOption` and `Assessment.options` in `types.ts`. Non-breaking (optional field) until
+        @kerimku1 agrees and adds `options: []` to the chat fixtures.
+  - [x] 14.2 Research: the §9 catalogue with COR/LOE, conditions, source and verification status; licensing note.
+  - [x] 14.3 `management.ts`: catalogue, symptom-status and NYHA readers, `assessManagement`, `evaluateCatalogue`.
+  - [x] 14.4 Unit tests at the condition boundaries:
+        - LVEF 40/41, 49/50;
+        - NYHA I vs II vs IV;
+        - symptomatic vs asymptomatic vs unknown severe AS;
+        - LVEF 49/50 for AS stage C2, 55/56 for AR;
+        - unverified entries never emitted.
+  - [x] 14.5 Cases in `tests/assistant/cases/` expecting options, and cases where none apply.
+  - [ ] 14.6 Make `options` required after the chat agrees. Tell @kerimku1.
+  - _Requirements: 13_

@@ -22,6 +22,7 @@ Expected values are written by hand from the guideline thresholds in `docs/resea
     "missing": ["observations.strokeVolume"],                                   // must be listed (subset)
     "absentMissing": ["…"],
     "redFlags": 0,                                                              // exact count
+    "options": [{ "findingCondition": "lv-ef-category", "cor": "1", "loe": "A" }],  // optional: EXACT set of management options
     "behavior": "answer"
   },
   "notes": "optional working, e.g. the LV-mass arithmetic",
@@ -50,6 +51,7 @@ Expected values are written by hand from the guideline thresholds in `docs/resea
 - Rule-defined grades: 100 % agreement (exact set).
 - Supported and possible findings, differential and missing items: as listed.
 - Red-flag count: exact.
+- Management options, when `expected.options` is given: exact set of (finding, COR, LOE). `[]` means none may apply.
 - Every evidence item carries a DOI source.
 - Every non-derived numeric evidence value occurs in the record (no invented numbers).
 - The disclaimer is present.

@@ -49,6 +49,18 @@ export const RULES = R({
   "R-DX-DIFF-RV": { title: "Causes of RV enlargement or dysfunction", sources: ["RUDSKI10", "ASE15"] },
   "R-DX-DIFF-QTC": { title: "Causes of QTc prolongation", sources: ["DREW10", "AHA09QT"] },
   "R-DX-DIFF-AS": { title: "Symptomatic severe aortic stenosis", sources: ["ACC20"] },
+  "R-DX-MGMT-READ": { title: "Record fact read for a management option (symptom status, NYHA class)", sources: ["AHA22", "ACC20"] },
+  "R-DX-MGMT-HF-ARNI": { title: "ARNi in HFrEF with NYHA II–III", sources: ["AHA22"] },
+  "R-DX-MGMT-HF-SGLT2I-REF": { title: "SGLT2i in symptomatic HFrEF", sources: ["AHA22"] },
+  "R-DX-MGMT-HF-SGLT2I-MREF": { title: "SGLT2i in HFmrEF", sources: ["AHA22"] },
+  "R-DX-MGMT-HF-GDMT-MREF": { title: "Other GDMT classes in HFmrEF", sources: ["AHA22"] },
+  "R-DX-MGMT-HF-SGLT2I-PEF": { title: "SGLT2i in HFpEF", sources: ["AHA22"] },
+  "R-DX-MGMT-AS-AVR-D1": { title: "AVR in symptomatic severe high-gradient AS", sources: ["ACC20"] },
+  "R-DX-MGMT-AS-AVR-C2": { title: "AVR in asymptomatic severe AS with reduced LVEF", sources: ["ACC20"] },
+  "R-DX-MGMT-AR-AVR-D": { title: "Aortic valve surgery in symptomatic severe AR", sources: ["ACC20"] },
+  "R-DX-MGMT-AR-AVR-C2": { title: "Aortic valve surgery in asymptomatic severe AR with LVEF at or below the limit", sources: ["ACC20"] },
+  "R-DX-MGMT-MR-SURG-D": { title: "Mitral valve intervention in symptomatic severe primary MR", sources: ["ACC20"] },
+  "R-DX-MGMT-CCD-STATIN": { title: "High-intensity statin in chronic coronary disease", sources: ["CCD23"] },
 });
 
 export type RuleId = keyof typeof RULES;
